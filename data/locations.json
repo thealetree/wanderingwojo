@@ -1,0 +1,82 @@
+[
+  {
+    "id": "loc-001",
+    "name": "Bend, Oregon",
+    "coordinates": [-121.3153, 44.0582],
+    "date_arrived": "2025-03-10",
+    "status": "visited",
+    "note": "Home base. The beginning."
+  },
+  {
+    "id": "loc-002",
+    "name": "Stevenson, Washington",
+    "coordinates": [-121.8846, 45.6915],
+    "date_arrived": "2025-03-16",
+    "status": "visited",
+    "note": "Columbia Gorge. Wind like a living thing."
+  },
+  {
+    "id": "loc-003",
+    "name": "Boise, Idaho",
+    "coordinates": [-116.2023, 43.6150],
+    "date_arrived": "2025-03-20",
+    "status": "visited",
+    "note": "Quick stop. Groceries and gas."
+  },
+  {
+    "id": "loc-004",
+    "name": "Salt Lake City, Utah",
+    "coordinates": [-111.8910, 40.7608],
+    "date_arrived": "2025-03-24",
+    "status": "visited",
+    "note": "Oil change, REI run, rig prep."
+  },
+  {
+    "id": "loc-005",
+    "name": "Moab, Utah",
+    "coordinates": [-109.5498, 38.5733],
+    "date_arrived": "2025-03-27",
+    "status": "current",
+    "note": "Red rock country. BLM camping by the river."
+  },
+  {
+    "id": "loc-006",
+    "name": "Kanab, Utah",
+    "coordinates": [-112.5263, 37.0475],
+    "date_arrived": null,
+    "status": "planned",
+    "note": "Gateway to Grand Staircase."
+  },
+  {
+    "id": "loc-007",
+    "name": "Santa Fe, New Mexico",
+    "coordinates": [-105.9378, 35.6870],
+    "date_arrived": null,
+    "status": "planned",
+    "note": "Art, green chile, old adobe."
+  },
+  {
+    "id": "loc-008",
+    "name": "Albuquerque, New Mexico",
+    "coordinates": [-106.6504, 35.0844],
+    "date_arrived": null,
+    "status": "planned",
+    "note": "Route 66 and the Rio Grande."
+  },
+  {
+    "id": "loc-009",
+    "name": "Tucson, Arizona",
+    "coordinates": [-110.9747, 32.2226],
+    "date_arrived": null,
+    "status": "planned",
+    "note": "Saguaro National Park. Desert winter."
+  },
+  {
+    "id": "loc-010",
+    "name": "Whitehorse, Yukon",
+    "coordinates": [-135.0568, 60.7212],
+    "date_arrived": null,
+    "status": "planned",
+    "note": "Alaska Highway. The long way north."
+  }
+]

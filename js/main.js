@@ -1,0 +1,278 @@
+/* ==========================================================================
+   Wandering Wojo — Main Application Module
+   Data loading, map-only mode, entry navigation, lightbox
+   ========================================================================== */
+
+const AppModule = (function () {
+  'use strict';
+
+  // --- State ---
+  let entries = [];
+  let locations = [];
+  let sortedEntries = [];   // entries sorted chronologically (oldest first)
+  let navIndex = 0;         // current index in sortedEntries
+  let lightboxPhotos = [];
+  let lightboxIndex = 0;
+
+  // --- DOM refs ---
+  const els = {};
+
+  /**
+   * Initialize the application
+   */
+  async function init() {
+    cacheDom();
+    await loadData();
+    initMap();
+    initEntryNav();
+    initLightbox();
+    initKeyboardNav();
+  }
+
+  /**
+   * Cache DOM references
+   */
+  function cacheDom() {
+    els.mapContainer = document.getElementById('map-container');
+    els.lightbox = document.getElementById('lightbox');
+    els.lightboxImg = document.getElementById('lightbox-img');
+    els.lightboxClose = document.getElementById('lightbox-close');
+    els.lightboxPrev = document.getElementById('lightbox-prev');
+    els.lightboxNext = document.getElementById('lightbox-next');
+    els.navPrev = document.getElementById('nav-prev');
+    els.navNext = document.getElementById('nav-next');
+    els.navInfo = document.getElementById('nav-info');
+    els.entryNav = document.getElementById('entry-nav');
+  }
+
+  /**
+   * Load JSON data files
+   */
+  async function loadData() {
+    try {
+      const [entriesRes, locationsRes] = await Promise.all([
+        fetch('data/entries.json'),
+        fetch('data/locations.json'),
+      ]);
+      entries = await entriesRes.json();
+      locations = await locationsRes.json();
+
+      // Sort chronologically (oldest first) for navigation
+      sortedEntries = entries.slice().sort(function (a, b) {
+        return new Date(a.date) - new Date(b.date);
+      });
+    } catch (err) {
+      console.error('Failed to load data:', err);
+      entries = [];
+      locations = [];
+      sortedEntries = [];
+    }
+  }
+
+  // =====================================================================
+  // MAP
+  // =====================================================================
+
+  function initMap() {
+    const mapInitialized = MapModule.init();
+
+    if (mapInitialized) {
+      const map = MapModule.getMap();
+      map.on('load', function () {
+        MapModule.addLocationMarkers(locations, entries);
+        MapModule.addRouteFromEntries(entries);
+        MapModule.addCorkPins(entries, handlePinClick);
+        updateNavInfo();
+      });
+    }
+  }
+
+  function handlePinClick(entry, pinEl, marker) {
+    // Update navIndex to match the clicked entry
+    var idx = sortedEntries.findIndex(function (e) { return e.id === entry.id; });
+    if (idx !== -1) navIndex = idx;
+    updateNavInfo();
+    MapModule.expandPinEntry(entry, pinEl);
+  }
+
+  // =====================================================================
+  // ENTRY NAVIGATION
+  // =====================================================================
+
+  function initEntryNav() {
+    if (sortedEntries.length === 0) {
+      els.entryNav.style.display = 'none';
+      return;
+    }
+
+    els.navPrev.addEventListener('click', function () {
+      navigateEntry(-1);
+    });
+
+    els.navNext.addEventListener('click', function () {
+      navigateEntry(1);
+    });
+
+    updateNavInfo();
+  }
+
+  function navigateEntry(dir) {
+    if (sortedEntries.length === 0) return;
+
+    // Close any expanded pin first
+    MapModule.closeExpandedPin();
+
+    // Move index (wrapping)
+    navIndex = (navIndex + dir + sortedEntries.length) % sortedEntries.length;
+
+    var entry = sortedEntries[navIndex];
+
+    // Fly to the entry
+    MapModule.flyToEntry(entry);
+
+    // Highlight the pin
+    highlightPin(entry.id);
+
+    // Update nav display
+    updateNavInfo();
+  }
+
+  function highlightPin(entryId) {
+    // Remove previous highlight
+    document.querySelectorAll('.cork-pin--highlighted').forEach(function (el) {
+      el.classList.remove('cork-pin--highlighted');
+    });
+
+    // Add highlight to the target pin
+    var pin = document.querySelector('[data-entry-id="' + entryId + '"]');
+    if (pin) {
+      pin.classList.add('cork-pin--highlighted');
+    }
+  }
+
+  function updateNavInfo() {
+    if (sortedEntries.length === 0) return;
+    els.navInfo.textContent = (navIndex + 1) + ' / ' + sortedEntries.length;
+  }
+
+  // =====================================================================
+  // LIGHTBOX
+  // =====================================================================
+
+  function initLightbox() {
+    els.lightboxClose.addEventListener('click', closeLightbox);
+    els.lightboxPrev.addEventListener('click', function () { navLightbox(-1); });
+    els.lightboxNext.addEventListener('click', function () { navLightbox(1); });
+
+    els.lightbox.addEventListener('click', function (e) {
+      if (e.target === els.lightbox) closeLightbox();
+    });
+  }
+
+  function openLightbox(photos, index) {
+    lightboxPhotos = photos;
+    lightboxIndex = index || 0;
+    updateLightboxImage();
+    els.lightbox.classList.add('active');
+    els.lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    els.lightbox.classList.remove('active');
+    els.lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function navLightbox(dir) {
+    lightboxIndex = (lightboxIndex + dir + lightboxPhotos.length) % lightboxPhotos.length;
+    updateLightboxImage();
+  }
+
+  function updateLightboxImage() {
+    if (lightboxPhotos.length === 0) return;
+    els.lightboxImg.src = lightboxPhotos[lightboxIndex];
+    els.lightboxImg.alt = 'Photo ' + (lightboxIndex + 1) + ' of ' + lightboxPhotos.length;
+
+    var showNav = lightboxPhotos.length > 1;
+    els.lightboxPrev.style.display = showNav ? '' : 'none';
+    els.lightboxNext.style.display = showNav ? '' : 'none';
+  }
+
+  // =====================================================================
+  // KEYBOARD NAVIGATION
+  // =====================================================================
+
+  function initKeyboardNav() {
+    document.addEventListener('keydown', function (e) {
+      // ESC closes lightbox or expanded entry
+      if (e.key === 'Escape') {
+        if (els.lightbox.classList.contains('active')) {
+          closeLightbox();
+        } else {
+          MapModule.closeExpandedPin();
+        }
+      }
+
+      // Arrow keys for lightbox
+      if (els.lightbox.classList.contains('active')) {
+        if (e.key === 'ArrowLeft') navLightbox(-1);
+        if (e.key === 'ArrowRight') navLightbox(1);
+      } else {
+        // Arrow keys for entry navigation (when lightbox is closed)
+        if (e.key === 'ArrowLeft') navigateEntry(-1);
+        if (e.key === 'ArrowRight') navigateEntry(1);
+      }
+    });
+  }
+
+  // =====================================================================
+  // GISCUS COMMENTS
+  // =====================================================================
+
+  var GISCUS_REPO_ID = '';
+  var GISCUS_CATEGORY_ID = '';
+
+  function loadGiscus(entryId) {
+    if (!GISCUS_REPO_ID || !GISCUS_CATEGORY_ID) return;
+
+    var container = document.getElementById('giscus-' + entryId);
+    if (!container || container.querySelector('.giscus')) return;
+
+    var script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('data-repo', 'thealetree/thealetree.github.io');
+    script.setAttribute('data-repo-id', GISCUS_REPO_ID);
+    script.setAttribute('data-category', 'Journal Comments');
+    script.setAttribute('data-category-id', GISCUS_CATEGORY_ID);
+    script.setAttribute('data-mapping', 'specific');
+    script.setAttribute('data-term', entryId);
+    script.setAttribute('data-strict', '0');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-emit-metadata', '0');
+    script.setAttribute('data-input-position', 'top');
+    script.setAttribute('data-theme', 'preferred_color_scheme');
+    script.setAttribute('data-lang', 'en');
+    script.setAttribute('data-loading', 'lazy');
+    script.crossOrigin = 'anonymous';
+    script.async = true;
+
+    container.appendChild(script);
+  }
+
+  // --- Public API ---
+  return {
+    init: init,
+    openLightbox: openLightbox,
+    closeLightbox: closeLightbox,
+    loadGiscus: loadGiscus,
+  };
+})();
+
+// Make AppModule accessible globally for MapModule callbacks
+window.AppModule = AppModule;
+
+// Boot
+document.addEventListener('DOMContentLoaded', function () {
+  AppModule.init();
+});

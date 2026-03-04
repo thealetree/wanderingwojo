@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wandering Wojo</title>
+  <meta name="description" content="A travel journal. Southwest to Alaska.">
+  <meta name="theme-color" content="#FAF9F6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1E1D1B" media="(prefers-color-scheme: dark)">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Wandering Wojo">
+  <meta property="og:description" content="A travel journal. Southwest to Alaska.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://thealetree.github.io/wanderingwojo">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+</head>
+<body>
+
+  <!-- ================================================================
+       FLOATING TITLE
+       ================================================================ -->
+  <div class="floating-title">Wandering Wojo</div>
+
+  <!-- ================================================================
+       ENTRY NAVIGATION
+       ================================================================ -->
+  <div class="entry-nav" id="entry-nav">
+    <button class="entry-nav__btn" id="nav-prev" aria-label="Previous entry">&lsaquo;</button>
+    <span class="entry-nav__info" id="nav-info"></span>
+    <button class="entry-nav__btn" id="nav-next" aria-label="Next entry">&rsaquo;</button>
+  </div>
+
+  <!-- ================================================================
+       MAP CONTAINER
+       ================================================================ -->
+  <div class="map-container" id="map-container">
+    <div id="map"></div>
+    <!-- Fallback shown if no Mapbox token -->
+    <div class="map-fallback hidden" id="map-fallback">
+      <h2 class="map-fallback__title">Map</h2>
+      <p class="map-fallback__instructions">
+        To enable the interactive map, add your Mapbox access token
+        in js/map.js. Get one at
+        <a href="https://account.mapbox.com/" target="_blank" rel="noopener">mapbox.com</a>.
+      </p>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       LIGHTBOX
+       ================================================================ -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-label="Photo viewer" aria-hidden="true">
+    <button class="lightbox__close" id="lightbox-close" aria-label="Close photo viewer">&times;</button>
+    <button class="lightbox__nav lightbox__nav--prev" id="lightbox-prev" aria-label="Previous photo">&lsaquo;</button>
+    <img class="lightbox__img" id="lightbox-img" src="" alt="">
+    <button class="lightbox__nav lightbox__nav--next" id="lightbox-next" aria-label="Next photo">&rsaquo;</button>
+  </div>
+
+  <!-- ================================================================
+       SCRIPTS
+       ================================================================ -->
+  <script src="js/map.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
