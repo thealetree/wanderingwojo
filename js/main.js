@@ -175,7 +175,6 @@ const AppModule = (function () {
     if (mapInitialized) {
       const map = MapModule.getMap();
       map.on('load', function () {
-        MapModule.addLocationMarkers(locations, entries);
         MapModule.addRouteFromEntries(entries);
         MapModule.addCorkPins(entries, handlePinClick);
         updateNavInfo();
