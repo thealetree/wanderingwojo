@@ -184,21 +184,16 @@ a:hover {
 }
 
 .floating-title__desc {
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
+  display: none;
   font-family: var(--font-body);
   font-size: 0.8125rem;
   line-height: 1.6;
   color: var(--text-secondary);
-  transition: max-height var(--transition-med), opacity var(--transition-med), margin var(--transition-med);
-  margin-top: 0;
+  margin-top: 0.5rem;
 }
 
 .floating-title--open .floating-title__desc {
-  max-height: 200px;
-  opacity: 1;
-  margin-top: 0.5rem;
+  display: block;
 }
 
 /* ==========================================================================
