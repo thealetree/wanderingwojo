@@ -196,6 +196,96 @@ a:hover {
   display: block;
 }
 
+.floating-title__blurb {
+  margin-bottom: 0.75rem;
+}
+
+/* --- Anonymous Contact Form --- */
+.contact-form {
+  border-top: 1px solid var(--beige-dark);
+  padding-top: 0.75rem;
+}
+
+.contact-form__label {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--near-black);
+  margin-bottom: 0.375rem;
+}
+
+.contact-form__input {
+  display: block;
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: var(--off-white);
+  border: 1px solid var(--beige-dark);
+  border-radius: 6px;
+  padding: 0.5rem 0.625rem;
+  resize: vertical;
+  min-height: 60px;
+  transition: border-color var(--transition-fast);
+}
+
+.contact-form__input:focus {
+  outline: none;
+  border-color: var(--warm-gray);
+}
+
+.contact-form__input::placeholder {
+  color: var(--warm-gray);
+}
+
+.contact-form__hint {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.02em;
+  color: var(--mid-gray);
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+.contact-form__btn {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.4rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  background: var(--near-black);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.contact-form__btn:hover {
+  opacity: 0.85;
+}
+
+.contact-form__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.contact-form__status {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  margin-top: 0.375rem;
+  text-align: center;
+}
+
+.contact-form__status--ok { color: #7C9A7E; }
+.contact-form__status--err { color: #C1440E; }
+
 /* ==========================================================================
    Entry Navigation
    ========================================================================== */

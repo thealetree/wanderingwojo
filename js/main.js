@@ -6,6 +6,11 @@
 const AppModule = (function () {
   'use strict';
 
+  // --- Config ---
+  // Set your email here to enable the anonymous contact form.
+  // Uses Formsubmit.co — first submission triggers a confirmation email.
+  var CONTACT_EMAIL = 'thealetree@gmail.com';
+
   // --- State ---
   let entries = [];
   let locations = [];
@@ -78,9 +83,21 @@ const AppModule = (function () {
   function initFloatingTitle() {
     if (!els.floatingTitle) return;
 
-    els.floatingTitle.addEventListener('click', function () {
+    var nameEl = els.floatingTitle.querySelector('.floating-title__name');
+    var form = document.getElementById('contact-form');
+
+    // Toggle open/close when clicking the title text
+    nameEl.addEventListener('click', function () {
       els.floatingTitle.classList.toggle('floating-title--open');
     });
+
+    // Stop clicks inside the desc area from closing the panel
+    var descEl = els.floatingTitle.querySelector('.floating-title__desc');
+    if (descEl) {
+      descEl.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+    }
 
     // Close when clicking elsewhere on the map
     document.addEventListener('click', function (e) {
@@ -88,6 +105,68 @@ const AppModule = (function () {
           els.floatingTitle.classList.contains('floating-title--open')) {
         els.floatingTitle.classList.remove('floating-title--open');
       }
+    });
+
+    // --- Contact form ---
+    if (form) {
+      if (!CONTACT_EMAIL) {
+        form.style.display = 'none';
+        return;
+      }
+      initContactForm(form);
+    }
+  }
+
+  function initContactForm(form) {
+    var msgInput = document.getElementById('contact-msg');
+    var btn = form.querySelector('.contact-form__btn');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var message = msgInput.value.trim();
+      if (!message) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      // Remove any previous status
+      var oldStatus = form.querySelector('.contact-form__status');
+      if (oldStatus) oldStatus.remove();
+
+      fetch('https://formsubmit.co/ajax/' + CONTACT_EMAIL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          message: message,
+          _subject: 'New message from Wandering Wojo',
+          _captcha: 'false',
+          _template: 'table'
+        })
+      })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        var status = document.createElement('span');
+        status.className = 'contact-form__status contact-form__status--ok';
+        status.textContent = 'Sent! Thanks for reaching out.';
+        form.appendChild(status);
+        msgInput.value = '';
+        btn.textContent = 'Send';
+        btn.disabled = false;
+
+        // Clear success message after a few seconds
+        setTimeout(function () { status.remove(); }, 4000);
+      })
+      .catch(function () {
+        var status = document.createElement('span');
+        status.className = 'contact-form__status contact-form__status--err';
+        status.textContent = 'Something went wrong. Try again?';
+        form.appendChild(status);
+        btn.textContent = 'Send';
+        btn.disabled = false;
+
+        setTimeout(function () { status.remove(); }, 4000);
+      });
     });
   }
 

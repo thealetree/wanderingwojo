@@ -119,6 +119,18 @@ API endpoints:
 - `POST /api/update-entry` — update an existing entry by ID
 - `POST /api/delete-entry` — delete an entry by ID
 
+## Anonymous Contact Form
+
+An anonymous message form lives inside the expandable "Wandering Wojo" title panel. Powered by [Formsubmit.co](https://formsubmit.co) — no backend needed. Messages are forwarded to the email set in `CONTACT_EMAIL` in `js/main.js`.
+
+- If `CONTACT_EMAIL` is empty, the form is hidden automatically
+- First time a message is submitted, Formsubmit sends a confirmation email — click the link to activate
+- After activation, all messages arrive in your inbox
+- No sender info is collected — completely anonymous unless the sender includes their own contact info
+- Uses the `/ajax/` endpoint with `fetch()` for inline success/error feedback (no page redirect)
+
+To change the recipient email, edit the `CONTACT_EMAIL` variable at the top of `js/main.js`.
+
 ## Giscus Comments (Optional, Not Configured)
 
 Comments use Giscus (GitHub Discussions). Currently disabled because `GISCUS_REPO_ID` and `GISCUS_CATEGORY_ID` are empty strings in `js/main.js`. To enable:
