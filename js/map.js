@@ -357,6 +357,19 @@ const MapModule = (function () {
     if (window.AppModule && window.AppModule.loadGiscus) {
       window.AppModule.loadGiscus(entry.id);
     }
+
+    // Pan map so the top of the expanded card is visible.
+    // Offset the center downward so the pin (and card above it) lands
+    // in the lower third of the viewport, leaving the card top in view.
+    setTimeout(function () {
+      var lngLat = [entry.coordinates[1], entry.coordinates[0]];
+      var point = map.project(lngLat);
+      var cardHeight = expanded.offsetHeight || 300;
+      // Shift the target point up by ~40% of card height so the top is visible
+      point.y -= cardHeight * 0.4;
+      var offsetCenter = map.unproject(point);
+      map.easeTo({ center: offsetCenter, duration: 400 });
+    }, 50);
   }
 
   /**

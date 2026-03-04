@@ -1,1 +1,72 @@
-[]
+[
+  {
+    "id": "2025-03-12-the-last-morning",
+    "date": "2025-03-12",
+    "title": "The last morning",
+    "type": "dispatch",
+    "location_name": "Bend, Oregon",
+    "coordinates": [44.0582, -121.3153],
+    "body": "Woke up to frost on the van windows and Wojo curled into my sleeping bag like a furry comma. This is the last morning in Bend — the town where we planned all of this, spread maps across the floor of a brewery, and decided to just go.\n\nThe van is packed tight. Every cabinet has a purpose. Wojo has claimed the passenger seat as his throne and the dash as his lookout. I think he knows something is different.\n\nWe're heading north first, up through the gorge. No real reason except the river pulls me that way. Then east. Then south. Then wherever the road feels right.\n\nGoodbye, Bend. Thanks for the launchpad.",
+    "video_url": null,
+    "photos": [],
+    "mood_left": "nervous",
+    "mood_right": "ready",
+    "mood_value": 0.7
+  },
+  {
+    "id": "2025-03-17-wind-and-water",
+    "date": "2025-03-17",
+    "title": "Wind and water",
+    "type": "field-notes",
+    "location_name": "Stevenson, Washington",
+    "coordinates": [45.6915, -121.8846],
+    "body": "The Columbia Gorge is a wind tunnel with opinions. Parked at a pullout near Beacon Rock and the van rocked all night like a boat. Wojo was not amused.\n\nSpent the morning watching kiteboarders tear across the river — tiny bright sails against all that gray water and green cliff. The scale of this place is hard to photograph. Everything is vertical.\n\nFound a little cafe in Stevenson that let Wojo sit on the patio. He watched a dog three times his size with the calm superiority only a cat can manage. The barista brought him a saucer of cream without asking.\n\nWe'll head east tomorrow. Idaho by nightfall if the passes are clear.",
+    "video_url": null,
+    "photos": [],
+    "mood_left": "wild",
+    "mood_right": "peaceful",
+    "mood_value": 0.35
+  },
+  {
+    "id": "2025-03-21-the-long-straight",
+    "date": "2025-03-21",
+    "title": "The long straight",
+    "type": "wojo-report",
+    "location_name": "Boise, Idaho",
+    "coordinates": [43.6150, -116.2023],
+    "body": "Drove across Oregon on roads so straight and empty that the horizon just sits there, waiting. Sagebrush forever. Wojo slept through most of it, which is his review.\n\nBoise was a grocery-and-gas stop that turned into two nights. Found a park along the river where Wojo could stretch his legs on his harness. He stalked a pigeon for twenty minutes. The pigeon was unbothered.\n\nThe van needs an oil change before we hit Utah. Found a shop that can squeeze us in tomorrow. The mechanic saw Wojo in the passenger seat and said, 'That cat looks like he's in charge.' Correct.",
+    "video_url": null,
+    "photos": [],
+    "mood_left": "restless",
+    "mood_right": "content",
+    "mood_value": 0.55
+  },
+  {
+    "id": "2025-03-25-city-in-the-basin",
+    "date": "2025-03-25",
+    "title": "City in the basin",
+    "type": "dispatch",
+    "location_name": "Salt Lake City, Utah",
+    "coordinates": [40.7608, -111.8910],
+    "body": "Salt Lake sits in its valley like something placed there on purpose — grid streets, mountains on every side, that enormous lake catching the light to the west. We came for practical reasons: REI for a new camp stove, oil change, fill the water tanks.\n\nBut we stayed an extra day because the city surprised me. Found a bookstore that smelled like old paper and ambition. Wojo waited in the van and judged me through the windshield.\n\nThe Wasatch Range is absurd. Snow-covered peaks right there, ten minutes from downtown, like a painting someone hung too close to a parking lot.\n\nMoab tomorrow. Everyone says the red rock will change something in us. I think Wojo is already changed — he sits differently now, watches the road ahead instead of behind.",
+    "video_url": null,
+    "photos": [],
+    "mood_left": "practical",
+    "mood_right": "wondering",
+    "mood_value": 0.6
+  },
+  {
+    "id": "2025-03-28-red-country",
+    "date": "2025-03-28",
+    "title": "Red country",
+    "type": "field-notes",
+    "location_name": "Moab, Utah",
+    "coordinates": [38.5733, -109.5498],
+    "body": "Everything is red. The dirt, the cliffs, the light at six in the morning. Even the shadows here have a warmth to them. We're camped on BLM land south of town, just the van and a few scattered rigs in the distance. The Colorado River is close enough to hear if the wind dies down.\n\nWojo discovered sand today and does not approve. He lifted each paw in sequence, shook it, and looked at me like I had personally invented the desert to inconvenience him. Then he found a flat rock in the sun and fell asleep for three hours.\n\nDrove into Arches at sunset. The formations don't look real — they look like something a planet would dream about. Stood under Delicate Arch with a handful of strangers and nobody talked. Just watched the light go from gold to pink to gone.\n\nI think we'll stay a while.",
+    "video_url": null,
+    "photos": [],
+    "mood_left": "calm",
+    "mood_right": "awed",
+    "mood_value": 0.8
+  }
+]
