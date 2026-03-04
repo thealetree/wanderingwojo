@@ -336,6 +336,11 @@ const MapModule = (function () {
     pinEl.appendChild(expanded);
     expandedPinEl = pinEl;
 
+    // Prevent touch events from reaching the map so the card scrolls on mobile
+    ['touchstart', 'touchmove', 'touchend'].forEach(function (evt) {
+      expanded.addEventListener(evt, function (e) { e.stopPropagation(); });
+    });
+
     // Close button handler
     expanded.querySelector('.entry-expanded__close').addEventListener('click', function (e) {
       e.stopPropagation();
