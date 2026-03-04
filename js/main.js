@@ -24,6 +24,7 @@ const AppModule = (function () {
     cacheDom();
     await loadData();
     initMap();
+    initFloatingTitle();
     initEntryNav();
     initLightbox();
     initKeyboardNav();
@@ -34,6 +35,7 @@ const AppModule = (function () {
    */
   function cacheDom() {
     els.mapContainer = document.getElementById('map-container');
+    els.floatingTitle = document.getElementById('floating-title');
     els.lightbox = document.getElementById('lightbox');
     els.lightboxImg = document.getElementById('lightbox-img');
     els.lightboxClose = document.getElementById('lightbox-close');
@@ -67,6 +69,26 @@ const AppModule = (function () {
       locations = [];
       sortedEntries = [];
     }
+  }
+
+  // =====================================================================
+  // FLOATING TITLE (expandable description)
+  // =====================================================================
+
+  function initFloatingTitle() {
+    if (!els.floatingTitle) return;
+
+    els.floatingTitle.addEventListener('click', function () {
+      els.floatingTitle.classList.toggle('floating-title--open');
+    });
+
+    // Close when clicking elsewhere on the map
+    document.addEventListener('click', function (e) {
+      if (!els.floatingTitle.contains(e.target) &&
+          els.floatingTitle.classList.contains('floating-title--open')) {
+        els.floatingTitle.classList.remove('floating-title--open');
+      }
+    });
   }
 
   // =====================================================================

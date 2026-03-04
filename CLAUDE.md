@@ -23,7 +23,7 @@ media/wojo/              Wojo-specific photos
 
 ### Map-Only Mode
 The site is purely map-based. No separate journal feed, no view toggle, no header. The map fills the entire viewport. Floating UI overlays sit on top:
-- **"Wandering Wojo" title** — fixed top-right corner
+- **"Wandering Wojo" title** — fixed top-right corner, clickable to expand/collapse a description paragraph
 - **Entry navigation** — fixed bottom-center, `< 1/4 >` style with prev/next buttons
 - **Cork board pins** — Mapbox custom HTML markers showing entry cards on the map
 
