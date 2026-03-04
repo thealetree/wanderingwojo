@@ -86,25 +86,20 @@ const AppModule = (function () {
     var nameEl = els.floatingTitle.querySelector('.floating-title__name');
     var form = document.getElementById('contact-form');
 
-    // Toggle open/close when clicking the title text
-    nameEl.addEventListener('click', function () {
+    // Only the title text toggles open/close
+    nameEl.addEventListener('click', function (e) {
+      e.stopPropagation();
       els.floatingTitle.classList.toggle('floating-title--open');
     });
 
-    // Stop clicks inside the desc area from closing the panel
-    var descEl = els.floatingTitle.querySelector('.floating-title__desc');
-    if (descEl) {
-      descEl.addEventListener('click', function (e) {
-        e.stopPropagation();
-      });
-    }
+    // Clicks anywhere inside the panel (desc, form, etc.) do nothing
+    els.floatingTitle.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
 
-    // Close when clicking elsewhere on the map
-    document.addEventListener('click', function (e) {
-      if (!els.floatingTitle.contains(e.target) &&
-          els.floatingTitle.classList.contains('floating-title--open')) {
-        els.floatingTitle.classList.remove('floating-title--open');
-      }
+    // Close when clicking outside the panel
+    document.addEventListener('click', function () {
+      els.floatingTitle.classList.remove('floating-title--open');
     });
 
     // --- Contact form ---
