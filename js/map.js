@@ -336,6 +336,10 @@ const MapModule = (function () {
     pinEl.appendChild(expanded);
     expandedPinEl = pinEl;
 
+    // Hide floating title so it doesn't cover the close button
+    var floatingTitle = document.getElementById('floating-title');
+    if (floatingTitle) floatingTitle.style.display = 'none';
+
     // Prevent touch events from reaching the map so the card scrolls on mobile
     ['touchstart', 'touchmove', 'touchend'].forEach(function (evt) {
       expanded.addEventListener(evt, function (e) { e.stopPropagation(); });
@@ -394,6 +398,10 @@ const MapModule = (function () {
     }
 
     expandedPinEl = null;
+
+    // Restore floating title
+    var floatingTitle = document.getElementById('floating-title');
+    if (floatingTitle) floatingTitle.style.display = '';
   }
 
   /**
