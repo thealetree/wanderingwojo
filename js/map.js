@@ -550,6 +550,11 @@ const MapModule = (function () {
     pinEl.appendChild(expanded);
     expandedPinEl = pinEl;
 
+    // Hide other pins so they don't show through expanded entry
+    corkPins.forEach(function (p) {
+      if (p.element !== pinEl) p.element.style.visibility = 'hidden';
+    });
+
     // Hide floating title
     var floatingTitle = document.getElementById('floating-title');
     if (floatingTitle) floatingTitle.style.display = 'none';
@@ -629,6 +634,11 @@ const MapModule = (function () {
     expandedPinEl = null;
     expandedPinEntries = [];
     expandedTabIndex = 0;
+
+    // Restore other pins
+    corkPins.forEach(function (p) {
+      p.element.style.visibility = '';
+    });
 
     // Restore floating title
     var floatingTitle = document.getElementById('floating-title');
