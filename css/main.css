@@ -196,6 +196,13 @@ a:hover {
   display: block;
 }
 
+/* Wojo illustration in panel — inline with blurb text */
+.wojo-illustration--panel {
+  float: right;
+  width: 80px;
+  margin: 0 0 var(--space-xs) var(--space-sm);
+}
+
 .floating-title__blurb {
   margin-bottom: 0.75rem;
 }
@@ -474,6 +481,24 @@ a:hover {
   border-top: 8px solid var(--beige-dark);
 }
 
+/* Grouped pin — stacked card effect */
+.cork-pin--grouped .cork-pin__card {
+  position: relative;
+}
+
+.cork-pin--grouped .cork-pin__card::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: -3px;
+  bottom: -3px;
+  background: var(--beige);
+  border: 1px solid var(--beige-dark);
+  border-radius: 8px;
+  z-index: -1;
+}
+
 /* Cork pin highlighted state */
 .cork-pin--highlighted {
   z-index: 200 !important;
@@ -521,12 +546,34 @@ a:hover {
   border-bottom: 1px solid var(--beige);
 }
 
-.entry-expanded__close {
+/* Wojo illustration in expanded entry header */
+.entry-expanded__header .wojo-illustration {
+  float: right;
+  width: 100px;
+  margin: 0 0 var(--space-sm) var(--space-md);
+  opacity: 0.9;
+}
+
+.wojo-illustration__img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Sticky header — holds close button + tab bar */
+.entry-expanded__sticky-header {
   position: sticky;
   top: 0;
   z-index: 10;
-  float: right;
-  margin: var(--space-sm) var(--space-sm) 0 0;
+  background: var(--white);
+  border-radius: 10px 10px 0 0;
+}
+
+.entry-expanded__close {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  z-index: 11;
   width: 28px;
   height: 28px;
   display: flex;
@@ -545,6 +592,46 @@ a:hover {
 .entry-expanded__close:hover {
   color: var(--near-black);
   border-color: var(--warm-gray);
+}
+
+/* --- Entry Tabs (grouped locations) --- */
+.entry-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--beige-dark);
+  padding: var(--space-sm) var(--space-lg);
+  padding-right: calc(var(--space-lg) + 36px); /* room for close button */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.entry-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.entry-tabs__tab {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+  color: var(--mid-gray);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: var(--space-xs) var(--space-md);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.entry-tabs__tab:hover {
+  color: var(--charcoal);
+}
+
+.entry-tabs__tab--active {
+  color: var(--near-black);
+  border-bottom-color: var(--charcoal);
+  font-weight: 500;
 }
 
 .entry-expanded__type {
@@ -898,6 +985,24 @@ a:hover {
   .entry-expanded {
     max-width: calc(100vw - 2rem);
     max-height: 85vh;
+  }
+
+  .entry-tabs {
+    padding: var(--space-xs) var(--space-md);
+    padding-right: calc(var(--space-md) + 36px);
+  }
+
+  .entry-tabs__tab {
+    font-size: 0.5625rem;
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .entry-expanded__header .wojo-illustration {
+    width: 72px;
+  }
+
+  .wojo-illustration--panel {
+    width: 64px;
   }
 
   .cork-pin__card {

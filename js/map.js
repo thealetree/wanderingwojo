@@ -23,6 +23,8 @@ const MapModule = (function () {
   let corkPins = [];
   let activePopup = null;
   let expandedPinEl = null;
+  let expandedPinEntries = [];
+  let expandedTabIndex = 0;
   let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
   // Route coordinates — built dynamically from entries
@@ -203,12 +205,12 @@ const MapModule = (function () {
   }
 
   /**
-   * Add cork board pins for journal entries
+   * Add cork board pins for journal entries, grouped by location_name
    */
   function addCorkPins(entries, onPinClick) {
     if (!map) return;
 
-    // Build chronological index lookup (1-based)
+    // Sort all entries chronologically
     var sorted = entries.slice().sort(function (a, b) {
       return new Date(a.date) - new Date(b.date);
     });
@@ -216,30 +218,56 @@ const MapModule = (function () {
     sorted.forEach(function (e, i) { entryNumber[e.id] = i + 1; });
     var total = sorted.length;
 
-    entries.forEach(function (entry) {
-      const pinEl = document.createElement('div');
-      pinEl.className = 'cork-pin';
-      pinEl.setAttribute('data-entry-id', entry.id);
+    // Group entries by location_name
+    var groups = {};
+    var groupOrder = [];
+    sorted.forEach(function (entry) {
+      var key = entry.location_name;
+      if (!groups[key]) {
+        groups[key] = [];
+        groupOrder.push(key);
+      }
+      groups[key].push(entry);
+    });
 
-      const typeClass = 'cork-pin__type--' + entry.type;
-      const typeLabel = formatType(entry.type);
-      const num = entryNumber[entry.id] || '';
+    // Create one pin per location group
+    groupOrder.forEach(function (locationName) {
+      var groupEntries = groups[locationName]; // already chronological
+      var displayEntry = groupEntries[groupEntries.length - 1]; // most recent for display
+      var positionEntry = groupEntries[0]; // earliest for map position
+      var isGrouped = groupEntries.length > 1;
+
+      var pinEl = document.createElement('div');
+      pinEl.className = 'cork-pin';
+      if (isGrouped) pinEl.classList.add('cork-pin--grouped');
+      pinEl.setAttribute('data-entry-ids', groupEntries.map(function (e) { return e.id; }).join(','));
+
+      var typeClass = 'cork-pin__type--' + displayEntry.type;
+      var typeLabel = formatType(displayEntry.type);
+
+      var numberDisplay;
+      if (isGrouped) {
+        var firstNum = entryNumber[groupEntries[0].id] || '';
+        var lastNum = entryNumber[groupEntries[groupEntries.length - 1].id] || '';
+        numberDisplay = firstNum + '-' + lastNum + '/' + total;
+      } else {
+        numberDisplay = (entryNumber[displayEntry.id] || '') + '/' + total;
+      }
 
       pinEl.innerHTML =
         '<div class="cork-pin__card">' +
           '<span class="cork-pin__type ' + typeClass + '">' + typeLabel + '</span>' +
-          '<div class="cork-pin__title">' + escapeHtml(entry.title) + '</div>' +
+          '<div class="cork-pin__title">' + escapeHtml(displayEntry.title) + '</div>' +
           '<div class="cork-pin__meta-row">' +
-            '<span class="cork-pin__date">' + formatDate(entry.date) + '</span>' +
-            '<span class="cork-pin__number">' + num + '/' + total + '</span>' +
+            '<span class="cork-pin__date">' + formatDate(displayEntry.date) + '</span>' +
+            '<span class="cork-pin__number">' + numberDisplay + '</span>' +
           '</div>' +
         '</div>' +
         '<div class="cork-pin__anchor"></div>';
 
-      // Coordinates in entries are [lat, lng], need [lng, lat] for Mapbox
-      const lngLat = [entry.coordinates[1], entry.coordinates[0]];
+      var lngLat = [positionEntry.coordinates[1], positionEntry.coordinates[0]];
 
-      const marker = new mapboxgl.Marker({
+      var marker = new mapboxgl.Marker({
         element: pinEl,
         anchor: 'bottom',
         offset: [0, 0],
@@ -249,40 +277,28 @@ const MapModule = (function () {
 
       pinEl.addEventListener('click', function (e) {
         e.stopPropagation();
-        if (onPinClick) onPinClick(entry, pinEl, marker);
+        if (onPinClick) onPinClick(groupEntries, pinEl, marker);
       });
 
-      corkPins.push({ marker, element: pinEl, data: entry });
+      corkPins.push({ marker: marker, element: pinEl, entries: groupEntries });
     });
   }
 
   /**
-   * Expand an entry on the cork board (in-place card expansion)
+   * Build the HTML content for a single entry (used by expand and tab switch)
    */
-  function expandPinEntry(entry, pinEl) {
-    closeExpandedPin();
+  function buildEntryContentHtml(entry) {
+    var typeClass = 'cork-pin__type--' + entry.type;
+    var typeLabel = formatType(entry.type);
+    var moodColor = getMoodColor(entry.mood_value != null ? entry.mood_value : 0.5);
+    var moodWidth = Math.round((entry.mood_value != null ? entry.mood_value : 0.5) * 100);
 
-    const card = pinEl.querySelector('.cork-pin__card');
-    if (!card) return;
-
-    // Hide the small card content
-    card.style.display = 'none';
-
-    // Create expanded content
-    const expanded = document.createElement('div');
-    expanded.className = 'entry-expanded';
-    expanded.setAttribute('data-expanded', 'true');
-
-    const typeClass = 'cork-pin__type--' + entry.type;
-    const typeLabel = formatType(entry.type);
-
-    // Build mood bar color (sage to terracotta based on mood_value)
-    const moodColor = getMoodColor(entry.mood_value != null ? entry.mood_value : 0.5);
-    const moodWidth = Math.round((entry.mood_value != null ? entry.mood_value : 0.5) * 100);
-
-    let html =
-      '<div class="entry-expanded__header" style="position:relative;">' +
-        '<button class="entry-expanded__close" aria-label="Close">&times;</button>' +
+    var html =
+      '<div class="entry-expanded__header">' +
+        '<picture class="wojo-illustration">' +
+          '<source srcset="svg/woj_whitelines.svg" media="(prefers-color-scheme: dark)">' +
+          '<img src="svg/Woj_darklines.svg" alt="" class="wojo-illustration__img">' +
+        '</picture>' +
         '<span class="entry-expanded__type ' + typeClass + '">' + typeLabel + '</span>' +
         '<div class="entry-expanded__location">' + escapeHtml(entry.location_name) +
         '&ensp;&middot;&ensp;' + entry.coordinates[0].toFixed(4) + ', ' + entry.coordinates[1].toFixed(4) + '</div>' +
@@ -291,7 +307,6 @@ const MapModule = (function () {
       '</div>' +
       '<div class="entry-expanded__body">' + renderBody(entry.body) + '</div>';
 
-    // Mood bar
     if (entry.mood_left && entry.mood_right) {
       html +=
         '<div class="wojo-mood">' +
@@ -303,7 +318,6 @@ const MapModule = (function () {
         '</div>';
     }
 
-    // Photos
     if (entry.photos && entry.photos.length > 0) {
       html += '<div class="entry-expanded__photos">';
       entry.photos.forEach(function (photo, i) {
@@ -314,7 +328,6 @@ const MapModule = (function () {
       html += '</div>';
     }
 
-    // Video
     if (entry.video_url) {
       html +=
         '<div class="entry-expanded__video">' +
@@ -324,61 +337,197 @@ const MapModule = (function () {
         '</div>';
     }
 
-    // Giscus placeholder
     html +=
       '<div class="entry-expanded__comments" id="giscus-' + entry.id + '">' +
         '<!-- Giscus loads here -->' +
       '</div>';
 
-    expanded.innerHTML = html;
+    return html;
+  }
 
-    // Insert expanded element into the pin
-    pinEl.appendChild(expanded);
-    expandedPinEl = pinEl;
-
-    // Hide floating title so it doesn't cover the close button
-    var floatingTitle = document.getElementById('floating-title');
-    if (floatingTitle) floatingTitle.style.display = 'none';
-
-    // Prevent touch events from reaching the map so the card scrolls on mobile
-    ['touchstart', 'touchmove', 'touchend'].forEach(function (evt) {
-      expanded.addEventListener(evt, function (e) { e.stopPropagation(); });
-    });
-
-    // Close button handler
-    expanded.querySelector('.entry-expanded__close').addEventListener('click', function (e) {
-      e.stopPropagation();
-      closeExpandedPin();
-    });
-
-    // Photo click handlers
+  /**
+   * Bind photo click handlers on the expanded content
+   */
+  function bindPhotoHandlers(expanded, entry) {
     expanded.querySelectorAll('.entry-expanded__photo').forEach(function (photoEl) {
       photoEl.addEventListener('click', function (e) {
         e.stopPropagation();
-        const idx = parseInt(photoEl.getAttribute('data-photo-index'));
+        var idx = parseInt(photoEl.getAttribute('data-photo-index'));
         if (window.AppModule && window.AppModule.openLightbox) {
           window.AppModule.openLightbox(entry.photos, idx);
         }
       });
     });
+  }
 
-    // Load Giscus
-    if (window.AppModule && window.AppModule.loadGiscus) {
-      window.AppModule.loadGiscus(entry.id);
-    }
-
-    // Pan map so the top of the expanded card is visible.
-    // Offset the center downward so the pin (and card above it) lands
-    // in the lower third of the viewport, leaving the card top in view.
+  /**
+   * Pan map so expanded card top is visible
+   */
+  function panToExpandedEntry(entry, expanded) {
     setTimeout(function () {
       var lngLat = [entry.coordinates[1], entry.coordinates[0]];
       var point = map.project(lngLat);
       var cardHeight = expanded.offsetHeight || 300;
-      // Shift the target point up by ~40% of card height so the top is visible
       point.y -= cardHeight * 0.4;
       var offsetCenter = map.unproject(point);
       map.easeTo({ center: offsetCenter, duration: 400 });
     }, 50);
+  }
+
+  /**
+   * Switch tab within an already-expanded grouped pin
+   */
+  function switchTab(expanded, sortedGroup, newIndex) {
+    expandedTabIndex = newIndex;
+
+    // Update tab active states
+    expanded.querySelectorAll('.entry-tabs__tab').forEach(function (tab, i) {
+      tab.classList.toggle('entry-tabs__tab--active', i === newIndex);
+    });
+
+    // Replace content
+    var contentEl = expanded.querySelector('.entry-expanded__content');
+    if (contentEl) {
+      contentEl.innerHTML = buildEntryContentHtml(sortedGroup[newIndex]);
+    }
+
+    // Rebind photo handlers
+    bindPhotoHandlers(expanded, sortedGroup[newIndex]);
+
+    // Load Giscus for new tab
+    if (window.AppModule && window.AppModule.loadGiscus) {
+      window.AppModule.loadGiscus(sortedGroup[newIndex].id);
+    }
+
+    // Sync navIndex in AppModule
+    if (window.AppModule && window.AppModule.onTabSwitch) {
+      window.AppModule.onTabSwitch(sortedGroup[newIndex].id);
+    }
+  }
+
+  /**
+   * Expand a pin with entries (supports grouped locations with tabs)
+   * @param {Array} entries - array of entries at this location
+   * @param {HTMLElement} pinEl - the pin DOM element
+   * @param {string} [targetEntryId] - optional entry ID to pre-select
+   */
+  function expandPinEntry(entries, pinEl, targetEntryId) {
+    closeExpandedPin();
+
+    var card = pinEl.querySelector('.cork-pin__card');
+    if (!card) return;
+    card.style.display = 'none';
+
+    // Sort entries chronologically within group
+    var sortedGroup = entries.slice().sort(function (a, b) {
+      return new Date(a.date) - new Date(b.date);
+    });
+
+    // Determine which tab to show
+    var activeIndex = 0;
+    if (targetEntryId) {
+      sortedGroup.forEach(function (e, i) {
+        if (e.id === targetEntryId) activeIndex = i;
+      });
+    }
+
+    expandedPinEntries = sortedGroup;
+    expandedTabIndex = activeIndex;
+
+    // Create expanded container
+    var expanded = document.createElement('div');
+    expanded.className = 'entry-expanded';
+    expanded.setAttribute('data-expanded', 'true');
+
+    // Build tab bar (only if multiple entries)
+    var tabBarHtml = '';
+    if (sortedGroup.length > 1) {
+      tabBarHtml = '<div class="entry-tabs">';
+      sortedGroup.forEach(function (e, i) {
+        var activeClass = i === activeIndex ? ' entry-tabs__tab--active' : '';
+        tabBarHtml +=
+          '<button class="entry-tabs__tab' + activeClass + '" data-tab-index="' + i + '">' +
+            formatDate(e.date) +
+          '</button>';
+      });
+      tabBarHtml += '</div>';
+    }
+
+    expanded.innerHTML =
+      '<div class="entry-expanded__sticky-header">' +
+        '<button class="entry-expanded__close" aria-label="Close">&times;</button>' +
+        tabBarHtml +
+      '</div>' +
+      '<div class="entry-expanded__content">' +
+        buildEntryContentHtml(sortedGroup[activeIndex]) +
+      '</div>';
+
+    // Insert into pin
+    pinEl.appendChild(expanded);
+    expandedPinEl = pinEl;
+
+    // Hide floating title
+    var floatingTitle = document.getElementById('floating-title');
+    if (floatingTitle) floatingTitle.style.display = 'none';
+
+    // Mobile touch scroll
+    ['touchstart', 'touchmove', 'touchend'].forEach(function (evt) {
+      expanded.addEventListener(evt, function (e) { e.stopPropagation(); });
+    });
+
+    // Close button
+    expanded.querySelector('.entry-expanded__close').addEventListener('click', function (e) {
+      e.stopPropagation();
+      closeExpandedPin();
+    });
+
+    // Tab click handlers
+    expanded.querySelectorAll('.entry-tabs__tab').forEach(function (tabBtn) {
+      tabBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var idx = parseInt(tabBtn.getAttribute('data-tab-index'));
+        switchTab(expanded, sortedGroup, idx);
+      });
+    });
+
+    // Bind photo handlers for initial tab
+    bindPhotoHandlers(expanded, sortedGroup[activeIndex]);
+
+    // Load Giscus
+    if (window.AppModule && window.AppModule.loadGiscus) {
+      window.AppModule.loadGiscus(sortedGroup[activeIndex].id);
+    }
+
+    // Pan map
+    panToExpandedEntry(sortedGroup[activeIndex], expanded);
+  }
+
+  /**
+   * Switch to a specific entry within the currently expanded pin (tab switch)
+   * Returns true if successful, false if entryId not in current pin
+   */
+  function switchToEntryInExpandedPin(entryId) {
+    if (!expandedPinEl || expandedPinEntries.length < 2) return false;
+
+    var idx = -1;
+    expandedPinEntries.forEach(function (e, i) {
+      if (e.id === entryId) idx = i;
+    });
+    if (idx === -1) return false;
+
+    var expanded = expandedPinEl.querySelector('[data-expanded="true"]');
+    if (!expanded) return false;
+
+    switchTab(expanded, expandedPinEntries, idx);
+    return true;
+  }
+
+  /**
+   * Get entry IDs in the currently expanded pin
+   */
+  function getExpandedPinEntryIds() {
+    if (!expandedPinEl || !expandedPinEntries.length) return [];
+    return expandedPinEntries.map(function (e) { return e.id; });
   }
 
   /**
@@ -387,17 +536,15 @@ const MapModule = (function () {
   function closeExpandedPin() {
     if (!expandedPinEl) return;
 
-    const expanded = expandedPinEl.querySelector('[data-expanded="true"]');
-    if (expanded) {
-      expanded.remove();
-    }
+    var expanded = expandedPinEl.querySelector('[data-expanded="true"]');
+    if (expanded) expanded.remove();
 
-    const card = expandedPinEl.querySelector('.cork-pin__card');
-    if (card) {
-      card.style.display = '';
-    }
+    var card = expandedPinEl.querySelector('.cork-pin__card');
+    if (card) card.style.display = '';
 
     expandedPinEl = null;
+    expandedPinEntries = [];
+    expandedTabIndex = 0;
 
     // Restore floating title
     var floatingTitle = document.getElementById('floating-title');
@@ -481,6 +628,8 @@ const MapModule = (function () {
     addCorkPins: addCorkPins,
     expandPinEntry: expandPinEntry,
     closeExpandedPin: closeExpandedPin,
+    switchToEntryInExpandedPin: switchToEntryInExpandedPin,
+    getExpandedPinEntryIds: getExpandedPinEntryIds,
     showCorkPins: showCorkPins,
     flyToEntry: flyToEntry,
     getCurrentLocation: getCurrentLocation,

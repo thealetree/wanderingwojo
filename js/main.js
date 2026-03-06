@@ -182,12 +182,13 @@ const AppModule = (function () {
     }
   }
 
-  function handlePinClick(entry, pinEl, marker) {
-    // Update navIndex to match the clicked entry
-    var idx = sortedEntries.findIndex(function (e) { return e.id === entry.id; });
+  function handlePinClick(groupEntries, pinEl, marker) {
+    // Default to the most recent entry in the group for navIndex
+    var displayEntry = groupEntries[groupEntries.length - 1];
+    var idx = sortedEntries.findIndex(function (e) { return e.id === displayEntry.id; });
     if (idx !== -1) navIndex = idx;
     updateNavInfo();
-    MapModule.expandPinEntry(entry, pinEl);
+    MapModule.expandPinEntry(groupEntries, pinEl);
   }
 
   // =====================================================================
@@ -214,21 +215,25 @@ const AppModule = (function () {
   function navigateEntry(dir) {
     if (sortedEntries.length === 0) return;
 
-    // Close any expanded pin first
-    MapModule.closeExpandedPin();
-
-    // Move index (wrapping)
-    navIndex = (navIndex + dir + sortedEntries.length) % sortedEntries.length;
-
+    // Calculate new index
+    var newIndex = (navIndex + dir + sortedEntries.length) % sortedEntries.length;
+    navIndex = newIndex;
     var entry = sortedEntries[navIndex];
 
-    // Fly to the entry
+    // Check if the target entry is in the currently expanded pin
+    var expandedIds = MapModule.getExpandedPinEntryIds();
+    if (expandedIds.length > 0 && expandedIds.indexOf(entry.id) !== -1) {
+      // Same grouped pin — just switch tabs
+      MapModule.switchToEntryInExpandedPin(entry.id);
+      highlightPin(entry.id);
+      updateNavInfo();
+      return;
+    }
+
+    // Different pin — close, fly, highlight
+    MapModule.closeExpandedPin();
     MapModule.flyToEntry(entry);
-
-    // Highlight the pin
     highlightPin(entry.id);
-
-    // Update nav display
     updateNavInfo();
   }
 
@@ -238,11 +243,14 @@ const AppModule = (function () {
       el.classList.remove('cork-pin--highlighted');
     });
 
-    // Add highlight to the target pin
-    var pin = document.querySelector('[data-entry-id="' + entryId + '"]');
-    if (pin) {
-      pin.classList.add('cork-pin--highlighted');
-    }
+    // Find the pin that contains this entry ID (grouped pins use data-entry-ids)
+    var allPins = document.querySelectorAll('.cork-pin');
+    allPins.forEach(function (pin) {
+      var ids = (pin.getAttribute('data-entry-ids') || '').split(',');
+      if (ids.indexOf(entryId) !== -1) {
+        pin.classList.add('cork-pin--highlighted');
+      }
+    });
   }
 
   function updateNavInfo() {
@@ -355,12 +363,24 @@ const AppModule = (function () {
     container.appendChild(script);
   }
 
+  /**
+   * Called by MapModule when user clicks a tab directly — keeps navIndex in sync
+   */
+  function onTabSwitch(entryId) {
+    var idx = sortedEntries.findIndex(function (e) { return e.id === entryId; });
+    if (idx !== -1) {
+      navIndex = idx;
+      updateNavInfo();
+    }
+  }
+
   // --- Public API ---
   return {
     init: init,
     openLightbox: openLightbox,
     closeLightbox: closeLightbox,
     loadGiscus: loadGiscus,
+    onTabSwitch: onTabSwitch,
   };
 })();
 

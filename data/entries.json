@@ -68,5 +68,19 @@
     "mood_left": "calm",
     "mood_right": "awed",
     "mood_value": 0.8
+  },
+  {
+    "id": "2025-04-01-desert-rhythm",
+    "date": "2025-04-01",
+    "title": "Desert rhythm",
+    "type": "wojo-report",
+    "location_name": "Moab, Utah",
+    "coordinates": [38.5733, -109.5498],
+    "body": "Four days in and we've found a rhythm here. Morning coffee while the canyon walls turn from purple to orange. Wojo patrols the campsite perimeter at dawn like a tiny ranger, then retires to his rock.\n\nHiked to Mesa Arch today. Left Wojo in the van with the windows cracked and his favorite blanket. He gave me a look that said both 'how dare you' and 'bring me something interesting.' I brought him a stick. He was unimpressed.\n\nThe stars here are different. No light pollution, no clouds — just the whole sky laid out like someone spilled something luminous. Wojo sat on the van roof with me and watched. I think he was hunting constellations.\n\nWe'll move on soon. But not yet.",
+    "video_url": null,
+    "photos": [],
+    "mood_left": "settled",
+    "mood_right": "restless",
+    "mood_value": 0.3
   }
 ]
