@@ -1058,7 +1058,16 @@ a:hover {
 
   .entry-expanded {
     max-width: calc(100vw - 2rem);
-    max-height: 85vh;
+    max-height: 75vh;
+    border-radius: 30px 8px 25px 8px / 8px 25px 8px 30px;
+  }
+
+  .entry-expanded::after {
+    border-radius: 30px 8px 25px 8px / 8px 25px 8px 30px;
+  }
+
+  .entry-expanded__sticky-header {
+    border-radius: 30px 8px 0 0 / 8px 25px 0 0;
   }
 
   .entry-tabs {
