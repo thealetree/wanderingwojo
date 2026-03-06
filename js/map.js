@@ -79,11 +79,70 @@ const MapModule = (function () {
       return new Date(a.date) - new Date(b.date);
     });
 
-    routeCoords = sorted.map(function (e) {
+    var waypoints = sorted.map(function (e) {
       return [e.coordinates[1], e.coordinates[0]];
     });
 
+    // Build meandering path between each pair of waypoints
+    routeCoords = [];
+    for (var i = 0; i < waypoints.length - 1; i++) {
+      var segment = meanderSegment(waypoints[i], waypoints[i + 1], i);
+      // Add all points except the last (to avoid duplicates at joins)
+      for (var j = 0; j < segment.length - 1; j++) {
+        routeCoords.push(segment[j]);
+      }
+    }
+    // Add final waypoint
+    routeCoords.push(waypoints[waypoints.length - 1]);
+
     addRouteLayer();
+  }
+
+  /**
+   * Generate a meandering path between two [lng, lat] points.
+   * Wander amount is proportional to segment length so all segments
+   * look equally organic regardless of distance.
+   */
+  function meanderSegment(from, to, seed) {
+    var dx = to[0] - from[0];
+    var dy = to[1] - from[1];
+    var dist = Math.sqrt(dx * dx + dy * dy);
+
+    // Skip meandering for zero/near-zero distance (same location)
+    if (dist < 0.001) return [from, to];
+
+    // Number of intermediate points — more for longer segments
+    var steps = Math.max(12, Math.round(dist * 8));
+
+    // Perpendicular unit vector
+    var px = -dy / dist;
+    var py = dx / dist;
+
+    // Wander amplitude scales with segment length (~3% of distance)
+    var amp = dist * 0.03;
+
+    // Seeded pseudo-random using sine — deterministic per segment
+    var s = (seed + 1) * 7.3;
+
+    var points = [];
+    for (var i = 0; i <= steps; i++) {
+      var t = i / steps;
+      // Layered sine waves at different frequencies for organic feel
+      var noise =
+        Math.sin(t * 6.2831 * 2.0 + s * 1.1) * 0.5 +
+        Math.sin(t * 6.2831 * 3.7 + s * 2.3) * 0.3 +
+        Math.sin(t * 6.2831 * 7.1 + s * 0.7) * 0.2;
+
+      // Taper at endpoints so the line meets waypoints cleanly
+      var taper = Math.sin(t * Math.PI);
+      var offset = noise * amp * taper;
+
+      points.push([
+        from[0] + dx * t + px * offset,
+        from[1] + dy * t + py * offset
+      ]);
+    }
+    return points;
   }
 
   /**
@@ -367,12 +426,29 @@ const MapModule = (function () {
   function panToExpandedEntry(entry, expanded) {
     setTimeout(function () {
       var lngLat = [entry.coordinates[1], entry.coordinates[0]];
-      var point = map.project(lngLat);
       var cardHeight = expanded.offsetHeight || 300;
-      point.y -= cardHeight * 0.4;
-      var offsetCenter = map.unproject(point);
-      map.easeTo({ center: offsetCenter, duration: 400 });
-    }, 50);
+      var cardWidth = expanded.offsetWidth || 340;
+      var viewportWidth = map.getContainer().offsetWidth;
+      var padding = 20;
+
+      // The pin is at the bottom-center of the expanded card (anchor: bottom).
+      // Card extends cardHeight px upward from pin position.
+      // We want pin to be at screen Y = cardHeight + padding so the
+      // card top lands at Y = padding.
+      var targetPinY = cardHeight + padding;
+      // Center horizontally: pin should be at viewport center
+      var targetPinX = viewportWidth / 2;
+
+      var currentPoint = map.project(lngLat);
+      var shiftY = currentPoint.y - targetPinY;
+      var shiftX = currentPoint.x - targetPinX;
+
+      var centerPoint = map.project(map.getCenter());
+      centerPoint.y += shiftY;
+      centerPoint.x += shiftX;
+      var newCenter = map.unproject(centerPoint);
+      map.easeTo({ center: newCenter, duration: 400 });
+    }, 100);
   }
 
   /**
