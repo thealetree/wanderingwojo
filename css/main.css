@@ -586,10 +586,17 @@ a:hover {
   max-width: 560px;
   max-height: 80vh;
   overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: var(--shadow-xl);
   animation: expandIn 0.4s var(--ease-out-expo) forwards;
   filter: url(#roughen);
   position: relative;
+  /* Hide scrollbar so it doesn't clip outside rounded corners */
+  scrollbar-width: none; /* Firefox */
+}
+
+.entry-expanded::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
 /* Paper texture on expanded entry */

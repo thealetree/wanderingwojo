@@ -424,10 +424,10 @@ const MapModule = (function () {
    * Pan map so expanded card top is visible
    */
   function panToExpandedEntry(entry, expanded) {
+    // Wait for card to fully render before measuring
     setTimeout(function () {
       var lngLat = [entry.coordinates[1], entry.coordinates[0]];
       var cardHeight = expanded.offsetHeight || 300;
-      var cardWidth = expanded.offsetWidth || 340;
       var viewportWidth = map.getContainer().offsetWidth;
       var padding = 20;
 
@@ -447,8 +447,15 @@ const MapModule = (function () {
       centerPoint.y += shiftY;
       centerPoint.x += shiftX;
       var newCenter = map.unproject(centerPoint);
-      map.easeTo({ center: newCenter, duration: 400 });
-    }, 100);
+      map.easeTo({
+        center: newCenter,
+        duration: 800,
+        easing: function (t) {
+          // Smooth ease-out cubic
+          return 1 - Math.pow(1 - t, 3);
+        }
+      });
+    }, 250);
   }
 
   /**
