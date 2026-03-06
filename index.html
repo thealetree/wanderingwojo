@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wandering Wojo</title>
   <meta name="description" content="A travel journal. Southwest to Alaska.">
-  <meta name="theme-color" content="#FAF9F6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#FAF6EF" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#1E1D1B" media="(prefers-color-scheme: dark)">
 
   <!-- Open Graph -->
@@ -16,6 +16,16 @@
 
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/main.css">
+
+  <!-- SVG Filters for hand-drawn effect -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <filter id="roughen">
+        <feTurbulence type="turbulence" baseFrequency="0.015" numOctaves="3" result="noise" seed="2"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
 
   <!-- Mapbox GL JS -->
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">

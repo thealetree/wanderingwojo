@@ -92,7 +92,7 @@ const MapModule = (function () {
   function addRouteLayer() {
     if (routeCoords.length < 2) return;
 
-    var routeColor = isDark ? '#B0ABA5' : '#3D3A37';
+    var routeColor = isDark ? '#B87D6A' : '#C1440E';
 
     map.addSource('route', {
       type: 'geojson',
@@ -106,7 +106,7 @@ const MapModule = (function () {
       },
     });
 
-    // Glow layer (wider, semi-transparent)
+    // Glow layer (wider, semi-transparent — soft crayon halo)
     map.addLayer({
       id: 'route-glow',
       type: 'line',
@@ -117,13 +117,13 @@ const MapModule = (function () {
       },
       paint: {
         'line-color': routeColor,
-        'line-width': 5,
-        'line-opacity': 0.08,
-        'line-blur': 6,
+        'line-width': 6,
+        'line-opacity': 0.1,
+        'line-blur': 8,
       },
     });
 
-    // Main route line
+    // Main route line — crayon-like dashes
     map.addLayer({
       id: 'route-line',
       type: 'line',
@@ -134,9 +134,9 @@ const MapModule = (function () {
       },
       paint: {
         'line-color': routeColor,
-        'line-width': 2,
-        'line-opacity': 0.5,
-        'line-dasharray': [2, 4],
+        'line-width': 3,
+        'line-opacity': 0.6,
+        'line-dasharray': [3, 2.5],
       },
     });
 
@@ -255,6 +255,7 @@ const MapModule = (function () {
       }
 
       pinEl.innerHTML =
+        '<div class="cork-pin__nail"></div>' +
         '<div class="cork-pin__card">' +
           '<span class="cork-pin__type ' + typeClass + '">' + typeLabel + '</span>' +
           '<div class="cork-pin__title">' + escapeHtml(displayEntry.title) + '</div>' +
