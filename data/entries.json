@@ -15,22 +15,5 @@
     "mood_left": "nervous",
     "mood_right": "ready",
     "mood_value": 0.7
-  },
-  {
-    "id": "2025-03-17-wind-and-water",
-    "date": "2025-03-17",
-    "title": "Wind and water",
-    "type": "field-notes",
-    "location_name": "Stevenson, Washington",
-    "coordinates": [
-      45.6915,
-      -121.8846
-    ],
-    "body": "The Columbia Gorge is a wind tunnel with opinions. Parked at a pullout near Beacon Rock and the van rocked all night like a boat. Wojo was not amused.\n\nSpent the morning watching kiteboarders tear across the river — tiny bright sails against all that gray water and green cliff. The scale of this place is hard to photograph. Everything is vertical.\n\nFound a little cafe in Stevenson that let Wojo sit on the patio. He watched a dog three times his size with the calm superiority only a cat can manage. The barista brought him a saucer of cream without asking.\n\nWe'll head east tomorrow. Idaho by nightfall if the passes are clear.",
-    "video_url": null,
-    "photos": [],
-    "mood_left": "wild",
-    "mood_right": "peaceful",
-    "mood_value": 0.35
   }
 ]
