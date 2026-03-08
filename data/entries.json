@@ -66,22 +66,5 @@
     "mood_left": "practical",
     "mood_right": "wondering",
     "mood_value": 0.6
-  },
-  {
-    "id": "2025-03-28-red-country",
-    "date": "2025-03-28",
-    "title": "Red country",
-    "type": "field-notes",
-    "location_name": "Moab, Utah",
-    "coordinates": [
-      38.5733,
-      -109.5498
-    ],
-    "body": "Everything is red. The dirt, the cliffs, the light at six in the morning. Even the shadows here have a warmth to them. We're camped on BLM land south of town, just the van and a few scattered rigs in the distance. The Colorado River is close enough to hear if the wind dies down.\n\nWojo discovered sand today and does not approve. He lifted each paw in sequence, shook it, and looked at me like I had personally invented the desert to inconvenience him. Then he found a flat rock in the sun and fell asleep for three hours.\n\nDrove into Arches at sunset. The formations don't look real — they look like something a planet would dream about. Stood under Delicate Arch with a handful of strangers and nobody talked. Just watched the light go from gold to pink to gone.\n\nI think we'll stay a while.",
-    "video_url": null,
-    "photos": [],
-    "mood_left": "calm",
-    "mood_right": "awed",
-    "mood_value": 0.8
   }
 ]
