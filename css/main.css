@@ -312,6 +312,35 @@ a:hover {
 .contact-form__status--ok { color: #7C9A7E; }
 .contact-form__status--err { color: #C1440E; }
 
+/* Other projects */
+.other-projects {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--beige-dark);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.other-projects__label {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--medium-gray);
+  letter-spacing: 0.02em;
+}
+
+.other-projects__link {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--charcoal);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.other-projects__link:hover {
+  color: var(--terracotta);
+}
+
 /* ==========================================================================
    Entry Navigation
    ========================================================================== */
@@ -530,16 +559,6 @@ a:hover {
   letter-spacing: 0.04em;
 }
 
-/* Cork pin connector */
-.cork-pin__anchor {
-  width: 0;
-  height: 0;
-  margin: 0 auto;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 8px solid var(--beige-dark);
-}
-
 /* Grouped pin — stacked card effect */
 .cork-pin--grouped .cork-pin__card {
   position: relative;
@@ -584,7 +603,7 @@ a:hover {
   border: 2px solid var(--beige-dark);
   border-radius: var(--rough-radius);
   max-width: 560px;
-  max-height: 80vh;
+  max-height: calc(100vh - 40px);
   overflow-y: auto;
   overflow-x: hidden;
   box-shadow: var(--shadow-xl);
@@ -787,6 +806,21 @@ a:hover {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* Single photo inline with text */
+.entry-expanded__photo--inline {
+  float: right;
+  width: 45%;
+  aspect-ratio: auto;
+  margin: 0 0 var(--space-md) var(--space-md);
+  border-radius: var(--rough-radius-sm);
+  border: 2px solid var(--beige-dark);
+  filter: url(#roughen);
+}
+
+.entry-expanded__photo--inline img {
+  height: auto;
 }
 
 /* --- Video embed --- */
@@ -1065,7 +1099,7 @@ a:hover {
 
   .entry-expanded {
     max-width: calc(100vw - 2rem);
-    max-height: 75vh;
+    max-height: calc(100vh - 40px);
     border-radius: 30px 8px 25px 8px / 8px 25px 8px 30px;
   }
 

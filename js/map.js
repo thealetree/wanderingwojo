@@ -323,14 +323,14 @@ const MapModule = (function () {
             '<span class="cork-pin__number">' + numberDisplay + '</span>' +
           '</div>' +
         '</div>' +
-        '<div class="cork-pin__anchor"></div>';
+        '';
 
       var lngLat = [positionEntry.coordinates[1], positionEntry.coordinates[0]];
 
       var marker = new mapboxgl.Marker({
         element: pinEl,
-        anchor: 'bottom',
-        offset: [0, 0],
+        anchor: 'top',
+        offset: [0, -7],
       })
         .setLngLat(lngLat)
         .addTo(map);
@@ -365,7 +365,17 @@ const MapModule = (function () {
         '<div class="entry-expanded__date">' + formatDate(entry.date) + '</div>' +
         '<h3 class="entry-expanded__title">' + escapeHtml(entry.title) + '</h3>' +
       '</div>' +
-      '<div class="entry-expanded__body">' + renderBody(entry.body) + '</div>';
+      '<div class="entry-expanded__body">';
+
+    // Single photo: inline with text wrapping around it
+    if (entry.photos && entry.photos.length === 1) {
+      html +=
+        '<div class="entry-expanded__photo entry-expanded__photo--inline" data-photo-index="0" data-entry-id="' + entry.id + '">' +
+          '<img src="' + escapeHtml(entry.photos[0]) + '" alt="Photo from ' + escapeHtml(entry.location_name) + '" loading="lazy">' +
+        '</div>';
+    }
+
+    html += renderBody(entry.body) + '</div>';
 
     if (entry.mood_left && entry.mood_right) {
       html +=
@@ -378,7 +388,8 @@ const MapModule = (function () {
         '</div>';
     }
 
-    if (entry.photos && entry.photos.length > 0) {
+    // Multiple photos: grid below body
+    if (entry.photos && entry.photos.length > 1) {
       html += '<div class="entry-expanded__photos">';
       entry.photos.forEach(function (photo, i) {
         html += '<div class="entry-expanded__photo" data-photo-index="' + i + '" data-entry-id="' + entry.id + '">' +
@@ -431,12 +442,10 @@ const MapModule = (function () {
       var viewportWidth = map.getContainer().offsetWidth;
       var padding = 20;
 
-      // The pin is at the bottom-center of the expanded card (anchor: bottom).
-      // Card extends cardHeight px upward from pin position.
-      // We want pin to be at screen Y = cardHeight + padding so the
-      // card top lands at Y = padding.
-      var targetPinY = cardHeight + padding;
-      // Center horizontally: pin should be at viewport center
+      // The nail is at the coordinate (anchor: top). Card hangs below.
+      // We want the nail near the top so the full card is visible.
+      var targetPinY = padding;
+      // Center horizontally
       var targetPinX = viewportWidth / 2;
 
       var currentPoint = map.project(lngLat);
@@ -559,8 +568,8 @@ const MapModule = (function () {
     var floatingTitle = document.getElementById('floating-title');
     if (floatingTitle) floatingTitle.style.display = 'none';
 
-    // Mobile touch scroll
-    ['touchstart', 'touchmove', 'touchend'].forEach(function (evt) {
+    // Prevent scroll/touch events from reaching the map
+    ['touchstart', 'touchmove', 'touchend', 'wheel'].forEach(function (evt) {
       expanded.addEventListener(evt, function (e) { e.stopPropagation(); });
     });
 
