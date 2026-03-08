@@ -49,22 +49,5 @@
     "mood_left": "restless",
     "mood_right": "content",
     "mood_value": 0.55
-  },
-  {
-    "id": "2025-03-25-city-in-the-basin",
-    "date": "2025-03-25",
-    "title": "City in the basin",
-    "type": "dispatch",
-    "location_name": "Salt Lake City, Utah",
-    "coordinates": [
-      40.7608,
-      -111.891
-    ],
-    "body": "Salt Lake sits in its valley like something placed there on purpose — grid streets, mountains on every side, that enormous lake catching the light to the west. We came for practical reasons: REI for a new camp stove, oil change, fill the water tanks.\n\nBut we stayed an extra day because the city surprised me. Found a bookstore that smelled like old paper and ambition. Wojo waited in the van and judged me through the windshield.\n\nThe Wasatch Range is absurd. Snow-covered peaks right there, ten minutes from downtown, like a painting someone hung too close to a parking lot.\n\nMoab tomorrow. Everyone says the red rock will change something in us. I think Wojo is already changed — he sits differently now, watches the road ahead instead of behind.",
-    "video_url": null,
-    "photos": [],
-    "mood_left": "practical",
-    "mood_right": "wondering",
-    "mood_value": 0.6
   }
 ]
