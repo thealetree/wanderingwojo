@@ -400,16 +400,31 @@ const MapModule = (function () {
     }
 
     if (entry.video_url) {
-      // Convert YouTube URLs to embed format
+      // Convert YouTube URLs to embed format and extract video ID
       var videoSrc = entry.video_url;
-      var ytMatch = videoSrc.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/);
-      if (ytMatch) videoSrc = 'https://www.youtube.com/embed/' + ytMatch[1];
-      html +=
-        '<div class="entry-expanded__video">' +
-          '<div class="video-wrapper">' +
-            '<iframe src="' + escapeHtml(videoSrc) + '" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" loading="lazy"></iframe>' +
-          '</div>' +
-        '</div>';
+      var videoId = null;
+      var ytMatch = videoSrc.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+      if (ytMatch) {
+        videoId = ytMatch[1];
+        videoSrc = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1';
+      }
+      // Show thumbnail with play button; loads iframe on click
+      if (videoId) {
+        html +=
+          '<div class="entry-expanded__video">' +
+            '<div class="video-wrapper video-wrapper--thumbnail" data-video-src="' + escapeHtml(videoSrc) + '">' +
+              '<img class="video-wrapper__thumb" src="https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg" alt="Video thumbnail">' +
+              '<div class="video-wrapper__play">&#9654;</div>' +
+            '</div>' +
+          '</div>';
+      } else {
+        html +=
+          '<div class="entry-expanded__video">' +
+            '<div class="video-wrapper">' +
+              '<iframe src="' + escapeHtml(videoSrc) + '" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>' +
+            '</div>' +
+          '</div>';
+      }
     }
 
     html +=
@@ -424,6 +439,16 @@ const MapModule = (function () {
    * Bind photo click handlers on the expanded content
    */
   function bindPhotoHandlers(expanded, entry) {
+    // Video thumbnail click — replace with iframe
+    expanded.querySelectorAll('.video-wrapper--thumbnail').forEach(function (wrapper) {
+      wrapper.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var src = wrapper.getAttribute('data-video-src');
+        wrapper.innerHTML = '<iframe src="' + src + '" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>';
+        wrapper.classList.remove('video-wrapper--thumbnail');
+      });
+    });
+
     expanded.querySelectorAll('.entry-expanded__photo').forEach(function (photoEl) {
       photoEl.addEventListener('click', function (e) {
         e.stopPropagation();
