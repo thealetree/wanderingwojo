@@ -178,6 +178,15 @@ const AppModule = (function () {
         MapModule.addRouteFromEntries(entries);
         MapModule.addCorkPins(entries, handlePinClick);
         updateNavInfo();
+
+        // Fit map to show all entry pins
+        if (entries.length > 0) {
+          var bounds = new mapboxgl.LngLatBounds();
+          entries.forEach(function (e) {
+            bounds.extend([e.coordinates[1], e.coordinates[0]]);
+          });
+          map.fitBounds(bounds, { padding: 80, maxZoom: 12 });
+        }
       });
     }
   }

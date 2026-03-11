@@ -407,7 +407,7 @@ const MapModule = (function () {
       html +=
         '<div class="entry-expanded__video">' +
           '<div class="video-wrapper">' +
-            '<iframe src="' + escapeHtml(videoSrc) + '" allowfullscreen loading="lazy"></iframe>' +
+            '<iframe src="' + escapeHtml(videoSrc) + '" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" loading="lazy"></iframe>' +
           '</div>' +
         '</div>';
     }
