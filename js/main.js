@@ -185,7 +185,10 @@ const AppModule = (function () {
           entries.forEach(function (e) {
             bounds.extend([e.coordinates[1], e.coordinates[0]]);
           });
-          map.fitBounds(bounds, { padding: 80, maxZoom: 12 });
+          map.fitBounds(bounds, {
+            padding: { top: 80, right: 260, bottom: 100, left: 40 },
+            maxZoom: 12
+          });
         }
       });
     }
