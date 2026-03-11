@@ -17,5 +17,24 @@
     "mood_left": "Lil'Anxious",
     "mood_right": "Stoked",
     "mood_value": 0.8
+  },
+  {
+    "id": "2026-03-11-touching-base",
+    "date": "2026-03-11",
+    "title": "Touching Base",
+    "type": "field-notes",
+    "location_name": "White Salmon, WA",
+    "coordinates": [
+      45.7278,
+      121.4867
+    ],
+    "body": "Started feeling a bit antsy in Central Oregon… Ready to get on the road but taking care of odds and ends, errands, paperwork, setting up the truck, all while he’s working full time and we’re hopping from place to place, crashing guest rooms.. odd how this can feel claustrophobic. \n\nFelt amazing to get on the road, even if just on a trip back north to The Gorge. Just a tiny taste of what’s to come. Half-way through the ride I got a little restless, stuck in this mesh backpack the big guy got me. He let me out and holy shit… sounds, trees and lights moving faster than I ever realized they could. He let me sit on his lap towards the end of the ride while he sang with the big sounds, “You’ve got a friend… ‘aint it good to know…”\n\nNow it’s just biding time in the hot room upstairs while it rains outside. I trust he’ll get our space all fixed up for the next leg of the ride. Meanwhile, I think I can see that he’s got some big feelings, maybe some sadness being back where he had his biggest dreams and almost made it all come together, but not quite.\n\nI can see his eyes get watery sometimes, but I know he’s been through tough times and can handle this. He says his shoulder tat is about flexibility, agility, resilience… “Whatever way you throw him, he lands upright”. Anyway… kinda like me, I guess. Being a cat and all.\n\nStill, I can hear him laughing and chatting with the fam he has here and knows it puts him at ease, maybe reminding him that it’s not just me who cares and looks after him. Seems like he loves them as much as I love him. Ugh, what a swirl of feelings. Let’s hope he finds some ease and smiles… maybe recharges a bit so we can start this adventure on the right paw.",
+    "video_url": "https://youtu.be/hZRaoUVxM-s",
+    "photos": [
+      "media/photos/woj1.jpg"
+    ],
+    "mood_left": "Nostalgic Sad",
+    "mood_right": "Restless Ready",
+    "mood_value": 0.5
   }
 ]
