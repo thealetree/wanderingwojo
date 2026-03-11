@@ -371,7 +371,7 @@ const MapModule = (function () {
     if (entry.photos && entry.photos.length === 1) {
       html +=
         '<div class="entry-expanded__photo entry-expanded__photo--inline" data-photo-index="0" data-entry-id="' + entry.id + '">' +
-          '<img src="' + escapeHtml(entry.photos[0]) + '" alt="Photo from ' + escapeHtml(entry.location_name) + '" loading="lazy">' +
+          '<img src="' + escapeHtml(entry.photos[0]) + '" alt="Photo from ' + escapeHtml(entry.location_name) + '">' +
         '</div>';
     }
 

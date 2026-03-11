@@ -813,6 +813,7 @@ a:hover {
   float: right;
   width: 45%;
   aspect-ratio: auto;
+  overflow: visible;
   margin: 0 0 var(--space-md) var(--space-md);
   border-radius: var(--rough-radius-sm);
   border: 2px solid var(--beige-dark);
@@ -820,7 +821,10 @@ a:hover {
 }
 
 .entry-expanded__photo--inline img {
+  width: 100%;
   height: auto;
+  object-fit: contain;
+  display: block;
 }
 
 /* --- Video embed --- */
