@@ -400,10 +400,14 @@ const MapModule = (function () {
     }
 
     if (entry.video_url) {
+      // Convert YouTube URLs to embed format
+      var videoSrc = entry.video_url;
+      var ytMatch = videoSrc.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/);
+      if (ytMatch) videoSrc = 'https://www.youtube.com/embed/' + ytMatch[1];
       html +=
         '<div class="entry-expanded__video">' +
           '<div class="video-wrapper">' +
-            '<iframe src="' + escapeHtml(entry.video_url) + '" allowfullscreen loading="lazy"></iframe>' +
+            '<iframe src="' + escapeHtml(videoSrc) + '" allowfullscreen loading="lazy"></iframe>' +
           '</div>' +
         '</div>';
     }
