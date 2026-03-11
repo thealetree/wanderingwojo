@@ -186,7 +186,7 @@ const AppModule = (function () {
             bounds.extend([e.coordinates[1], e.coordinates[0]]);
           });
           map.fitBounds(bounds, {
-            padding: { top: 80, right: 260, bottom: 100, left: 40 },
+            padding: { top: 80, right: 260, bottom: 220, left: 40 },
             maxZoom: 12
           });
         }
