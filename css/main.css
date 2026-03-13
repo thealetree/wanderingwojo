@@ -177,11 +177,11 @@ a:hover {
   position: fixed;
   top: var(--space-lg);
   left: var(--space-lg);
-  z-index: 1000;
+  z-index: 999;
   background: var(--bg-card);
   border: 2px solid var(--beige-dark);
   border-radius: var(--rough-radius-sm);
-  padding: 0.4rem 0.85rem;
+  padding: 0.5rem 1rem;
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -1158,6 +1158,12 @@ a:hover {
    Responsive
    ========================================================================== */
 @media (max-width: 768px) {
+  .floating-shop {
+    top: var(--space-sm);
+    left: var(--space-sm);
+    padding: 0.375rem 0.75rem;
+  }
+
   .floating-title {
     top: var(--space-sm);
     right: var(--space-sm);
