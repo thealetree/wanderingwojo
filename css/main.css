@@ -171,6 +171,46 @@ a:hover {
 }
 
 /* ==========================================================================
+   Floating Shop Link
+   ========================================================================== */
+.floating-shop {
+  position: fixed;
+  top: var(--space-lg);
+  left: var(--space-lg);
+  z-index: 1000;
+  background: var(--bg-card);
+  border: 2px solid var(--beige-dark);
+  border-radius: var(--rough-radius-sm);
+  padding: 0.4rem 0.85rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: var(--shadow-md);
+  filter: url(#roughen);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  cursor: pointer;
+}
+
+.floating-shop:hover {
+  transform: translateY(-2px) rotate(-1deg);
+  box-shadow: var(--shadow-lg);
+}
+
+.floating-shop__icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.floating-shop__text {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  letter-spacing: 0.01em;
+}
+
+/* ==========================================================================
    Floating Title
    ========================================================================== */
 .floating-title {
