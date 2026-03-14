@@ -146,13 +146,14 @@ const MapModule = (function () {
   }
 
   /**
-   * Add the route line to the map
+   * Add the route line to the map (with draw-in animation)
    */
   function addRouteLayer() {
     if (routeCoords.length < 2) return;
 
     var routeColor = isDark ? '#B87D6A' : '#C1440E';
 
+    // Start with minimal data — animation will reveal the full route
     map.addSource('route', {
       type: 'geojson',
       data: {
@@ -160,7 +161,7 @@ const MapModule = (function () {
         properties: {},
         geometry: {
           type: 'LineString',
-          coordinates: routeCoords,
+          coordinates: [routeCoords[0], routeCoords[0]],
         },
       },
     });
@@ -199,23 +200,45 @@ const MapModule = (function () {
       },
     });
 
-    // Animate dash
-    animateRouteDash();
+    // Animate the route drawing in
+    animateRouteDrawIn();
   }
 
   /**
-   * Animate the route dash pattern
+   * Animate the route line drawing in from start to end
    */
-  function animateRouteDash() {
-    let offset = 0;
-    function step() {
-      offset = (offset + 0.5) % 200;
-      if (map.getLayer('route-line')) {
-        map.setPaintProperty('route-line', 'line-dasharray', [2, 4]);
+  function animateRouteDrawIn() {
+    var startTime = null;
+    var duration = 2500; // 2.5 seconds
+
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var elapsed = timestamp - startTime;
+      var progress = Math.min(elapsed / duration, 1);
+
+      // Ease-out cubic for smooth deceleration
+      var eased = 1 - Math.pow(1 - progress, 3);
+
+      var endIndex = Math.max(1, Math.floor(eased * (routeCoords.length - 1)));
+      var animCoords = routeCoords.slice(0, endIndex + 1);
+
+      if (map.getSource('route')) {
+        map.getSource('route').setData({
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: animCoords,
+          },
+        });
       }
-      requestAnimationFrame(step);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
     }
-    step();
+
+    requestAnimationFrame(step);
   }
 
   /**
@@ -301,9 +324,6 @@ const MapModule = (function () {
       if (isGrouped) pinEl.classList.add('cork-pin--grouped');
       pinEl.setAttribute('data-entry-ids', groupEntries.map(function (e) { return e.id; }).join(','));
 
-      var typeClass = 'cork-pin__type--' + displayEntry.type;
-      var typeLabel = formatType(displayEntry.type);
-
       var numberDisplay;
       if (isGrouped) {
         var firstNum = entryNumber[groupEntries[0].id] || '';
@@ -313,15 +333,28 @@ const MapModule = (function () {
         numberDisplay = (entryNumber[displayEntry.id] || '') + '/' + total;
       }
 
+      // Find first available photo from group (try most recent first)
+      var thumbPhoto = null;
+      for (var gi = groupEntries.length - 1; gi >= 0; gi--) {
+        if (groupEntries[gi].photos && groupEntries[gi].photos.length > 0) {
+          thumbPhoto = groupEntries[gi].photos[0];
+          break;
+        }
+      }
+      var thumbHtml = '';
+      if (thumbPhoto) {
+        thumbHtml = '<div class="cork-pin__thumb"><img src="' + escapeHtml(thumbPhoto) + '" alt="" loading="lazy"></div>';
+      }
+
       pinEl.innerHTML =
         '<div class="cork-pin__nail"></div>' +
         '<div class="cork-pin__card">' +
-          '<span class="cork-pin__type ' + typeClass + '">' + typeLabel + '</span>' +
           '<div class="cork-pin__title">' + escapeHtml(displayEntry.title) + '</div>' +
           '<div class="cork-pin__meta-row">' +
             '<span class="cork-pin__date">' + formatDate(displayEntry.date) + '</span>' +
             '<span class="cork-pin__number">' + numberDisplay + '</span>' +
           '</div>' +
+          thumbHtml +
         '</div>' +
         '';
 
@@ -427,16 +460,23 @@ const MapModule = (function () {
       }
     }
 
+    // Action bar: share link + postcard download
+    var slug = entry.id.replace(/^\d{4}-\d{2}-\d{2}-/, '');
     html +=
-      '<div class="entry-expanded__comments" id="giscus-' + entry.id + '">' +
-        '<!-- Giscus loads here -->' +
+      '<div class="entry-expanded__actions">' +
+        '<button class="entry-action-btn entry-action-btn--share" data-entry-id="' + entry.id + '" data-slug="' + slug + '" title="Copy link to this entry">' +
+          '<span class="entry-action-btn__icon">&#128279;</span> Share Link' +
+        '</button>' +
+        '<button class="entry-action-btn entry-action-btn--postcard" data-entry-id="' + entry.id + '" title="Download as postcard">' +
+          '<span class="entry-action-btn__icon">&#9993;</span> Save Postcard' +
+        '</button>' +
       '</div>';
 
     return html;
   }
 
   /**
-   * Bind photo click handlers on the expanded content
+   * Bind photo, share, and postcard click handlers on the expanded content
    */
   function bindPhotoHandlers(expanded, entry) {
     // Video thumbnail click — replace with iframe
@@ -458,6 +498,175 @@ const MapModule = (function () {
         }
       });
     });
+
+    // Share button — copy permalink to clipboard
+    expanded.querySelectorAll('.entry-action-btn--share').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var slug = btn.getAttribute('data-slug');
+        var url = window.location.origin + window.location.pathname + '#' + slug;
+
+        function onCopied() {
+          btn.innerHTML = '<span class="entry-action-btn__icon">&#10003;</span> Copied!';
+          showCopyToast('Link copied to clipboard!');
+          setTimeout(function () {
+            btn.innerHTML = '<span class="entry-action-btn__icon">&#128279;</span> Share Link';
+          }, 2000);
+        }
+
+        // Modern clipboard API (needs secure context)
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(onCopied).catch(function () {
+            // Fallback: hidden textarea trick
+            var ta = document.createElement('textarea');
+            ta.value = url;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            onCopied();
+          });
+        } else {
+          // Legacy fallback
+          var ta = document.createElement('textarea');
+          ta.value = url;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          onCopied();
+        }
+      });
+    });
+
+    // Postcard download button
+    expanded.querySelectorAll('.entry-action-btn--postcard').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        downloadPostcard(entry);
+      });
+    });
+  }
+
+  /**
+   * Show a brief toast notification (e.g. "Link copied!")
+   */
+  function showCopyToast(message) {
+    var existing = document.querySelector('.copy-toast');
+    if (existing) existing.remove();
+
+    var toast = document.createElement('div');
+    toast.className = 'copy-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Trigger reflow then add .show for the transition
+    toast.offsetHeight; // force reflow
+    toast.classList.add('show');
+
+    setTimeout(function () {
+      toast.classList.remove('show');
+      setTimeout(function () { toast.remove(); }, 300);
+    }, 2200);
+  }
+
+  /**
+   * Generate and download a postcard image from an entry
+   */
+  function downloadPostcard(entry) {
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    canvas.width = 1200;
+    canvas.height = 800;
+
+    function drawCard(img) {
+      // Warm paper background
+      ctx.fillStyle = isDark ? '#2A2825' : '#FAF6EF';
+      ctx.fillRect(0, 0, 1200, 800);
+
+      // If we have a photo, draw it in the top area
+      if (img) {
+        var photoH = 540;
+        ctx.save();
+        // Rounded clip area
+        roundRect(ctx, 40, 40, 1120, photoH, 12);
+        ctx.clip();
+        var scale = Math.max(1120 / img.width, photoH / img.height);
+        var w = img.width * scale;
+        var h = img.height * scale;
+        ctx.drawImage(img, 40 + (1120 - w) / 2, 40 + (photoH - h) / 2, w, h);
+        ctx.restore();
+      }
+
+      // Dashed border
+      ctx.strokeStyle = isDark ? '#B87D6A' : '#C1440E';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([10, 5]);
+      roundRect(ctx, 20, 20, 1160, 760, 16);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Title
+      ctx.font = 'bold 52px Caveat, cursive';
+      ctx.fillStyle = isDark ? '#F0EBE3' : '#2C2825';
+      ctx.textAlign = 'left';
+      ctx.fillText(entry.title, 60, img ? 640 : 400);
+
+      // Location & date
+      ctx.font = '30px Patrick Hand, cursive';
+      ctx.fillStyle = isDark ? '#B0ABA5' : '#6B6560';
+      ctx.fillText(entry.location_name + '  \u00b7  ' + formatDate(entry.date), 60, img ? 685 : 445);
+
+      // Mood
+      if (entry.mood_left && entry.mood_right) {
+        ctx.font = '24px Patrick Hand, cursive';
+        ctx.fillStyle = isDark ? '#8A8580' : '#999590';
+        ctx.fillText(entry.mood_left + '  \u2194  ' + entry.mood_right, 60, img ? 725 : 485);
+      }
+
+      // Watermark
+      ctx.font = '24px Caveat, cursive';
+      ctx.fillStyle = isDark ? '#5A5652' : '#C4BFB6';
+      ctx.textAlign = 'right';
+      ctx.fillText('wanderingwojo.com', 1140, 760);
+
+      // Download
+      var link = document.createElement('a');
+      link.download = 'postcard-' + entry.id + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    if (entry.photos && entry.photos.length > 0) {
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function () { drawCard(img); };
+      img.onerror = function () { drawCard(null); };
+      img.src = entry.photos[0];
+    } else {
+      drawCard(null);
+    }
+  }
+
+  /**
+   * Draw a rounded rectangle path (for canvas postcard)
+   */
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
   }
 
   /**
@@ -520,6 +729,10 @@ const MapModule = (function () {
     if (window.AppModule && window.AppModule.loadGiscus) {
       window.AppModule.loadGiscus(sortedGroup[newIndex].id);
     }
+
+    // Update URL hash
+    var slug = sortedGroup[newIndex].id.replace(/^\d{4}-\d{2}-\d{2}-/, '');
+    history.replaceState(null, '', '#' + slug);
 
     // Sync navIndex in AppModule
     if (window.AppModule && window.AppModule.onTabSwitch) {
@@ -625,6 +838,10 @@ const MapModule = (function () {
       window.AppModule.loadGiscus(sortedGroup[activeIndex].id);
     }
 
+    // Update URL hash for deep linking
+    var slug = sortedGroup[activeIndex].id.replace(/^\d{4}-\d{2}-\d{2}-/, '');
+    history.replaceState(null, '', '#' + slug);
+
     // Pan map
     panToExpandedEntry(sortedGroup[activeIndex], expanded);
   }
@@ -681,6 +898,9 @@ const MapModule = (function () {
     // Restore floating title
     var floatingTitle = document.getElementById('floating-title');
     if (floatingTitle) floatingTitle.style.display = '';
+
+    // Clear URL hash
+    history.replaceState(null, '', window.location.pathname);
   }
 
   /**

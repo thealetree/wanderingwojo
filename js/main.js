@@ -33,6 +33,7 @@ const AppModule = (function () {
     initEntryNav();
     initLightbox();
     initKeyboardNav();
+    initJourneyStats();
   }
 
   /**
@@ -50,6 +51,7 @@ const AppModule = (function () {
     els.navNext = document.getElementById('nav-next');
     els.navInfo = document.getElementById('nav-info');
     els.entryNav = document.getElementById('entry-nav');
+    els.journeyStats = document.getElementById('journey-stats');
   }
 
   /**
@@ -179,17 +181,29 @@ const AppModule = (function () {
         MapModule.addCorkPins(entries, handlePinClick);
         updateNavInfo();
 
-        // Fit map to show all entry pins
+        // Fit map to show all entry pins, centered with room for UI overlays
         if (entries.length > 0) {
           var bounds = new mapboxgl.LngLatBounds();
           entries.forEach(function (e) {
             bounds.extend([e.coordinates[1], e.coordinates[0]]);
           });
+
+          // Padding accounts for: floating title (top-right), shop link
+          // (top-left), nav bar (bottom-center), and pin cards that hang
+          // ~200px below their coordinate point.
+          // Pin cards with photos hang ~220px below their coordinate,
+          // so bottom padding must be generous to keep cards fully visible.
+          var isMobile = window.innerWidth < 768;
           map.fitBounds(bounds, {
-            padding: { top: 80, right: 260, bottom: 220, left: 40 },
-            maxZoom: 12
+            padding: isMobile
+              ? { top: 80, right: 20, bottom: 200, left: 20 }
+              : { top: 100, right: 80, bottom: 280, left: 80 },
+            maxZoom: 10
           });
         }
+
+        // Check for deep link hash after map is ready
+        checkUrlHash();
       });
     }
   }
@@ -339,6 +353,114 @@ const AppModule = (function () {
         if (e.key === 'ArrowRight') navigateEntry(1);
       }
     });
+  }
+
+  // =====================================================================
+  // DEEP LINKING (URL hash)
+  // =====================================================================
+
+  function checkUrlHash() {
+    var hash = window.location.hash.slice(1);
+    if (!hash || sortedEntries.length === 0) return;
+
+    // Match by full entry ID or by slug (part after date prefix)
+    var entry = null;
+    for (var i = 0; i < sortedEntries.length; i++) {
+      var e = sortedEntries[i];
+      var slug = e.id.replace(/^\d{4}-\d{2}-\d{2}-/, '');
+      if (e.id === hash || slug === hash) {
+        entry = e;
+        break;
+      }
+    }
+
+    if (!entry) return;
+
+    var idx = sortedEntries.indexOf(entry);
+    navIndex = idx;
+    updateNavInfo();
+
+    // Fly to entry
+    MapModule.flyToEntry(entry);
+    highlightPin(entry.id);
+
+    // Auto-expand after fly animation finishes
+    setTimeout(function () {
+      var pin = document.querySelector('.cork-pin[data-entry-ids*="' + entry.id + '"]');
+      if (pin) {
+        var ids = (pin.getAttribute('data-entry-ids') || '').split(',');
+        var groupEntries = ids.map(function (id) {
+          return sortedEntries.find(function (se) { return se.id === id; });
+        }).filter(Boolean);
+
+        MapModule.expandPinEntry(groupEntries, pin, entry.id);
+      }
+    }, 1400);
+  }
+
+  // =====================================================================
+  // JOURNEY STATS
+  // =====================================================================
+
+  function initJourneyStats() {
+    if (!els.journeyStats || sortedEntries.length === 0) {
+      if (els.journeyStats) els.journeyStats.style.display = 'none';
+      return;
+    }
+
+    // Days on the road (first entry to today)
+    var firstDate = new Date(sortedEntries[0].date + 'T00:00:00');
+    var today = new Date();
+    var days = Math.max(1, Math.round((today - firstDate) / (1000 * 60 * 60 * 24)));
+
+    // Number of entries
+    var numEntries = sortedEntries.length;
+
+    // Approximate miles (haversine between consecutive entries)
+    var totalMiles = 0;
+    for (var i = 1; i < sortedEntries.length; i++) {
+      totalMiles += haversineDistance(
+        sortedEntries[i - 1].coordinates[0], sortedEntries[i - 1].coordinates[1],
+        sortedEntries[i].coordinates[0], sortedEntries[i].coordinates[1]
+      );
+    }
+    totalMiles = Math.round(totalMiles);
+
+    // Unique states/regions
+    var states = {};
+    sortedEntries.forEach(function (e) {
+      if (e.location_name) {
+        var parts = e.location_name.split(',');
+        if (parts.length > 1) {
+          states[parts[parts.length - 1].trim()] = true;
+        }
+      }
+    });
+    var numStates = Object.keys(states).length;
+
+    // Build stats HTML
+    els.journeyStats.innerHTML =
+      '<span class="journey-stats__item"><strong>' + days + '</strong> days</span>' +
+      '<span class="journey-stats__divider">\u00b7</span>' +
+      '<span class="journey-stats__item"><strong>' + numEntries + '</strong> entr' + (numEntries === 1 ? 'y' : 'ies') + '</span>' +
+      '<span class="journey-stats__divider">\u00b7</span>' +
+      '<span class="journey-stats__item"><strong>~' + totalMiles + '</strong> mi</span>' +
+      '<span class="journey-stats__divider">\u00b7</span>' +
+      '<span class="journey-stats__item"><strong>' + numStates + '</strong> state' + (numStates === 1 ? '' : 's') + '</span>';
+  }
+
+  /**
+   * Haversine distance between two [lat, lng] points in miles
+   */
+  function haversineDistance(lat1, lng1, lat2, lng2) {
+    var R = 3959; // Earth radius in miles
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLng = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
   }
 
   // =====================================================================

@@ -12,7 +12,10 @@
   <meta property="og:title" content="Wandering Wojo">
   <meta property="og:description" content="A travel journal. Southwest to Alaska.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://thealetree.github.io/wanderingwojo">
+  <meta property="og:url" content="https://wanderingwojo.com">
+
+  <!-- RSS Feed -->
+  <link rel="alternate" type="application/rss+xml" title="Wandering Wojo" href="feed.xml">
 
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/main.css">
@@ -51,6 +54,12 @@
         <span class="contact-form__hint">This is 100% anonymous, unless you include your contact info</span>
         <button class="contact-form__btn" type="submit">Send</button>
       </form>
+      <div class="rss-subscribe">
+        <a class="rss-subscribe__link" href="feed.xml" target="_blank" rel="noopener">
+          <span class="rss-subscribe__icon">&#9641;</span> Subscribe via RSS
+        </a>
+        <span class="rss-subscribe__hint">Follow along in your favorite feed reader</span>
+      </div>
       <div class="other-projects">
         <span class="other-projects__label">Other projects by Van:</span>
         <a class="other-projects__link" href="https://repsim.live" target="_blank" rel="noopener">Repsim — Natural Selection Sim</a>
@@ -68,12 +77,15 @@
   </a>
 
   <!-- ================================================================
-       ENTRY NAVIGATION
+       ENTRY NAVIGATION + JOURNEY STATS (unified bar)
        ================================================================ -->
   <div class="entry-nav" id="entry-nav">
-    <button class="entry-nav__btn" id="nav-prev" aria-label="Previous entry">&lsaquo;</button>
-    <span class="entry-nav__info" id="nav-info"></span>
-    <button class="entry-nav__btn" id="nav-next" aria-label="Next entry">&rsaquo;</button>
+    <div class="entry-nav__stats" id="journey-stats"></div>
+    <div class="entry-nav__controls">
+      <button class="entry-nav__btn" id="nav-prev" aria-label="Previous entry">&lsaquo;</button>
+      <span class="entry-nav__info" id="nav-info"></span>
+      <button class="entry-nav__btn" id="nav-next" aria-label="Next entry">&rsaquo;</button>
+    </div>
   </div>
 
   <!-- ================================================================

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Wandering Wojo</title>
+    <link>https://wanderingwojo.com</link>
+    <description>A travel journal. Southwest to Alaska. Wojo the cat and his co-pilot Van on the road.</description>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 14 Mar 2026 00:00:00 GMT</lastBuildDate>
+    <atom:link href="https://wanderingwojo.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>The Precipice</title>
+      <link>https://wanderingwojo.com/#the-precipice</link>
+      <guid isPermaLink="true">https://wanderingwojo.com/#the-precipice</guid>
+      <pubDate>Sat, 14 Mar 2026 00:00:00 GMT</pubDate>
+      <description>Stevenson, WA — The adventure really begins tomorrow morning. It's been nice staying with family in The Gorge, buttoning up odds and ends, getting some laughs and hugs in.</description>
+    </item>
+    <item>
+      <title>Touching Base</title>
+      <link>https://wanderingwojo.com/#touching-base</link>
+      <guid isPermaLink="true">https://wanderingwojo.com/#touching-base</guid>
+      <pubDate>Wed, 11 Mar 2026 00:00:00 GMT</pubDate>
+      <description>White Salmon, WA — Started feeling a bit antsy in Central Oregon… Ready to get on the road but taking care of odds and ends, errands, paperwork, setting up the truck.</description>
+    </item>
+    <item>
+      <title>Beginning in Bend</title>
+      <link>https://wanderingwojo.com/#beginning-in-bend</link>
+      <guid isPermaLink="true">https://wanderingwojo.com/#beginning-in-bend</guid>
+      <pubDate>Sun, 08 Mar 2026 00:00:00 GMT</pubDate>
+      <description>Bend, Oregon — Been a month since leaving White Salmon, WA to set out on this adventure. Still calling Washington home for now, but really the road is going to be home.</description>
+    </item>
+  </channel>
+</rss>

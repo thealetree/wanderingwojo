@@ -10,16 +10,20 @@ Usage:
     python3 tools/journal.py --port 8888
 """
 
+import base64
 import http.server
 import json
 import os
 import re
+import shutil
+import ssl
 import subprocess
+import urllib.request
 import sys
 import threading
 import webbrowser
 from datetime import date
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs, quote
 
 PORT = 5555
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -204,6 +208,10 @@ HTML_PAGE = r"""<!DOCTYPE html>
       color: var(--warm-gray);
       margin-top: 0.25rem;
     }
+
+    .geocode-status--success { color: #5a8; }
+    .geocode-status--error { color: var(--warm-gray); font-style: italic; }
+    .geocode-status--loading { color: var(--mid-gray); }
 
     /* ---- Mood slider ---- */
     .mood-preview {
@@ -632,6 +640,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
             <input class="form-input" id="entry-lng" type="number" step="any" placeholder="-109.5498" required>
           </div>
         </div>
+        <div class="form-hint" id="geocode-status" style="margin-top: -0.75rem; margin-bottom: 0.75rem;"></div>
 
         <div class="form-group">
           <label class="form-label" for="entry-body">Body *</label>
@@ -645,9 +654,12 @@ HTML_PAGE = r"""<!DOCTYPE html>
             <div class="form-hint">YouTube embed URL</div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="entry-photos">Photos (optional)</label>
-            <input class="form-input" id="entry-photos" type="text" placeholder="media/photos/pic1.jpg, pic2.jpg">
-            <div class="form-hint">Comma-separated paths</div>
+            <label class="form-label">Photos (optional)</label>
+            <input type="file" id="photo-upload" accept="image/*" multiple style="display:none;">
+            <button type="button" id="btn-add-photos" class="form-input" style="cursor:pointer; text-align:center; color:var(--mid-gray);">+ Add photos</button>
+            <div id="photo-list" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;"></div>
+            <input type="hidden" id="entry-photos">
+            <div class="form-hint">Auto-resized to 1200px wide</div>
           </div>
         </div>
 
@@ -731,6 +743,74 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
     // ---- State ----
     var editingId = null;  // null = new entry mode, string = editing existing entry
+    var coordsManual = false;  // true when user manually typed lat/lng
+    var lastGeocodedLocation = '';
+    var geocodeStatusEl = document.getElementById('geocode-status');
+
+    // ---- Geocode via local proxy ----
+    async function geocodeLocation(locationName) {
+      if (!locationName || !locationName.trim()) return null;
+      try {
+        var resp = await fetch('/api/geocode?q=' + encodeURIComponent(locationName.trim()));
+        var data = await resp.json();
+        if (data && data.lat != null && data.lng != null) {
+          return { lat: data.lat, lng: data.lng };
+        }
+        return null;
+      } catch (err) {
+        console.error('Geocode error:', err);
+        return null;
+      }
+    }
+
+    function setGeocodeStatus(text, type) {
+      if (!geocodeStatusEl) return;
+      geocodeStatusEl.textContent = text;
+      geocodeStatusEl.className = 'form-hint' + (type ? ' geocode-status--' + type : '');
+      if (text && type === 'success') {
+        setTimeout(function() {
+          if (geocodeStatusEl.textContent === text) {
+            geocodeStatusEl.textContent = '';
+          }
+        }, 4000);
+      }
+    }
+
+    // ---- Track manual coordinate entry ----
+    fields.lat.addEventListener('input', function() {
+      coordsManual = true;
+      setGeocodeStatus('', '');
+    });
+    fields.lng.addEventListener('input', function() {
+      coordsManual = true;
+      setGeocodeStatus('', '');
+    });
+
+    // ---- Geocode on location blur ----
+    fields.location.addEventListener('blur', async function() {
+      var loc = fields.location.value.trim();
+
+      // Skip if: manual coords, empty location, or same location already geocoded
+      if (coordsManual || !loc || loc === lastGeocodedLocation) return;
+
+      setGeocodeStatus('Looking up coordinates\u2026', 'loading');
+
+      var result = await geocodeLocation(loc);
+      if (result) {
+        fields.lat.value = result.lat;
+        fields.lng.value = result.lng;
+        lastGeocodedLocation = loc;
+        setGeocodeStatus('\ud83d\udccd Auto-filled from \u201c' + loc + '\u201d', 'success');
+        updatePreview();
+      } else {
+        setGeocodeStatus('Could not find coordinates for \u201c' + loc + '\u201d', 'error');
+      }
+    });
+
+    // Reset manual flag when location name changes (allow re-geocoding for new location)
+    fields.location.addEventListener('input', function() {
+      coordsManual = false;
+    });
 
     // ---- Set today as default date ----
     fields.date.value = new Date().toISOString().split('T')[0];
@@ -927,10 +1007,16 @@ HTML_PAGE = r"""<!DOCTYPE html>
       fields.lng.value = entry.coordinates ? entry.coordinates[1] : '';
       fields.body.value = entry.body || '';
       fields.video.value = entry.video_url || '';
-      fields.photos.value = (entry.photos || []).join(', ');
+      photoPaths = (entry.photos || []).slice();
+      renderPhotoList();
       fields.moodLeft.value = entry.mood_left || '';
       fields.moodRight.value = entry.mood_right || '';
       fields.moodValue.value = entry.mood_value != null ? entry.mood_value : 0.5;
+
+      // Existing entry has coordinates — don't let geocoding overwrite them
+      coordsManual = true;
+      lastGeocodedLocation = entry.location_name || '';
+      setGeocodeStatus('', '');
 
       // Update UI
       btnSave.textContent = 'Update & Push';
@@ -1023,6 +1109,11 @@ HTML_PAGE = r"""<!DOCTYPE html>
         }
       });
       fields.date.value = new Date().toISOString().split('T')[0];
+      coordsManual = false;
+      lastGeocodedLocation = '';
+      setGeocodeStatus('', '');
+      photoPaths = [];
+      renderPhotoList();
       updateMoodPreview();
       updatePreview();
       statusEl.innerHTML = '';
@@ -1032,6 +1123,91 @@ HTML_PAGE = r"""<!DOCTYPE html>
       switchToNewMode();
       clearForm();
     });
+
+    // ==================================================================
+    // PHOTO UPLOAD
+    // ==================================================================
+
+    var photoPaths = [];  // array of relative paths like "media/photos/woj2.jpg"
+    var photoUploadInput = document.getElementById('photo-upload');
+    var btnAddPhotos = document.getElementById('btn-add-photos');
+    var photoListEl = document.getElementById('photo-list');
+
+    btnAddPhotos.addEventListener('click', function() {
+      photoUploadInput.click();
+    });
+
+    photoUploadInput.addEventListener('change', async function() {
+      var files = Array.from(photoUploadInput.files);
+      if (!files.length) return;
+
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        btnAddPhotos.textContent = 'Uploading ' + file.name + '...';
+        btnAddPhotos.disabled = true;
+
+        try {
+          // Read as base64
+          var base64 = await fileToBase64(file);
+
+          var resp = await fetch('/api/upload-photo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: file.name,
+              data: base64
+            })
+          });
+
+          var result = await resp.json();
+          if (result.path) {
+            photoPaths.push(result.path);
+            renderPhotoList();
+          } else {
+            alert('Upload failed: ' + (result.error || 'Unknown error'));
+          }
+        } catch (err) {
+          alert('Upload error: ' + err.message);
+        }
+      }
+
+      btnAddPhotos.textContent = '+ Add photos';
+      btnAddPhotos.disabled = false;
+      photoUploadInput.value = '';  // reset so same file can be re-selected
+      updatePreview();
+    });
+
+    function fileToBase64(file) {
+      return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function() {
+          // Strip the data:image/...;base64, prefix
+          var result = reader.result.split(',')[1];
+          resolve(result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderPhotoList() {
+      photoListEl.innerHTML = '';
+      photoPaths.forEach(function(path, index) {
+        var item = document.createElement('div');
+        item.style.cssText = 'position:relative; display:inline-block;';
+        item.innerHTML =
+          '<img src="/' + escapeHtml(path) + '?' + Date.now() + '" style="width:80px; height:60px; object-fit:cover; border-radius:6px; border:2px solid var(--beige-dark);">' +
+          '<button type="button" style="position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; border:none; background:var(--charcoal); color:var(--white); font-size:0.7rem; cursor:pointer; display:flex; align-items:center; justify-content:center;" data-index="' + index + '">&times;</button>';
+        item.querySelector('button').addEventListener('click', function() {
+          photoPaths.splice(index, 1);
+          renderPhotoList();
+          updatePreview();
+        });
+        photoListEl.appendChild(item);
+      });
+      // Sync hidden input
+      fields.photos.value = photoPaths.join(', ');
+    }
 
     // ==================================================================
     // SAVE / UPDATE
@@ -1062,9 +1238,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
         coordinates: [parseFloat(fields.lat.value), parseFloat(fields.lng.value)],
         body: fields.body.value.trim(),
         video_url: fields.video.value.trim() || null,
-        photos: fields.photos.value.trim()
-          ? fields.photos.value.split(',').map(function(s) { return s.trim(); }).filter(Boolean)
-          : [],
+        photos: photoPaths.slice(),
         mood_left: fields.moodLeft.value.trim() || null,
         mood_right: fields.moodRight.value.trim() || null,
         mood_value: parseFloat(fields.moodValue.value)
@@ -1157,11 +1331,17 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(HTML_PAGE.encode('utf-8'))
         elif self.path == '/api/entries':
             self.handle_list_entries()
+        elif self.path.startswith('/api/geocode'):
+            self.handle_geocode()
+        elif self.path.startswith('/media/photos/'):
+            self.serve_photo()
         else:
             self.send_error(404)
 
     def do_POST(self):
-        if self.path == '/api/save-entry':
+        if self.path == '/api/upload-photo':
+            self.handle_upload_photo()
+        elif self.path == '/api/save-entry':
             self.handle_save_entry()
         elif self.path == '/api/update-entry':
             self.handle_update_entry()
@@ -1178,6 +1358,139 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(200, entries)
         except (FileNotFoundError, json.JSONDecodeError):
             self.send_json(200, [])
+
+    def handle_geocode(self):
+        """Proxy geocoding request to Nominatim (avoids browser CORS issues)."""
+        parsed = urlparse(self.path)
+        params = parse_qs(parsed.query)
+        query = params.get('q', [''])[0].strip()
+
+        if not query:
+            self.send_json(400, {'error': 'Missing q parameter'})
+            return
+
+        try:
+            nominatim_url = (
+                'https://nominatim.openstreetmap.org/search?'
+                + 'q=' + quote(query)
+                + '&format=json&limit=1'
+            )
+            req = urllib.request.Request(
+                nominatim_url,
+                headers={'User-Agent': 'WanderingWojo-JournalTool/1.0 (local dev tool)'}
+            )
+            # macOS Python often lacks SSL certs — use unverified context (local dev tool only)
+            ssl_ctx = ssl._create_unverified_context()
+            with urllib.request.urlopen(req, timeout=10, context=ssl_ctx) as resp:
+                data = json.loads(resp.read().decode('utf-8'))
+
+            if data and len(data) > 0:
+                self.send_json(200, {
+                    'lat': float(data[0]['lat']),
+                    'lng': float(data[0]['lon']),
+                    'display_name': data[0].get('display_name', ''),
+                })
+            else:
+                self.send_json(200, {'lat': None, 'lng': None, 'display_name': None})
+
+        except Exception as e:
+            self.send_json(500, {'error': str(e)})
+
+    def serve_photo(self):
+        """Serve a photo from media/photos/ for thumbnail preview."""
+        # Strip query string (cache-busting)
+        path = self.path.split('?')[0]
+        # Sanitize: only allow files directly in media/photos/
+        filename = os.path.basename(path)
+        file_path = os.path.join(PROJECT_ROOT, 'media', 'photos', filename)
+        if not os.path.isfile(file_path):
+            self.send_error(404)
+            return
+        ext = os.path.splitext(filename)[1].lower()
+        content_types = {
+            '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+            '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp',
+        }
+        ct = content_types.get(ext, 'application/octet-stream')
+        self.send_response(200)
+        self.send_header('Content-Type', ct)
+        self.send_header('Cache-Control', 'no-cache')
+        self.end_headers()
+        with open(file_path, 'rb') as f:
+            self.wfile.write(f.read())
+
+    def handle_upload_photo(self):
+        """Upload a photo, resize it, and save to media/photos/."""
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length)
+
+        try:
+            data = json.loads(body)
+        except json.JSONDecodeError as e:
+            self.send_json(400, {'error': f'Invalid JSON: {e}'})
+            return
+
+        filename = data.get('filename', '').strip()
+        file_data = data.get('data', '')  # base64-encoded
+
+        if not filename or not file_data:
+            self.send_json(400, {'error': 'Missing filename or data'})
+            return
+
+        # Sanitize filename — keep extension, slugify the name
+        name, ext = os.path.splitext(filename)
+        ext = ext.lower()
+        if ext not in ('.jpg', '.jpeg', '.png', '.gif', '.webp'):
+            self.send_json(400, {'error': f'Unsupported file type: {ext}'})
+            return
+
+        safe_name = re.sub(r'[^a-z0-9_-]', '', name.lower().replace(' ', '-'))
+        if not safe_name:
+            safe_name = 'photo'
+        out_filename = safe_name + ext
+        photos_dir = os.path.join(PROJECT_ROOT, 'media', 'photos')
+        os.makedirs(photos_dir, exist_ok=True)
+
+        # Avoid overwriting — add suffix if file exists
+        out_path = os.path.join(photos_dir, out_filename)
+        counter = 1
+        while os.path.exists(out_path):
+            out_filename = f"{safe_name}-{counter}{ext}"
+            out_path = os.path.join(photos_dir, out_filename)
+            counter += 1
+
+        try:
+            # Decode and write file
+            raw = base64.b64decode(file_data)
+            with open(out_path, 'wb') as f:
+                f.write(raw)
+
+            original_size = len(raw)
+
+            # Resize with sips (macOS) — max width 1200px
+            if shutil.which('sips'):
+                resize_result = subprocess.run(
+                    ['sips', '--resampleWidth', '1200', out_path, '--out', out_path],
+                    capture_output=True, text=True
+                )
+                if resize_result.returncode != 0:
+                    print(f"  ⚠ sips resize warning: {resize_result.stderr.strip()}")
+
+            final_size = os.path.getsize(out_path)
+            rel_path = f"media/photos/{out_filename}"
+            print(f"  ✓ Photo saved: {rel_path} ({original_size // 1024}KB → {final_size // 1024}KB)")
+
+            self.send_json(200, {
+                'path': rel_path,
+                'filename': out_filename,
+                'size': final_size,
+            })
+
+        except Exception as e:
+            # Clean up on failure
+            if os.path.exists(out_path):
+                os.remove(out_path)
+            self.send_json(500, {'error': str(e)})
 
     def handle_save_entry(self):
         """Save a new entry to entries.json and push to git."""
@@ -1221,6 +1534,7 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(500, result)
             return
 
+        self._regenerate_feed()
         self._git_commit_and_push(result, f"Add entry: {entry.get('title', 'New entry')}")
         self.send_json(200, result)
 
@@ -1276,6 +1590,7 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(500, result)
             return
 
+        self._regenerate_feed()
         self._git_commit_and_push(result, f"Update entry: {updated_entry.get('title', 'Untitled')}")
         self.send_json(200, result)
 
@@ -1331,17 +1646,118 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(500, result)
             return
 
+        self._regenerate_feed()
         self._git_commit_and_push(result, f"Delete entry: {title}")
         self.send_json(200, result)
 
-    def _git_commit_and_push(self, result, message):
-        """Shared git commit + push logic."""
+    def _regenerate_feed(self):
+        """Regenerate feed.xml from entries.json for RSS subscribers."""
         try:
+            with open(ENTRIES_FILE, 'r', encoding='utf-8') as f:
+                entries = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return
+
+        # Sort newest first for the feed
+        entries.sort(key=lambda e: e.get('date', ''), reverse=True)
+
+        base_url = 'https://wanderingwojo.com'
+
+        # RFC 822 day-of-week lookup
+        dow = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+        def to_rfc822(date_str):
+            from datetime import datetime
+            d = datetime.strptime(date_str, '%Y-%m-%d')
+            return f'{dow[d.weekday()]}, {d.day:02d} {months[d.month - 1]} {d.year} 00:00:00 GMT'
+
+        def make_slug(entry_id):
+            return re.sub(r'^\d{4}-\d{2}-\d{2}-', '', entry_id)
+
+        def excerpt(body, location, max_len=160):
+            text = body.replace('\n', ' ').strip() if body else ''
+            prefix = f'{location} \u2014 ' if location else ''
+            avail = max_len - len(prefix)
+            if len(text) > avail:
+                text = text[:avail].rsplit(' ', 1)[0] + '...'
+            return prefix + text
+
+        def xml_escape(s):
+            return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+
+        last_build = to_rfc822(entries[0]['date']) if entries else ''
+
+        items = []
+        for entry in entries:
+            slug = make_slug(entry.get('id', ''))
+            link = f'{base_url}/#{slug}'
+            desc = excerpt(entry.get('body', ''), entry.get('location_name', ''))
+            items.append(
+                f'    <item>\n'
+                f'      <title>{xml_escape(entry.get("title", "Untitled"))}</title>\n'
+                f'      <link>{link}</link>\n'
+                f'      <guid isPermaLink="true">{link}</guid>\n'
+                f'      <pubDate>{to_rfc822(entry.get("date", "2026-01-01"))}</pubDate>\n'
+                f'      <description>{xml_escape(desc)}</description>\n'
+                f'    </item>'
+            )
+
+        feed_xml = (
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n'
+            '  <channel>\n'
+            '    <title>Wandering Wojo</title>\n'
+            f'    <link>{base_url}</link>\n'
+            '    <description>A travel journal. Southwest to Alaska. Wojo the cat and his co-pilot Van on the road.</description>\n'
+            '    <language>en-us</language>\n'
+            f'    <lastBuildDate>{last_build}</lastBuildDate>\n'
+            f'    <atom:link href="{base_url}/feed.xml" rel="self" type="application/rss+xml"/>\n'
+            + '\n'.join(items) + '\n'
+            '  </channel>\n'
+            '</rss>\n'
+        )
+
+        feed_path = os.path.join(PROJECT_ROOT, 'feed.xml')
+        with open(feed_path, 'w', encoding='utf-8') as f:
+            f.write(feed_xml)
+        print('  \u2713 Regenerated feed.xml')
+
+    def _git_commit_and_push(self, result, message):
+        """Shared git commit + push logic — robust version."""
+        try:
+            # Stage entries.json, photos, and feed.xml
             subprocess.run(
                 ['git', 'add', 'data/entries.json'],
                 cwd=PROJECT_ROOT,
                 capture_output=True, text=True, check=True
             )
+            subprocess.run(
+                ['git', 'add', 'media/photos/'],
+                cwd=PROJECT_ROOT,
+                capture_output=True, text=True
+            )
+            subprocess.run(
+                ['git', 'add', 'feed.xml'],
+                cwd=PROJECT_ROOT,
+                capture_output=True, text=True
+            )
+
+            # Check if there's actually anything staged to commit
+            diff_check = subprocess.run(
+                ['git', 'diff', '--cached', '--quiet'],
+                cwd=PROJECT_ROOT,
+                capture_output=True, text=True
+            )
+            if diff_check.returncode == 0:
+                # Nothing staged — file content didn't change
+                result['committed'] = True
+                result['pushed'] = True
+                print(f"  \u2713 Already up to date")
+                return
+
+            # Commit the staged changes
             commit_result = subprocess.run(
                 ['git', 'commit', '-m', message],
                 cwd=PROJECT_ROOT,
@@ -1351,13 +1767,20 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
                 result['committed'] = True
                 print(f"  \u2713 Committed")
             else:
-                result['commit_error'] = commit_result.stderr.strip() or commit_result.stdout.strip()
+                err = commit_result.stderr.strip() or commit_result.stdout.strip()
+                # Clean up verbose git status from the error
+                first_line = err.split('\n')[0] if err else 'Commit failed'
+                result['commit_error'] = first_line
+                return
         except FileNotFoundError:
             result['commit_error'] = 'git not found'
+            return
         except subprocess.CalledProcessError as e:
-            result['commit_error'] = e.stderr.strip()
+            result['commit_error'] = e.stderr.strip() or 'git add failed'
+            return
 
-        if result['committed']:
+        # Push (with retry: pull --rebase if remote is ahead, then push again)
+        for attempt in range(2):
             try:
                 push_result = subprocess.run(
                     ['git', 'push'],
@@ -1368,12 +1791,31 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
                 if push_result.returncode == 0:
                     result['pushed'] = True
                     print(f"  \u2713 Pushed to remote")
+                    return
                 else:
-                    result['push_error'] = push_result.stderr.strip() or push_result.stdout.strip()
+                    push_err = push_result.stderr.strip() or push_result.stdout.strip()
+                    # If remote is ahead, try pull --rebase then retry push
+                    if attempt == 0 and ('rejected' in push_err or 'fetch first' in push_err):
+                        print(f"  \u21bb Remote ahead, rebasing...")
+                        rebase = subprocess.run(
+                            ['git', 'pull', '--rebase'],
+                            cwd=PROJECT_ROOT,
+                            capture_output=True, text=True,
+                            timeout=30
+                        )
+                        if rebase.returncode != 0:
+                            result['push_error'] = 'Rebase failed: ' + (rebase.stderr.strip().split('\n')[0])
+                            return
+                        continue  # retry the push
+                    else:
+                        result['push_error'] = push_err.split('\n')[0] if push_err else 'Push failed'
+                        return
             except FileNotFoundError:
                 result['push_error'] = 'git not found'
+                return
             except subprocess.TimeoutExpired:
                 result['push_error'] = 'Push timed out (30s)'
+                return
 
     def send_json(self, code, data):
         self.send_response(code)

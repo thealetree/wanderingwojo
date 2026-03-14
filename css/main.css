@@ -67,18 +67,18 @@
 /* --- Dark Mode (auto-detect system theme) --- */
 @media (prefers-color-scheme: dark) {
   :root {
-    --white:      #1A1817;
-    --off-white:  #1E1D1B;
-    --beige:      #2A2825;
-    --beige-dark: #353230;
-    --warm-gray:  #5A5652;
-    --mid-gray:   #8A8580;
-    --dark-gray:  #B0ABA5;
-    --charcoal:   #D4D0CC;
-    --near-black: #F0EBE3;
+    --white:      #1A1A1A;
+    --off-white:  #1E1E1E;
+    --beige:      #282828;
+    --beige-dark: #333333;
+    --warm-gray:  #575757;
+    --mid-gray:   #888888;
+    --dark-gray:  #AAAAAA;
+    --charcoal:   #D0D0D0;
+    --near-black: #ECECEC;
 
-    --accent:       #D4D0CC;
-    --accent-light: #B0ABA5;
+    --accent:       #D0D0D0;
+    --accent-light: #AAAAAA;
 
     --bg-page: var(--off-white);
     --bg-card: var(--white);
@@ -352,6 +352,39 @@ a:hover {
 .contact-form__status--ok { color: #7C9A7E; }
 .contact-form__status--err { color: #C1440E; }
 
+/* RSS subscribe */
+.rss-subscribe {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--beige-dark);
+  text-align: center;
+}
+
+.rss-subscribe__link {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--charcoal);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.rss-subscribe__link:hover {
+  color: var(--terracotta);
+}
+
+.rss-subscribe__icon {
+  display: inline-block;
+  color: var(--terracotta);
+}
+
+.rss-subscribe__hint {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--mid-gray);
+  margin-top: 0.2rem;
+}
+
 /* Other projects */
 .other-projects {
   margin-top: var(--space-lg);
@@ -382,7 +415,7 @@ a:hover {
 }
 
 /* ==========================================================================
-   Entry Navigation
+   Entry Navigation + Journey Stats (unified bar)
    ========================================================================== */
 .entry-nav {
   position: fixed;
@@ -391,14 +424,53 @@ a:hover {
   transform: translateX(-50%);
   z-index: 1000;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   background: var(--bg-card);
   border: 2px solid var(--beige-dark);
   border-radius: var(--rough-radius);
-  padding: 4px 12px;
+  padding: 6px 14px 5px;
   box-shadow: var(--shadow-md);
   filter: url(#roughen);
+}
+
+/* Stats row (sits above the nav controls) */
+.entry-nav__stats {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--mid-gray);
+  white-space: nowrap;
+  user-select: none;
+  padding-bottom: 3px;
+  width: 100%;
+  justify-content: center;
+}
+
+.entry-nav__stats:empty {
+  display: none;
+}
+
+.journey-stats__item strong {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.journey-stats__divider {
+  color: var(--warm-gray);
+  font-size: 0.7rem;
+}
+
+/* Nav controls row */
+.entry-nav__controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .entry-nav__btn {
@@ -599,6 +671,28 @@ a:hover {
   letter-spacing: 0.04em;
 }
 
+/* Photo thumbnail on collapsed pin */
+.cork-pin__thumb {
+  margin-top: 0.375rem;
+  border-radius: 12px 4px 10px 4px / 4px 10px 4px 12px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border-top: 1.5px solid var(--beige-dark);
+}
+
+.cork-pin__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%; /* bias toward top to keep faces visible */
+  display: block;
+  transition: transform var(--transition-med);
+}
+
+.cork-pin:hover .cork-pin__thumb img {
+  transform: scale(1.05);
+}
+
 /* Grouped pin — stacked card effect */
 .cork-pin--grouped .cork-pin__card {
   position: relative;
@@ -643,7 +737,7 @@ a:hover {
   border: 2px solid var(--beige-dark);
   border-radius: var(--rough-radius);
   max-width: 560px;
-  max-height: calc(100vh - 40px);
+  max-height: calc(100vh - 160px);
   overflow-y: auto;
   overflow-x: hidden;
   box-shadow: var(--shadow-xl);
@@ -658,16 +752,7 @@ a:hover {
   display: none; /* Chrome/Safari */
 }
 
-/* Paper texture on expanded entry */
-.entry-expanded::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: var(--rough-radius);
-  opacity: 0.02;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+/* Paper texture removed — ::after with position:absolute doesn't scroll with content */
 
 @keyframes expandIn {
   from {
@@ -956,6 +1041,42 @@ a:hover {
   transition: width 0.6s var(--ease-out-expo);
 }
 
+/* --- Entry Action Buttons (share, postcard) --- */
+.entry-expanded__actions {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg) var(--space-lg);
+  border-top: 1.5px solid var(--beige);
+}
+
+.entry-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--dark-gray);
+  background: var(--bg-page);
+  border: 1.5px solid var(--beige-dark);
+  border-radius: var(--rough-radius-sm);
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.entry-action-btn:hover {
+  background: var(--beige);
+  color: var(--near-black);
+  transform: rotate(-0.5deg);
+}
+
+.entry-action-btn__icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
 /* --- Giscus --- */
 .entry-expanded__comments {
   padding: var(--space-lg);
@@ -1094,6 +1215,51 @@ a:hover {
   border-color: var(--charcoal);
 }
 
+/* --- Mapbox Control Overrides (dark mode) --- */
+@media (prefers-color-scheme: dark) {
+  .mapboxgl-ctrl-group {
+    background: #1A1A1A !important;
+    border-color: #333 !important;
+  }
+
+  .mapboxgl-ctrl-group button {
+    background-color: transparent !important;
+    color: #ECECEC !important;
+  }
+
+  .mapboxgl-ctrl-group button + button {
+    border-top-color: #333 !important;
+  }
+
+  .mapboxgl-ctrl-group button:focus {
+    box-shadow: 0 0 2px 2px rgba(255,255,255,0.15) !important;
+  }
+
+  /* Zoom +/- icon color */
+  .mapboxgl-ctrl-group button .mapboxgl-ctrl-icon {
+    filter: invert(1);
+  }
+
+  /* Mapbox logo — invert to light version */
+  .mapboxgl-ctrl-logo {
+    filter: invert(1) hue-rotate(180deg);
+  }
+
+  /* Attribution text */
+  .mapboxgl-ctrl-attrib {
+    background-color: rgba(26, 26, 26, 0.7) !important;
+    color: #AAA !important;
+  }
+
+  .mapboxgl-ctrl-attrib a {
+    color: #AAA !important;
+  }
+
+  .mapboxgl-ctrl-attrib-button {
+    filter: invert(1);
+  }
+}
+
 /* --- Mapbox Popup Overrides --- */
 .mapboxgl-popup-content {
   background: var(--bg-card) !important;
@@ -1158,6 +1324,15 @@ a:hover {
    Responsive
    ========================================================================== */
 @media (max-width: 768px) {
+  .entry-nav__stats {
+    font-size: 0.72rem;
+    gap: 0.25rem;
+  }
+
+  .journey-stats__item strong {
+    font-size: 0.85rem;
+  }
+
   .floating-shop {
     top: var(--space-sm);
     left: var(--space-sm);
@@ -1185,11 +1360,7 @@ a:hover {
 
   .entry-expanded {
     max-width: calc(100vw - 2rem);
-    max-height: calc(100vh - 40px);
-    border-radius: 30px 8px 25px 8px / 8px 25px 8px 30px;
-  }
-
-  .entry-expanded::after {
+    max-height: calc(100vh - 160px);
     border-radius: 30px 8px 25px 8px / 8px 25px 8px 30px;
   }
 
@@ -1277,4 +1448,29 @@ a:hover {
 .fade-in.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* --- Copy-link toast --- */
+.copy-toast {
+  position: fixed;
+  top: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: var(--charcoal);
+  color: var(--off-white);
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.05rem;
+  padding: var(--space-xs) var(--space-lg);
+  border-radius: 20px;
+  border: 2px solid var(--warm-gray);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10000;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.copy-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
