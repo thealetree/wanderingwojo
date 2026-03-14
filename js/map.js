@@ -580,93 +580,46 @@ const MapModule = (function () {
   function downloadPostcard(entry) {
     var canvas = document.createElement('canvas');
     var ctx = canvas.getContext('2d');
-    canvas.width = 1200;
-    canvas.height = 800;
 
-    function drawCard(images) {
+    function drawCard(img) {
+      // Detect orientation and size canvas accordingly
+      var isPortrait = img && img.height > img.width;
+      var cw = isPortrait ? 800 : 1200;
+      var ch = isPortrait ? 1200 : 800;
+      canvas.width = cw;
+      canvas.height = ch;
+
+      var pad = 40;
+      var textBlockH = 160;
+      var photoW = cw - pad * 2;
+      var photoH = ch - pad * 2 - textBlockH;
+
       // Warm paper background
       ctx.fillStyle = isDark ? '#282828' : '#FAF6EF';
-      ctx.fillRect(0, 0, 1200, 800);
+      ctx.fillRect(0, 0, cw, ch);
 
-      var hasPhotos = images.length > 0;
-
-      if (images.length === 1) {
-        // Single photo — draw full width
-        var img = images[0];
-        var photoH = 540;
+      // Photo
+      if (img) {
         ctx.save();
-        roundRect(ctx, 40, 40, 1120, photoH, 12);
+        roundRect(ctx, pad, pad, photoW, photoH, 12);
         ctx.clip();
-        var scale = Math.max(1120 / img.width, photoH / img.height);
+        var scale = Math.max(photoW / img.width, photoH / img.height);
         var w = img.width * scale;
         var h = img.height * scale;
-        ctx.drawImage(img, 40 + (1120 - w) / 2, 40 + (photoH - h) / 2, w, h);
+        ctx.drawImage(img, pad + (photoW - w) / 2, pad + (photoH - h) / 2, w, h);
         ctx.restore();
-      } else if (images.length > 1) {
-        // Multiple photos — scattered like tossed polaroids
-        var photoW = 380;
-        var photoH = 280;
-        var count = Math.min(images.length, 4);
-        // Shuffle and pick
-        var shuffled = images.slice().sort(function () { return Math.random() - 0.5; });
-        var picked = shuffled.slice(0, count);
-
-        // Layout positions — spread across the card area
-        var positions = [
-          { x: 60,  y: 30 },
-          { x: 440, y: 50 },
-          { x: 200, y: 220 },
-          { x: 620, y: 180 }
-        ];
-
-        // Seed some variety in rotation
-        var angles = [-6, 4, -3, 7];
-
-        for (var i = 0; i < picked.length; i++) {
-          var pos = positions[i];
-          var angle = angles[i] * Math.PI / 180;
-          var img = picked[i];
-
-          ctx.save();
-          ctx.translate(pos.x + photoW / 2, pos.y + photoH / 2);
-          ctx.rotate(angle);
-
-          // White polaroid border
-          var borderW = photoW + 20;
-          var borderH = photoH + 20;
-          ctx.fillStyle = isDark ? '#333333' : '#FFFFFF';
-          ctx.shadowColor = 'rgba(0,0,0,0.25)';
-          ctx.shadowBlur = 12;
-          ctx.shadowOffsetX = 3;
-          ctx.shadowOffsetY = 4;
-          ctx.fillRect(-borderW / 2, -borderH / 2, borderW, borderH);
-          ctx.shadowColor = 'transparent';
-
-          // Photo inside the border
-          ctx.save();
-          ctx.beginPath();
-          ctx.rect(-photoW / 2, -photoH / 2, photoW, photoH);
-          ctx.clip();
-          var s = Math.max(photoW / img.width, photoH / img.height);
-          var sw = img.width * s;
-          var sh = img.height * s;
-          ctx.drawImage(img, -sw / 2, -sh / 2, sw, sh);
-          ctx.restore();
-
-          ctx.restore();
-        }
       }
 
       // Dashed border
       ctx.strokeStyle = isDark ? '#B87D6A' : '#C1440E';
       ctx.lineWidth = 4;
       ctx.setLineDash([10, 5]);
-      roundRect(ctx, 20, 20, 1160, 760, 16);
+      roundRect(ctx, 20, 20, cw - 40, ch - 40, 16);
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Text area — bottom section
-      var textY = hasPhotos ? 640 : 400;
+      // Text area
+      var textY = img ? (pad + photoH + 50) : (ch / 2 - 40);
 
       // Title
       ctx.font = 'bold 52px Caveat, cursive';
@@ -690,7 +643,7 @@ const MapModule = (function () {
       ctx.font = '24px Caveat, cursive';
       ctx.fillStyle = isDark ? '#575757' : '#C4BFB6';
       ctx.textAlign = 'right';
-      ctx.fillText('wanderingwojo.com', 1140, 760);
+      ctx.fillText('wanderingwojo.com', cw - 60, ch - 40);
 
       // Download
       var link = document.createElement('a');
@@ -700,25 +653,15 @@ const MapModule = (function () {
     }
 
     if (entry.photos && entry.photos.length > 0) {
-      var loaded = [];
-      var total = entry.photos.length;
-      var done = 0;
-      entry.photos.forEach(function (src) {
-        var img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = function () {
-          loaded.push(img);
-          done++;
-          if (done === total) drawCard(loaded);
-        };
-        img.onerror = function () {
-          done++;
-          if (done === total) drawCard(loaded);
-        };
-        img.src = src;
-      });
+      // Pick one photo at random
+      var src = entry.photos[Math.floor(Math.random() * entry.photos.length)];
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function () { drawCard(img); };
+      img.onerror = function () { drawCard(null); };
+      img.src = src;
     } else {
-      drawCard([]);
+      drawCard(null);
     }
   }
 
