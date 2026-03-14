@@ -797,8 +797,8 @@ a:hover {
   border: 2px solid var(--beige-dark);
   border-radius: var(--rough-radius);
   max-width: 560px;
-  max-height: calc(100vh - 160px);
-  max-height: calc(100dvh - 160px);
+  max-height: calc(100vh - 80px);
+  max-height: calc(100dvh - 80px);
   overflow-y: auto;
   overflow-x: hidden;
   box-shadow: var(--shadow-xl);
@@ -1420,8 +1420,8 @@ a:hover {
 
   .entry-expanded {
     max-width: calc(100vw - 2rem);
-    max-height: calc(100vh - 200px);
-    max-height: calc(100dvh - 200px);
+    max-height: calc(100vh - 100px);
+    max-height: calc(100dvh - 100px);
     border-radius: 30px 8px 25px 8px / 8px 25px 8px 30px;
   }
 
