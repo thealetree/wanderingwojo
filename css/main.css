@@ -256,6 +256,31 @@ a:hover {
   display: block;
 }
 
+.floating-title__close {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  z-index: 11;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--mid-gray);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  line-height: 1;
+  transition: all var(--transition-fast);
+}
+
+.floating-title__close:hover {
+  color: var(--near-black);
+  transform: rotate(-4deg) scale(1.1);
+}
+
 /* Wojo illustration in panel — inline with blurb text */
 .wojo-illustration--panel {
   float: right;
@@ -1404,6 +1429,20 @@ a:hover {
     right: var(--space-sm);
     padding: 0.375rem 0.75rem;
     max-width: calc(100vw - 2rem);
+    transition: box-shadow var(--transition-fast), max-width var(--transition-med),
+                left var(--transition-med), right var(--transition-med),
+                top var(--transition-med), transform var(--transition-med);
+  }
+
+  .floating-title--open {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    top: var(--space-lg);
+    max-width: calc(100vw - 2rem);
+    width: calc(100vw - 2rem);
+    max-height: calc(100dvh - 2 * var(--space-lg));
+    overflow-y: auto;
   }
 
   .floating-title__name {

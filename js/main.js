@@ -88,13 +88,44 @@ const AppModule = (function () {
     if (!els.floatingTitle) return;
 
     var nameEl = els.floatingTitle.querySelector('.floating-title__name');
+    var closeBtn = document.getElementById('floating-title-close');
     var form = document.getElementById('contact-form');
+
+    function openAboutPanel() {
+      els.floatingTitle.classList.add('floating-title--open');
+      // Hide swag button and bottom nav
+      var floatingShop = document.querySelector('.floating-shop');
+      var entryNav = document.getElementById('entry-nav');
+      if (floatingShop) floatingShop.style.display = 'none';
+      if (entryNav) entryNav.style.display = 'none';
+    }
+
+    function closeAboutPanel() {
+      els.floatingTitle.classList.remove('floating-title--open');
+      // Restore swag button and bottom nav
+      var floatingShop = document.querySelector('.floating-shop');
+      var entryNav = document.getElementById('entry-nav');
+      if (floatingShop) floatingShop.style.display = '';
+      if (entryNav) entryNav.style.display = '';
+    }
 
     // Only the title text toggles open/close
     nameEl.addEventListener('click', function (e) {
       e.stopPropagation();
-      els.floatingTitle.classList.toggle('floating-title--open');
+      if (els.floatingTitle.classList.contains('floating-title--open')) {
+        closeAboutPanel();
+      } else {
+        openAboutPanel();
+      }
     });
+
+    // Close button inside the panel
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeAboutPanel();
+      });
+    }
 
     // Clicks anywhere inside the panel (desc, form, etc.) do nothing
     els.floatingTitle.addEventListener('click', function (e) {
@@ -103,7 +134,7 @@ const AppModule = (function () {
 
     // Close when clicking outside the panel
     document.addEventListener('click', function () {
-      els.floatingTitle.classList.remove('floating-title--open');
+      closeAboutPanel();
     });
 
     // --- Contact form ---
