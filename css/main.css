@@ -745,7 +745,7 @@ a:hover {
 
 @keyframes pinBounceInSmall {
   from { opacity: 0; transform: scale(0); }
-  to   { opacity: 1; transform: scale(0.55); }
+  to   { opacity: 1; transform: scale(0.667); }
 }
 
 @keyframes pinBounceInFull {
@@ -753,7 +753,7 @@ a:hover {
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* Non-highlighted pins stay at half size */
+/* Non-highlighted pins at 2/3 size (active is 1.5x inactive) */
 .cork-pin__card,
 .cork-pin__nail {
   transform-origin: top center;
@@ -763,7 +763,7 @@ a:hover {
 
 .cork-pin:not(.cork-pin--highlighted):not(.cork-pin--pending) .cork-pin__card,
 .cork-pin:not(.cork-pin--highlighted):not(.cork-pin--pending) .cork-pin__nail {
-  transform: scale(0.55);
+  transform: scale(0.667);
 }
 
 /* Cork pin highlighted state — full size */
