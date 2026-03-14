@@ -52,6 +52,12 @@ Use the local journal tool to add new entries. It saves to `data/entries.json` a
 python3 tools/journal.py
 ```
 
+
+'''
+cd /Users/vansanders/Documents/CodingProjects/Wandering\ Wojo
+python3 tools/journal.py --port 5556
+'''
+
 This opens a browser-based form on `http://127.0.0.1:5555` with:
 - Live preview of your entry
 - Mood bar with customizable labels

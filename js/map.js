@@ -29,6 +29,7 @@ const MapModule = (function () {
 
   // Route coordinates — built dynamically from entries
   let routeCoords = [];
+  let waypointIndices = []; // routeCoords index for each entry waypoint
 
   /**
    * Initialize the map. Returns false if no valid token.
@@ -84,13 +85,16 @@ const MapModule = (function () {
     });
 
     // Build meandering path between each pair of waypoints
+    // Track which routeCoords index each entry waypoint maps to
     routeCoords = [];
+    waypointIndices = [0]; // first entry is at index 0
     for (var i = 0; i < waypoints.length - 1; i++) {
       var segment = meanderSegment(waypoints[i], waypoints[i + 1], i);
       // Add all points except the last (to avoid duplicates at joins)
       for (var j = 0; j < segment.length - 1; j++) {
         routeCoords.push(segment[j]);
       }
+      waypointIndices.push(routeCoords.length); // index where next entry lands
     }
     // Add final waypoint
     routeCoords.push(waypoints[waypoints.length - 1]);
@@ -200,26 +204,47 @@ const MapModule = (function () {
       },
     });
 
-    // Animate the route drawing in
-    animateRouteDrawIn();
+    // Animation is triggered externally via startRouteAnimation()
+    // after fitBounds completes
   }
 
   /**
-   * Animate the route line drawing in from start to end
+   * Animate the route line drawing in at constant physical speed,
+   * revealing cork pins as the route reaches each waypoint.
+   * Pins are created with cork-pin--pending class (hidden from the start).
    */
   function animateRouteDrawIn() {
+    if (routeCoords.length < 2) return;
+
+    // Build cumulative distance array for constant-speed interpolation
+    var cumDist = [0];
+    for (var i = 1; i < routeCoords.length; i++) {
+      var dx = routeCoords[i][0] - routeCoords[i - 1][0];
+      var dy = routeCoords[i][1] - routeCoords[i - 1][1];
+      cumDist.push(cumDist[i - 1] + Math.sqrt(dx * dx + dy * dy));
+    }
+    var totalDist = cumDist[cumDist.length - 1];
+
     var startTime = null;
-    var duration = 2500; // 2.5 seconds
+    var duration = 2500;
+    var revealedPins = {};
 
     function step(timestamp) {
       if (!startTime) startTime = timestamp;
       var elapsed = timestamp - startTime;
       var progress = Math.min(elapsed / duration, 1);
 
-      // Ease-out cubic for smooth deceleration
-      var eased = 1 - Math.pow(1 - progress, 3);
+      // Linear progress mapped to distance for constant speed
+      var targetDist = progress * totalDist;
 
-      var endIndex = Math.max(1, Math.floor(eased * (routeCoords.length - 1)));
+      // Binary search for the coordinate index at this distance
+      var lo = 0, hi = cumDist.length - 1;
+      while (lo < hi) {
+        var mid = (lo + hi) >> 1;
+        if (cumDist[mid] < targetDist) lo = mid + 1;
+        else hi = mid;
+      }
+      var endIndex = Math.max(1, lo);
       var animCoords = routeCoords.slice(0, endIndex + 1);
 
       if (map.getSource('route')) {
@@ -231,6 +256,19 @@ const MapModule = (function () {
             coordinates: animCoords,
           },
         });
+      }
+
+      // Reveal pins whose waypoint the route has reached
+      for (var wi = 0; wi < waypointIndices.length; wi++) {
+        if (!revealedPins[wi] && endIndex >= waypointIndices[wi] && wi < corkPins.length) {
+          revealedPins[wi] = true;
+          (function (pin) {
+            setTimeout(function () {
+              pin.element.classList.remove('cork-pin--pending');
+              pin.element.classList.add('cork-pin--reveal');
+            }, 80);
+          })(corkPins[wi]);
+        }
       }
 
       if (progress < 1) {
@@ -320,7 +358,7 @@ const MapModule = (function () {
       var isGrouped = groupEntries.length > 1;
 
       var pinEl = document.createElement('div');
-      pinEl.className = 'cork-pin';
+      pinEl.className = 'cork-pin cork-pin--pending';
       if (isGrouped) pinEl.classList.add('cork-pin--grouped');
       pinEl.setAttribute('data-entry-ids', groupEntries.map(function (e) { return e.id; }).join(','));
 
@@ -991,6 +1029,7 @@ const MapModule = (function () {
     addLocationMarkers: addLocationMarkers,
     addRouteFromEntries: addRouteFromEntries,
     addCorkPins: addCorkPins,
+    startRouteAnimation: animateRouteDrawIn,
     expandPinEntry: expandPinEntry,
     closeExpandedPin: closeExpandedPin,
     switchToEntryInExpandedPin: switchToEntryInExpandedPin,

@@ -70,6 +70,8 @@ const AppModule = (function () {
       sortedEntries = entries.slice().sort(function (a, b) {
         return new Date(a.date) - new Date(b.date);
       });
+      // Default to the most recent entry
+      navIndex = Math.max(0, sortedEntries.length - 1);
     } catch (err) {
       console.error('Failed to load data:', err);
       entries = [];
@@ -177,8 +179,8 @@ const AppModule = (function () {
     if (mapInitialized) {
       const map = MapModule.getMap();
       map.on('load', function () {
-        MapModule.addRouteFromEntries(entries);
         MapModule.addCorkPins(entries, handlePinClick);
+        MapModule.addRouteFromEntries(entries);
         updateNavInfo();
 
         // Fit map to show all entry pins, centered with room for UI overlays
@@ -188,11 +190,6 @@ const AppModule = (function () {
             bounds.extend([e.coordinates[1], e.coordinates[0]]);
           });
 
-          // Padding accounts for: floating title (top-right), shop link
-          // (top-left), nav bar (bottom-center), and pin cards that hang
-          // ~200px below their coordinate point.
-          // Pin cards with photos hang ~220px below their coordinate,
-          // so bottom padding must be generous to keep cards fully visible.
           var isMobile = window.innerWidth < 768;
           map.fitBounds(bounds, {
             padding: isMobile
@@ -200,10 +197,20 @@ const AppModule = (function () {
               : { top: 100, right: 80, bottom: 280, left: 80 },
             maxZoom: 10
           });
-        }
 
-        // Check for deep link hash after map is ready
-        checkUrlHash();
+          // After fitBounds finishes, start the route draw-in animation
+          map.once('moveend', function () {
+            // Highlight the most recent entry's pin before animation starts
+            if (sortedEntries.length > 0) {
+              highlightPin(sortedEntries[sortedEntries.length - 1].id);
+            }
+            MapModule.startRouteAnimation();
+            // Check for deep link hash after animation starts
+            checkUrlHash();
+          });
+        } else {
+          checkUrlHash();
+        }
       });
     }
   }
