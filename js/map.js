@@ -583,16 +583,18 @@ const MapModule = (function () {
     canvas.width = 1200;
     canvas.height = 800;
 
-    function drawCard(img) {
+    function drawCard(images) {
       // Warm paper background
-      ctx.fillStyle = isDark ? '#2A2825' : '#FAF6EF';
+      ctx.fillStyle = isDark ? '#282828' : '#FAF6EF';
       ctx.fillRect(0, 0, 1200, 800);
 
-      // If we have a photo, draw it in the top area
-      if (img) {
+      var hasPhotos = images.length > 0;
+
+      if (images.length === 1) {
+        // Single photo — draw full width
+        var img = images[0];
         var photoH = 540;
         ctx.save();
-        // Rounded clip area
         roundRect(ctx, 40, 40, 1120, photoH, 12);
         ctx.clip();
         var scale = Math.max(1120 / img.width, photoH / img.height);
@@ -600,6 +602,59 @@ const MapModule = (function () {
         var h = img.height * scale;
         ctx.drawImage(img, 40 + (1120 - w) / 2, 40 + (photoH - h) / 2, w, h);
         ctx.restore();
+      } else if (images.length > 1) {
+        // Multiple photos — scattered like tossed polaroids
+        var photoW = 380;
+        var photoH = 280;
+        var count = Math.min(images.length, 4);
+        // Shuffle and pick
+        var shuffled = images.slice().sort(function () { return Math.random() - 0.5; });
+        var picked = shuffled.slice(0, count);
+
+        // Layout positions — spread across the card area
+        var positions = [
+          { x: 60,  y: 30 },
+          { x: 440, y: 50 },
+          { x: 200, y: 220 },
+          { x: 620, y: 180 }
+        ];
+
+        // Seed some variety in rotation
+        var angles = [-6, 4, -3, 7];
+
+        for (var i = 0; i < picked.length; i++) {
+          var pos = positions[i];
+          var angle = angles[i] * Math.PI / 180;
+          var img = picked[i];
+
+          ctx.save();
+          ctx.translate(pos.x + photoW / 2, pos.y + photoH / 2);
+          ctx.rotate(angle);
+
+          // White polaroid border
+          var borderW = photoW + 20;
+          var borderH = photoH + 20;
+          ctx.fillStyle = isDark ? '#333333' : '#FFFFFF';
+          ctx.shadowColor = 'rgba(0,0,0,0.25)';
+          ctx.shadowBlur = 12;
+          ctx.shadowOffsetX = 3;
+          ctx.shadowOffsetY = 4;
+          ctx.fillRect(-borderW / 2, -borderH / 2, borderW, borderH);
+          ctx.shadowColor = 'transparent';
+
+          // Photo inside the border
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(-photoW / 2, -photoH / 2, photoW, photoH);
+          ctx.clip();
+          var s = Math.max(photoW / img.width, photoH / img.height);
+          var sw = img.width * s;
+          var sh = img.height * s;
+          ctx.drawImage(img, -sw / 2, -sh / 2, sw, sh);
+          ctx.restore();
+
+          ctx.restore();
+        }
       }
 
       // Dashed border
@@ -610,27 +665,30 @@ const MapModule = (function () {
       ctx.stroke();
       ctx.setLineDash([]);
 
+      // Text area — bottom section
+      var textY = hasPhotos ? 640 : 400;
+
       // Title
       ctx.font = 'bold 52px Caveat, cursive';
-      ctx.fillStyle = isDark ? '#F0EBE3' : '#2C2825';
+      ctx.fillStyle = isDark ? '#ECECEC' : '#2C2825';
       ctx.textAlign = 'left';
-      ctx.fillText(entry.title, 60, img ? 640 : 400);
+      ctx.fillText(entry.title, 60, textY);
 
       // Location & date
       ctx.font = '30px Patrick Hand, cursive';
-      ctx.fillStyle = isDark ? '#B0ABA5' : '#6B6560';
-      ctx.fillText(entry.location_name + '  \u00b7  ' + formatDate(entry.date), 60, img ? 685 : 445);
+      ctx.fillStyle = isDark ? '#AAAAAA' : '#6B6560';
+      ctx.fillText(entry.location_name + '  \u00b7  ' + formatDate(entry.date), 60, textY + 45);
 
       // Mood
       if (entry.mood_left && entry.mood_right) {
         ctx.font = '24px Patrick Hand, cursive';
-        ctx.fillStyle = isDark ? '#8A8580' : '#999590';
-        ctx.fillText(entry.mood_left + '  \u2194  ' + entry.mood_right, 60, img ? 725 : 485);
+        ctx.fillStyle = isDark ? '#888888' : '#999590';
+        ctx.fillText(entry.mood_left + '  \u2194  ' + entry.mood_right, 60, textY + 85);
       }
 
       // Watermark
       ctx.font = '24px Caveat, cursive';
-      ctx.fillStyle = isDark ? '#5A5652' : '#C4BFB6';
+      ctx.fillStyle = isDark ? '#575757' : '#C4BFB6';
       ctx.textAlign = 'right';
       ctx.fillText('wanderingwojo.com', 1140, 760);
 
@@ -642,13 +700,25 @@ const MapModule = (function () {
     }
 
     if (entry.photos && entry.photos.length > 0) {
-      var img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = function () { drawCard(img); };
-      img.onerror = function () { drawCard(null); };
-      img.src = entry.photos[0];
+      var loaded = [];
+      var total = entry.photos.length;
+      var done = 0;
+      entry.photos.forEach(function (src) {
+        var img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function () {
+          loaded.push(img);
+          done++;
+          if (done === total) drawCard(loaded);
+        };
+        img.onerror = function () {
+          done++;
+          if (done === total) drawCard(loaded);
+        };
+        img.src = src;
+      });
     } else {
-      drawCard(null);
+      drawCard([]);
     }
   }
 
