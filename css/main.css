@@ -750,7 +750,7 @@ a:hover {
 
 @keyframes pinBounceInFull {
   from { opacity: 0; transform: scale(0); }
-  to   { opacity: 1; transform: scale(1); }
+  to   { opacity: 1; transform: scale(0.8); }
 }
 
 /* Non-highlighted pins at 2/3 size (active is 1.5x inactive) */
@@ -774,11 +774,11 @@ a:hover {
 .cork-pin--highlighted .cork-pin__card {
   border-color: var(--charcoal);
   box-shadow: var(--shadow-lg);
-  transform: scale(1);
+  transform: scale(0.8);
 }
 
 .cork-pin--highlighted .cork-pin__nail {
-  transform: scale(1);
+  transform: scale(0.8);
 }
 
 /* ==========================================================================
