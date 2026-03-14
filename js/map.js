@@ -66,6 +66,26 @@ const MapModule = (function () {
       }
     });
 
+    // Zoom-based pin scaling — pins shrink when zoomed out, grow when zoomed in
+    function updatePinScale() {
+      var zoom = map.getZoom();
+      var refZoom = 7;
+      // Dampened scale: each zoom level adjusts strongly
+      var scale = Math.pow(2, (zoom - refZoom) * 0.88);
+      // Clamp: 0.4 at very zoomed out, 1.3 at very zoomed in
+      scale = Math.max(0.4, Math.min(1.3, scale));
+      var mapEl = document.getElementById('map');
+      mapEl.style.setProperty('--pin-zoom-scale', scale);
+      // Hide photo thumbnails when zoomed out too far
+      if (zoom < 6.5) {
+        mapEl.classList.add('pin-thumbs-hidden');
+      } else {
+        mapEl.classList.remove('pin-thumbs-hidden');
+      }
+    }
+    map.on('zoom', updatePinScale);
+    map.on('load', updatePinScale);
+
     return true;
   }
 
@@ -857,9 +877,11 @@ const MapModule = (function () {
       if (p.element !== pinEl) p.element.style.visibility = 'hidden';
     });
 
-    // Hide floating title
+    // Hide floating title and shop link
     var floatingTitle = document.getElementById('floating-title');
     if (floatingTitle) floatingTitle.style.display = 'none';
+    var floatingShop = document.querySelector('.floating-shop');
+    if (floatingShop) floatingShop.style.display = 'none';
 
     // Prevent scroll/touch events from reaching the map
     ['touchstart', 'touchmove', 'touchend', 'wheel'].forEach(function (evt) {
@@ -946,9 +968,11 @@ const MapModule = (function () {
       p.element.style.visibility = '';
     });
 
-    // Restore floating title
+    // Restore floating title and shop link
     var floatingTitle = document.getElementById('floating-title');
     if (floatingTitle) floatingTitle.style.display = '';
+    var floatingShop = document.querySelector('.floating-shop');
+    if (floatingShop) floatingShop.style.display = '';
 
     // Clear URL hash
     history.replaceState(null, '', window.location.pathname);
