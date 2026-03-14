@@ -226,7 +226,7 @@ const MapModule = (function () {
     var totalDist = cumDist[cumDist.length - 1];
 
     var startTime = null;
-    var duration = 2500;
+    var duration = 1250;
     var revealedPins = {};
 
     function step(timestamp) {
