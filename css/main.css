@@ -621,7 +621,7 @@ a:hover {
   background: var(--terracotta);
   border-radius: 50%;
   position: absolute;
-  top: -7px;
+  top: -3px;
   left: 50%;
   transform: translateX(-50%);
   box-shadow: 0 1px 3px rgba(0,0,0,0.2), inset 0 -1px 2px rgba(0,0,0,0.15);

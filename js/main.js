@@ -221,6 +221,7 @@ const AppModule = (function () {
     var idx = sortedEntries.findIndex(function (e) { return e.id === displayEntry.id; });
     if (idx !== -1) navIndex = idx;
     updateNavInfo();
+    highlightPin(displayEntry.id);
     MapModule.expandPinEntry(groupEntries, pinEl);
   }
 
