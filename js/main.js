@@ -93,11 +93,13 @@ const AppModule = (function () {
 
     function openAboutPanel() {
       els.floatingTitle.classList.add('floating-title--open');
-      // Hide swag button and bottom nav
-      var floatingShop = document.querySelector('.floating-shop');
-      var entryNav = document.getElementById('entry-nav');
-      if (floatingShop) floatingShop.style.display = 'none';
-      if (entryNav) entryNav.style.display = 'none';
+      // Hide swag button and bottom nav on mobile only
+      if (window.innerWidth <= 768) {
+        var floatingShop = document.querySelector('.floating-shop');
+        var entryNav = document.getElementById('entry-nav');
+        if (floatingShop) floatingShop.style.display = 'none';
+        if (entryNav) entryNav.style.display = 'none';
+      }
     }
 
     function closeAboutPanel() {
