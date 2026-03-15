@@ -347,7 +347,7 @@ const MapModule = (function () {
   /**
    * Add cork board pins for journal entries, grouped by location_name
    */
-  function addCorkPins(entries, onPinClick) {
+  function addCorkPins(entries, onPinClick, onPinHover) {
     if (!map) return;
 
     // Sort all entries chronologically
@@ -429,6 +429,10 @@ const MapModule = (function () {
       pinEl.addEventListener('click', function (e) {
         e.stopPropagation();
         if (onPinClick) onPinClick(groupEntries, pinEl, marker);
+      });
+
+      pinEl.addEventListener('mouseenter', function () {
+        if (onPinHover) onPinHover(groupEntries, pinEl, marker);
       });
 
       corkPins.push({ marker: marker, element: pinEl, entries: groupEntries });

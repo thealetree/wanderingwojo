@@ -212,7 +212,7 @@ const AppModule = (function () {
     if (mapInitialized) {
       const map = MapModule.getMap();
       map.on('load', function () {
-        MapModule.addCorkPins(entries, handlePinClick);
+        MapModule.addCorkPins(entries, handlePinClick, handlePinHover);
         MapModule.addRouteFromEntries(entries);
         updateNavInfo();
 
@@ -256,6 +256,16 @@ const AppModule = (function () {
     updateNavInfo();
     highlightPin(displayEntry.id);
     MapModule.expandPinEntry(groupEntries, pinEl);
+  }
+
+  function handlePinHover(groupEntries, pinEl, marker) {
+    // On desktop, hovering a pin selects it as the active story
+    if (window.innerWidth <= 768) return;
+    var displayEntry = groupEntries[groupEntries.length - 1];
+    var idx = sortedEntries.findIndex(function (e) { return e.id === displayEntry.id; });
+    if (idx !== -1) navIndex = idx;
+    updateNavInfo();
+    highlightPin(displayEntry.id);
   }
 
   // =====================================================================
