@@ -77,7 +77,7 @@ const MapModule = (function () {
       var mapEl = document.getElementById('map');
       mapEl.style.setProperty('--pin-zoom-scale', scale);
       // Hide photo thumbnails when zoomed out too far
-      if (zoom < 6.5) {
+      if (zoom < 4.5) {
         mapEl.classList.add('pin-thumbs-hidden');
       } else {
         mapEl.classList.remove('pin-thumbs-hidden');
