@@ -85,5 +85,31 @@
     "mood_left": "TIRED",
     "mood_right": "ZONKY",
     "mood_value": 1
+  },
+  {
+    "id": "2026-03-17-oooookay",
+    "date": "2026-03-17",
+    "title": "OOoookay",
+    "type": "field-notes",
+    "location_name": "Dunsmuir, CA",
+    "coordinates": [
+      41.208209,
+      -122.271953
+    ],
+    "body": "Oooookay... today wasn't so bad. The big guy took pics of me to share, but there were plenty that weren't captured. I got to stretch my legs, sunbathe, scratch trees, eat grass, watch birds... And then a nice long nap in the truck. \n\nThe decompression seems to finally be starting to hit... what now? There's no one. Actually, that's not true, Big guy's bestie happened to stop by for a quick visit. That was truly special and unexpected (see the cheesy pic of them hamming it up, eh they're alright).  \n\nHe also has some bright squares that his people seem to talk through with him. They show up from time to time to cheer him on, and me too it seems. The fun one with the food hair even spent some square time with him today... I can tell how much that puts him at ease and tugs on strings. Sounds like others even send messages through our journal, without even including their names... Anonymous encouragement feels so real. Thanks everyone 🫂\n\nBut... how the hell did I end up homeless with a 40 year old human in tow...? He says he's house hunting... But how to hunt when you don't even know where, or what for? Land to build? House to buy? Why? Why not? Maybe he needs to think more like a cat... we know how to hunt... \n\nAnyway, too many questions... the decompression seems to have paused. Think it's time to clean and get cozy for the evening. Maybe close my eyes and just feel grateful until I crap out. So damn deeply grateful.... 💤",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_2336.jpg",
+      "media/photos/img_2328.jpg",
+      "media/photos/img_2327.jpg",
+      "media/photos/img_2329.jpg",
+      "media/photos/img_2333.jpg",
+      "media/photos/img_2325.jpg",
+      "media/photos/678fd3a6-f2b7-4116-acc5-f2e91fe0e553.jpg",
+      "media/photos/img_2338.jpg"
+    ],
+    "mood_left": "Grateful",
+    "mood_right": "Grateful",
+    "mood_value": 0.15
   }
 ]
