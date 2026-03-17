@@ -404,7 +404,25 @@ const MapModule = (function () {
         thumbHtml = '<div class="cork-pin__thumb"><img src="' + escapeHtml(thumbPhoto) + '" alt="" loading="lazy"></div>';
       }
 
+      // Build stack cards for grouped pins (N-1 fake cards behind the main, max 4)
+      var stackHtml = '';
+      if (isGrouped) {
+        var stackCount = Math.min(groupEntries.length - 1, 4);
+        pinEl.style.setProperty('--stack-count', stackCount);
+        // Seeded angles: alternate direction, playful messy spread
+        var angles = [-8, 10, -13, 15];
+        for (var si = 0; si < stackCount; si++) {
+          var angle = angles[si] || (si % 2 === 0 ? -(si * 2 + 3) : (si * 2 + 3));
+          stackHtml +=
+            '<div class="cork-pin__stack-layer" style="--stack-i:' + si + ';--stack-angle:' + angle + 'deg">' +
+              '<div class="cork-pin__stack-nail"></div>' +
+              '<div class="cork-pin__stack-card"></div>' +
+            '</div>';
+        }
+      }
+
       pinEl.innerHTML =
+        stackHtml +
         '<div class="cork-pin__nail"></div>' +
         '<div class="cork-pin__card">' +
           '<div class="cork-pin__title">' + escapeHtml(displayEntry.title) + '</div>' +
@@ -833,8 +851,8 @@ const MapModule = (function () {
       return new Date(a.date) - new Date(b.date);
     });
 
-    // Determine which tab to show
-    var activeIndex = 0;
+    // Determine which tab to show (default to most recent)
+    var activeIndex = sortedGroup.length - 1;
     if (targetEntryId) {
       sortedGroup.forEach(function (e, i) {
         if (e.id === targetEntryId) activeIndex = i;

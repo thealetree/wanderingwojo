@@ -31,6 +31,7 @@
   --bg-card:        var(--white);
   --bg-card-hover:  var(--white);
   --border-subtle:  var(--beige-dark);
+  --stack-card-bg:  var(--beige-dark);  /* slightly darker than card in light mode */
 
   /* Typography */
   --font-display: 'Caveat', cursive;
@@ -84,6 +85,7 @@
     --bg-card: var(--white);
     --bg-card-hover: var(--white);
     --border-subtle: var(--beige-dark);
+    --stack-card-bg: #2E2E2E;  /* slightly lighter than card in dark mode */
 
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -281,11 +283,20 @@ a:hover {
   transform: rotate(-4deg) scale(1.1);
 }
 
-/* Wojo illustration in panel — inline with blurb text */
-.wojo-illustration--panel {
-  float: right;
-  width: 80px;
-  margin: 0 0 var(--space-xs) var(--space-sm);
+/* Hero photo in about panel — full width, text below */
+.floating-title__hero {
+  width: 100%;
+  border-radius: var(--rough-radius);
+  overflow: hidden;
+  margin-bottom: var(--space-sm);
+}
+
+.floating-title__hero-img {
+  width: 100%;
+  max-height: 280px;
+  display: block;
+  object-fit: cover;
+  object-position: center 20%;
 }
 
 .floating-title__blurb {
@@ -607,6 +618,7 @@ a:hover {
   transform: scale(var(--pin-zoom-scale, 1));
   transition: transform var(--transition-fast);
   z-index: 1;
+  position: relative;
 }
 
 .cork-pin:hover {
@@ -738,28 +750,69 @@ a:hover {
   display: none;
 }
 
-/* Grouped pin — stacked card effect */
+/* Grouped pin — stacked card effect (full card+nail per extra entry) */
 .cork-pin--grouped .cork-pin__card {
   position: relative;
 }
 
-.cork-pin--grouped .cork-pin__card::before {
-  content: '';
+.cork-pin__stack-layer {
   position: absolute;
-  top: 4px;
-  left: 4px;
-  right: -4px;
-  bottom: -4px;
-  background: var(--beige);
-  border: 2px solid var(--beige-dark);
-  border-radius: var(--rough-radius-alt);
-  z-index: -1;
-  opacity: 0.6;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform: rotate(var(--stack-angle, 0deg));
+  transform-origin: top center;
+  z-index: calc(-1 * (var(--stack-count, 1) - var(--stack-i, 0)));
+  pointer-events: none;
+}
+
+.cork-pin__stack-nail {
+  width: 14px;
+  height: 14px;
+  background: var(--terracotta);
+  border-radius: 50%;
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2), inset 0 -1px 2px rgba(0,0,0,0.15);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.cork-pin__stack-nail::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 70%);
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 3px;
+}
+
+.cork-pin__stack-card {
+  background: var(--stack-card-bg, var(--beige-dark));
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--rough-radius);
+  min-width: 220px;
+  min-height: 80px;
+  height: 100%;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  transition: border-color var(--transition-med);
+}
+
+/* Stack cards get highlighted border when pin is active */
+.cork-pin--highlighted .cork-pin__stack-card {
+  border-color: var(--charcoal);
 }
 
 /* Cork pin pending — hidden before route reaches it */
 .cork-pin--pending .cork-pin__nail,
-.cork-pin--pending .cork-pin__card {
+.cork-pin--pending .cork-pin__card,
+.cork-pin--pending .cork-pin__stack-layer {
   opacity: 0;
   transform: scale(0);
 }
@@ -770,10 +823,18 @@ a:hover {
   animation: pinBounceInSmall 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+.cork-pin--reveal .cork-pin__stack-layer {
+  animation: pinBounceInSmallRotated 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
 /* Highlighted pin reveals at full size */
 .cork-pin--highlighted.cork-pin--reveal .cork-pin__nail,
 .cork-pin--highlighted.cork-pin--reveal .cork-pin__card {
   animation: pinBounceInFull 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.cork-pin--highlighted.cork-pin--reveal .cork-pin__stack-layer {
+  animation: pinBounceInFullRotated 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 @keyframes pinBounceInSmall {
@@ -786,9 +847,20 @@ a:hover {
   to   { opacity: 1; transform: scale(0.8); }
 }
 
+@keyframes pinBounceInSmallRotated {
+  from { opacity: 0; transform: scale(0) rotate(var(--stack-angle, 0deg)); }
+  to   { opacity: 1; transform: scale(0.667) rotate(var(--stack-angle, 0deg)); }
+}
+
+@keyframes pinBounceInFullRotated {
+  from { opacity: 0; transform: scale(0) rotate(var(--stack-angle, 0deg)); }
+  to   { opacity: 1; transform: scale(0.8) rotate(var(--stack-angle, 0deg)); }
+}
+
 /* Non-highlighted pins at 2/3 size (active is 1.5x inactive) */
 .cork-pin__card,
-.cork-pin__nail {
+.cork-pin__nail,
+.cork-pin__stack-layer {
   transform-origin: top center;
   transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1),
               opacity 0.3s ease;
@@ -797,6 +869,10 @@ a:hover {
 .cork-pin:not(.cork-pin--highlighted):not(.cork-pin--pending) .cork-pin__card,
 .cork-pin:not(.cork-pin--highlighted):not(.cork-pin--pending) .cork-pin__nail {
   transform: scale(0.667);
+}
+
+.cork-pin:not(.cork-pin--highlighted):not(.cork-pin--pending) .cork-pin__stack-layer {
+  transform: scale(0.667) rotate(var(--stack-angle, 0deg));
 }
 
 /* Cork pin highlighted state — full size */
@@ -812,6 +888,10 @@ a:hover {
 
 .cork-pin--highlighted .cork-pin__nail {
   transform: scale(0.8);
+}
+
+.cork-pin--highlighted .cork-pin__stack-layer {
+  transform: scale(0.8) rotate(var(--stack-angle, 0deg));
 }
 
 /* ==========================================================================
@@ -1451,6 +1531,16 @@ a:hover {
 
   .floating-title__desc {
     font-size: 0.95rem;
+  }
+
+  .floating-title__hero {
+    float: right;
+    width: 45%;
+    margin: 0 0 var(--space-xs) var(--space-sm);
+  }
+
+  .floating-title__hero-img {
+    max-height: none;
   }
 
   .entry-nav {
