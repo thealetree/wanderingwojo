@@ -111,5 +111,35 @@
     "mood_left": "Grateful",
     "mood_right": "Grateful",
     "mood_value": 0.15
+  },
+  {
+    "id": "2026-03-18-morning-time-now",
+    "date": "2026-03-18",
+    "title": "Morning Time Now",
+    "type": "field-notes",
+    "location_name": "Dunsmuir, CA",
+    "coordinates": [
+      41.208209,
+      -122.271953
+    ],
+    "body": "It's morning time now. lLstening to all of the sounds out here... chainsaws, a nearby river, birds, people... It's nice but still a lot to take in. So, yeah, I'm sitting on the big guy's lap, resting my chin on his arm, patiently waiting for the sun to come around and warm us up. Crazy how it can be so cold at night here, and so hot during the day!\n\nLove seeing all the nice anonymous messages come in from our journal page! What a treat to be so loved...",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_2366.jpg",
+      "media/photos/img_2368.jpg",
+      "media/photos/img_2371.jpg",
+      "media/photos/img_2359.jpg",
+      "media/photos/img_2360.jpg",
+      "media/photos/img_2372.jpg",
+      "media/photos/img_2373.jpg",
+      "media/photos/img_2353.jpg",
+      "media/photos/img_2355.jpg",
+      "media/photos/img_2358.jpg",
+      "media/photos/img_2361.jpg",
+      "media/photos/img_2364.jpg"
+    ],
+    "mood_left": "Ease",
+    "mood_right": "Chill",
+    "mood_value": 0.75
   }
 ]
