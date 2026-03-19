@@ -141,5 +141,30 @@
     "mood_left": "Ease",
     "mood_right": "Chill",
     "mood_value": 0.75
+  },
+  {
+    "id": "2026-03-19-finding-ease",
+    "date": "2026-03-19",
+    "title": "Finding Ease",
+    "type": "field-notes",
+    "location_name": "Dunsmuir, CA",
+    "coordinates": [
+      41.208209,
+      -122.271953
+    ],
+    "body": "Spent most of the day outside on the longer leash the big guy got me. Actually went for a little stroll with him and I gotta admit... once I got past the fear of the big sounds... I kind liked it. Lots of grass to chew, smells to sniff, bugs to chase. Not too shabby... No shab at all really.\n\nHonestly, not much to report today besides finding a bit of space, relaxation, ease. Sometimes it's not about a flashy day, or grandiose things. Seems like sometimes the most grandiose is when we get to breathe, or at least remember that it's possible to breathe. \n\nHow cool to be this fortunate... to just have trees show up... sunlight... hugs, kind and considerate messages of support and admiration, collaboration with good people. Screw the news... I choose this.",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_2391.jpg",
+      "media/photos/img_2388.jpg",
+      "media/photos/img_2390.jpg",
+      "media/photos/img_2396.jpg",
+      "media/photos/img_2406.jpg",
+      "media/photos/img_2408.jpg",
+      "media/photos/img_2407.jpg"
+    ],
+    "mood_left": "Calm",
+    "mood_right": "Lizard",
+    "mood_value": 0.1
   }
 ]
