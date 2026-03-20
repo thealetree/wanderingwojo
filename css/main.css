@@ -838,13 +838,13 @@ a:hover {
 }
 
 @keyframes pinBounceInSmall {
-  from { opacity: 0; transform: scale(0); }
-  to   { opacity: 1; transform: scale(0.667); }
+  from { opacity: 0; transform: scale(0) rotate(var(--pin-angle, 0deg)); }
+  to   { opacity: 1; transform: scale(0.667) rotate(var(--pin-angle, 0deg)); }
 }
 
 @keyframes pinBounceInFull {
-  from { opacity: 0; transform: scale(0); }
-  to   { opacity: 1; transform: scale(0.8); }
+  from { opacity: 0; transform: scale(0) rotate(var(--pin-angle, 0deg)); }
+  to   { opacity: 1; transform: scale(0.8) rotate(var(--pin-angle, 0deg)); }
 }
 
 @keyframes pinBounceInSmallRotated {
@@ -868,7 +868,7 @@ a:hover {
 
 .cork-pin:not(.cork-pin--highlighted):not(.cork-pin--pending) .cork-pin__card,
 .cork-pin:not(.cork-pin--highlighted):not(.cork-pin--pending) .cork-pin__nail {
-  transform: scale(0.667);
+  transform: scale(0.667) rotate(var(--pin-angle, 0deg));
 }
 
 .cork-pin:not(.cork-pin--highlighted):not(.cork-pin--pending) .cork-pin__stack-layer {
@@ -883,11 +883,11 @@ a:hover {
 .cork-pin--highlighted .cork-pin__card {
   border-color: var(--charcoal);
   box-shadow: var(--shadow-lg);
-  transform: scale(0.8);
+  transform: scale(0.8) rotate(var(--pin-angle, 0deg));
 }
 
 .cork-pin--highlighted .cork-pin__nail {
-  transform: scale(0.8);
+  transform: scale(0.8) rotate(var(--pin-angle, 0deg));
 }
 
 .cork-pin--highlighted .cork-pin__stack-layer {

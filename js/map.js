@@ -26,6 +26,9 @@ const MapModule = (function () {
   let expandedPinEntries = [];
   let expandedTabIndex = 0;
   let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  let entryNumberMap = {};  // entry id -> 1-based number
+  let totalEntries = 0;
+  let activePreviewEntryId = null; // which entry is currently shown in a pin preview
 
   // Route coordinates — built dynamically from entries
   let routeCoords = [];
@@ -357,6 +360,8 @@ const MapModule = (function () {
     var entryNumber = {};
     sorted.forEach(function (e, i) { entryNumber[e.id] = i + 1; });
     var total = sorted.length;
+    entryNumberMap = entryNumber;
+    totalEntries = total;
 
     // Group entries by location_name
     var groups = {};
@@ -370,17 +375,36 @@ const MapModule = (function () {
       groups[key].push(entry);
     });
 
+    // Seeded pseudo-random for deterministic pin angles
+    function seededRandom(seed) {
+      var x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+      return x - Math.floor(x);
+    }
+
     // Create one pin per location group
+    var groupIndex = 0;
     groupOrder.forEach(function (locationName) {
       var groupEntries = groups[locationName]; // already chronological
       var displayEntry = groupEntries[groupEntries.length - 1]; // most recent for display
       var positionEntry = groupEntries[0]; // earliest for map position
       var isGrouped = groupEntries.length > 1;
 
+      // Assign a per-entry angle for each entry in this group
+      var maxAngle = isGrouped ? 7 : 6;
+      var entryAngles = {};
+      groupEntries.forEach(function (e, i) {
+        var r = seededRandom(groupIndex * 100 + i);
+        entryAngles[e.id] = (r - 0.5) * 2 * maxAngle;
+      });
+
       var pinEl = document.createElement('div');
       pinEl.className = 'cork-pin cork-pin--pending';
       if (isGrouped) pinEl.classList.add('cork-pin--grouped');
       pinEl.setAttribute('data-entry-ids', groupEntries.map(function (e) { return e.id; }).join(','));
+
+      // Set initial angle for the display entry
+      var displayAngle = entryAngles[displayEntry.id] || 0;
+      pinEl.style.setProperty('--pin-angle', displayAngle.toFixed(1) + 'deg');
 
       var numberDisplay;
       if (isGrouped) {
@@ -453,8 +477,79 @@ const MapModule = (function () {
         if (onPinHover) onPinHover(groupEntries, pinEl, marker);
       });
 
-      corkPins.push({ marker: marker, element: pinEl, entries: groupEntries });
+      corkPins.push({ marker: marker, element: pinEl, entries: groupEntries, entryAngles: entryAngles });
+      groupIndex++;
     });
+  }
+
+  /**
+   * Update a pin's preview card to show a specific entry from its group.
+   * Called when the user navigates with prev/next into a grouped pin.
+   */
+  function updatePinPreview(entryId) {
+    activePreviewEntryId = entryId;
+
+    // Find the pin that contains this entry
+    var pin = null;
+    var pinData = null;
+    for (var i = 0; i < corkPins.length; i++) {
+      var ids = corkPins[i].entries.map(function (e) { return e.id; });
+      if (ids.indexOf(entryId) !== -1) {
+        pin = corkPins[i].element;
+        pinData = corkPins[i];
+        break;
+      }
+    }
+    if (!pin || !pinData) return;
+
+    // Find the specific entry
+    var entry = null;
+    for (var j = 0; j < pinData.entries.length; j++) {
+      if (pinData.entries[j].id === entryId) {
+        entry = pinData.entries[j];
+        break;
+      }
+    }
+    if (!entry) return;
+
+    // Update card content
+    var card = pin.querySelector('.cork-pin__card');
+    if (!card) return;
+
+    var titleEl = card.querySelector('.cork-pin__title');
+    var dateEl = card.querySelector('.cork-pin__date');
+    var numberEl = card.querySelector('.cork-pin__number');
+    var thumbEl = card.querySelector('.cork-pin__thumb');
+
+    if (titleEl) titleEl.textContent = entry.title;
+    if (dateEl) dateEl.textContent = formatDate(entry.date);
+    if (numberEl) numberEl.textContent = (entryNumberMap[entry.id] || '') + '/' + totalEntries;
+
+    // Update pin angle for this entry
+    var angle = (pinData.entryAngles && pinData.entryAngles[entryId]) || 0;
+    pin.style.setProperty('--pin-angle', angle.toFixed(1) + 'deg');
+
+    // Update thumbnail
+    var newThumb = (entry.photos && entry.photos.length > 0) ? entry.photos[0] : null;
+    if (newThumb) {
+      if (thumbEl) {
+        thumbEl.querySelector('img').src = newThumb;
+      } else {
+        var thumbDiv = document.createElement('div');
+        thumbDiv.className = 'cork-pin__thumb';
+        thumbDiv.innerHTML = '<img src="' + escapeHtml(newThumb) + '" alt="" loading="lazy">';
+        card.appendChild(thumbDiv);
+      }
+    } else if (thumbEl) {
+      thumbEl.remove();
+    }
+  }
+
+  /**
+   * Get the currently active preview entry ID (for expand targeting)
+   */
+  function getActivePreviewEntryId() {
+    return activePreviewEntryId;
   }
 
   /**
@@ -1080,6 +1175,8 @@ const MapModule = (function () {
     closeExpandedPin: closeExpandedPin,
     switchToEntryInExpandedPin: switchToEntryInExpandedPin,
     getExpandedPinEntryIds: getExpandedPinEntryIds,
+    updatePinPreview: updatePinPreview,
+    getActivePreviewEntryId: getActivePreviewEntryId,
     showCorkPins: showCorkPins,
     flyToEntry: flyToEntry,
     getCurrentLocation: getCurrentLocation,

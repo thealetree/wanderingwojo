@@ -249,13 +249,18 @@ const AppModule = (function () {
   }
 
   function handlePinClick(groupEntries, pinEl, marker) {
-    // Default to the most recent entry in the group for navIndex
+    // Use the actively previewed entry if it's in this group, otherwise most recent
+    var activeId = MapModule.getActivePreviewEntryId();
     var displayEntry = groupEntries[groupEntries.length - 1];
+    if (activeId) {
+      var activeEntry = groupEntries.find(function (e) { return e.id === activeId; });
+      if (activeEntry) displayEntry = activeEntry;
+    }
     var idx = sortedEntries.findIndex(function (e) { return e.id === displayEntry.id; });
     if (idx !== -1) navIndex = idx;
     updateNavInfo();
     highlightPin(displayEntry.id);
-    MapModule.expandPinEntry(groupEntries, pinEl);
+    MapModule.expandPinEntry(groupEntries, pinEl, displayEntry.id);
   }
 
   function handlePinHover(groupEntries, pinEl, marker) {
@@ -307,23 +312,12 @@ const AppModule = (function () {
       return;
     }
 
-    // Different pin — close, fly, highlight, then expand at correct tab
+    // Different pin — close, fly, highlight, update preview
     MapModule.closeExpandedPin();
     MapModule.flyToEntry(entry);
     highlightPin(entry.id);
     updateNavInfo();
-
-    // Auto-expand the target pin after fly animation, selecting the correct entry tab
-    setTimeout(function () {
-      var pin = document.querySelector('.cork-pin[data-entry-ids*="' + entry.id + '"]');
-      if (pin) {
-        var ids = (pin.getAttribute('data-entry-ids') || '').split(',');
-        var groupEntries = ids.map(function (id) {
-          return sortedEntries.find(function (se) { return se.id === id; });
-        }).filter(Boolean);
-        MapModule.expandPinEntry(groupEntries, pin, entry.id);
-      }
-    }, 1400);
+    MapModule.updatePinPreview(entry.id);
   }
 
   function highlightPin(entryId) {
