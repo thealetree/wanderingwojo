@@ -169,5 +169,26 @@
     "mood_left": "Calm",
     "mood_right": "Lizard",
     "mood_value": 0.1
+  },
+  {
+    "id": "2026-03-19-planning",
+    "date": "2026-03-19",
+    "title": "Planning...",
+    "type": "field-notes",
+    "location_name": "Dunsmuir, CA",
+    "coordinates": [
+      41.208209,
+      -122.271953
+    ],
+    "body": "What a lazy day... but that's what cats crave. Still... Been thinking about the next destination. \n\nWhile doing a little research, its starting to feel a bit like Truman when he planned to go to Fiji... gas prices are suddenly exploding, a multi-week heat wave exactly where we're going... potential crash pads suddenly not responding... kinda like \"fire at the plant!\", a broken down bus... a freak localized storm directly over head...\n\nHmmmm... OK so it'll be unbearably hot and expensive in the Southwest... So we'll follow the temps and roam around here. Find some hot springs, visit the coast, pop into the mountains... hell we could go to Nebraska. Right?\n\nAnyway, feels nice to let go and let it all happen. No need to get angry when the red dot you caught isn't really under your paw, but is actually back on the wall... Let's just enjoy the chase.",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_2424.jpg",
+      "media/photos/img_2419.jpg",
+      "media/photos/img_2417.jpg"
+    ],
+    "mood_left": "Oink",
+    "mood_right": "Yeah",
+    "mood_value": 0.5
   }
 ]
