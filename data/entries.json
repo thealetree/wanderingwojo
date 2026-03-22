@@ -190,5 +190,29 @@
     "mood_left": "Oink",
     "mood_right": "Yeah",
     "mood_value": 0.5
+  },
+  {
+    "id": "2026-03-22-family-in-nevada",
+    "date": "2026-03-22",
+    "title": "Family in Nevada",
+    "type": "field-notes",
+    "location_name": "Carson City, NV",
+    "coordinates": [
+      39.1663259,
+      -119.7670374
+    ],
+    "body": "Well... what an amazing Saturday we had... On a whim we blasted out of Shasta and down into the super warm valley below. Stunning green rolling hills, lush with plants and smells for this feline nasal delight!! \n\nAfter rolling through that humid warmth we began back up the mountains through trees and into desert and snow to see some of the big guy's family tribe. \n\nThey didn't see it, but I saw him get glassy eyes as he felt grateful for the incredible hospitality as they fed him and shared stories. We even got to sleep in a bed and meet two weird looking cats that were so excited and super sweet. \n\nAnyway, just a quick stop on our way south. More to come this evening. What an amazing whirlwind... amazing food for the soul. Can't wait to come back and hang a bit more :) \n\n\"Shower the people you love with love.\"",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_2471.jpg",
+      "media/photos/img_2458.jpg",
+      "media/photos/img_2452.jpg",
+      "media/photos/img_2448.jpg",
+      "media/photos/img_2457.jpg",
+      "media/photos/img_2442.jpg"
+    ],
+    "mood_left": "Grateful",
+    "mood_right": "Loved",
+    "mood_value": 0.5
   }
 ]
