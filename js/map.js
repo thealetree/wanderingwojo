@@ -28,6 +28,17 @@ const MapModule = (function () {
   let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   let entryNumberMap = {};  // entry id -> 1-based number
   let totalEntries = 0;
+
+  /**
+   * Get the preview/thumbnail photo for an entry.
+   * Uses preview_photo index if set, otherwise falls back to photos[0].
+   */
+  function getPreviewPhoto(entry) {
+    if (!entry.photos || entry.photos.length === 0) return null;
+    var idx = (typeof entry.preview_photo === 'number' && entry.preview_photo < entry.photos.length)
+      ? entry.preview_photo : 0;
+    return entry.photos[idx];
+  }
   let activePreviewEntryId = null; // which entry is currently shown in a pin preview
 
   // Route coordinates — built dynamically from entries
@@ -419,7 +430,7 @@ const MapModule = (function () {
       var thumbPhoto = null;
       for (var gi = groupEntries.length - 1; gi >= 0; gi--) {
         if (groupEntries[gi].photos && groupEntries[gi].photos.length > 0) {
-          thumbPhoto = groupEntries[gi].photos[0];
+          thumbPhoto = getPreviewPhoto(groupEntries[gi]);
           break;
         }
       }
@@ -532,7 +543,7 @@ const MapModule = (function () {
     pin.style.setProperty('--pin-angle', angle.toFixed(1) + 'deg');
 
     // Update thumbnail
-    var newThumb = (entry.photos && entry.photos.length > 0) ? entry.photos[0] : null;
+    var newThumb = (entry.photos && entry.photos.length > 0) ? getPreviewPhoto(entry) : null;
     if (newThumb) {
       if (thumbEl) {
         thumbEl.querySelector('img').src = newThumb;

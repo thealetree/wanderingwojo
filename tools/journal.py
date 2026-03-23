@@ -659,7 +659,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
             <button type="button" id="btn-add-photos" class="form-input" style="cursor:pointer; text-align:center; color:var(--mid-gray);">+ Add photos</button>
             <div id="photo-list" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;"></div>
             <input type="hidden" id="entry-photos">
-            <div class="form-hint">Auto-resized to 1200px wide</div>
+            <div class="form-hint">Auto-resized to 1200px wide · Click a photo to set it as the map preview</div>
           </div>
         </div>
 
@@ -1008,6 +1008,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
       fields.body.value = entry.body || '';
       fields.video.value = entry.video_url || '';
       photoPaths = (entry.photos || []).slice();
+      previewPhotoIndex = (typeof entry.preview_photo === 'number') ? entry.preview_photo : null;
       renderPhotoList();
       fields.moodLeft.value = entry.mood_left || '';
       fields.moodRight.value = entry.mood_right || '';
@@ -1113,6 +1114,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
       lastGeocodedLocation = '';
       setGeocodeStatus('', '');
       photoPaths = [];
+      previewPhotoIndex = null;
       renderPhotoList();
       updateMoodPreview();
       updatePreview();
@@ -1129,6 +1131,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
     // ==================================================================
 
     var photoPaths = [];  // array of relative paths like "media/photos/woj2.jpg"
+    var previewPhotoIndex = null;  // which photo is the pin preview (null = first)
     var photoUploadInput = document.getElementById('photo-upload');
     var btnAddPhotos = document.getElementById('btn-add-photos');
     var photoListEl = document.getElementById('photo-list');
@@ -1192,14 +1195,35 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
     function renderPhotoList() {
       photoListEl.innerHTML = '';
+      // Fix preview index if out of bounds
+      if (previewPhotoIndex !== null && previewPhotoIndex >= photoPaths.length) {
+        previewPhotoIndex = null;
+      }
+      var effectivePreview = (previewPhotoIndex !== null) ? previewPhotoIndex : 0;
       photoPaths.forEach(function(path, index) {
+        var isPreview = (photoPaths.length > 0 && index === effectivePreview);
         var item = document.createElement('div');
-        item.style.cssText = 'position:relative; display:inline-block;';
+        item.style.cssText = 'position:relative; display:inline-block; cursor:pointer;';
+        var borderColor = isPreview ? '#C1440E' : 'var(--beige-dark)';
+        var borderWidth = isPreview ? '3px' : '2px';
         item.innerHTML =
-          '<img src="/' + escapeHtml(path) + '?' + Date.now() + '" style="width:80px; height:60px; object-fit:cover; border-radius:6px; border:2px solid var(--beige-dark);">' +
+          '<img src="/' + escapeHtml(path) + '?' + Date.now() + '" style="width:80px; height:60px; object-fit:cover; border-radius:6px; border:' + borderWidth + ' solid ' + borderColor + ';" title="Click to set as preview photo">' +
+          (isPreview ? '<span style="position:absolute; bottom:2px; left:4px; font-size:0.6rem; background:#C1440E; color:white; padding:1px 4px; border-radius:3px; font-family:var(--font-mono);">PREVIEW</span>' : '') +
           '<button type="button" style="position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; border:none; background:var(--charcoal); color:var(--white); font-size:0.7rem; cursor:pointer; display:flex; align-items:center; justify-content:center;" data-index="' + index + '">&times;</button>';
-        item.querySelector('button').addEventListener('click', function() {
+        // Click image to set as preview
+        item.querySelector('img').addEventListener('click', function() {
+          previewPhotoIndex = index;
+          renderPhotoList();
+          updatePreview();
+        });
+        item.querySelector('button').addEventListener('click', function(e) {
+          e.stopPropagation();
           photoPaths.splice(index, 1);
+          // Adjust preview index
+          if (previewPhotoIndex !== null) {
+            if (index === previewPhotoIndex) previewPhotoIndex = null;
+            else if (index < previewPhotoIndex) previewPhotoIndex--;
+          }
           renderPhotoList();
           updatePreview();
         });
@@ -1239,6 +1263,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
         body: fields.body.value.trim(),
         video_url: fields.video.value.trim() || null,
         photos: photoPaths.slice(),
+        preview_photo: previewPhotoIndex,
         mood_left: fields.moodLeft.value.trim() || null,
         mood_right: fields.moodRight.value.trim() || null,
         mood_value: parseFloat(fields.moodValue.value)
