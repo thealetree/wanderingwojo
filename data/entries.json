@@ -214,5 +214,31 @@
     "mood_left": "Grateful",
     "mood_right": "Loved",
     "mood_value": 0.5
+  },
+  {
+    "id": "2026-03-23-straddled",
+    "date": "2026-03-23",
+    "title": "Straddled",
+    "type": "field-notes",
+    "location_name": "Lone Pine, CA",
+    "coordinates": [
+      36.583176,
+      -118.0783265
+    ],
+    "body": "We drove out of Reno and up through the Sierra Mountains, behind Yosemite, to keep a bit more cool today. A stunning drive that I savagely meowed through in its entirety. \n\nNow we're on the edge of the heatwave just south of us, straddled by the Sequoia National Forest to the west and Death Valley to the east. Its stunningly beautiful here, and honestly, the whole campsite has ground that's like natural kitty litter... maybe I'll experiment with that a bit in the next few days.\n\nThe plan is to hang tight and let the big guy work before mobbing out through the Mojave Desert to Flagstaff where it's higher and cooler, and then Grand Canyon Thursday evening. We'll do some off-grid camping and canyon exploring for a while after that.\n\nOr at least that's what we're thinking. That can always change :)\n\nOn another note... What is meaning? Why the compulsion for closeness, comfort, familiarity? It's fascinating to observe oneself once all routine and regularity is removed. Knee-jerk reactions, creature comforts, annoyances, pleasant surprises. They just show up... And then decisions are made and then more things show up. What a stream. But what do I know? Why so contemplative? I'm just a friggin cat... I do notice that I'm getting more comfortable in the truck though, sitting on the console touching my nose to the big guy's arm. And with those weird big loud short faced \"cats\" at some people's houses... I guess they're not so bad. And all these new places and smells... I even got to stick my teeny nose tip out the window today to smell the passing mountain air.... Not too shabby... no stab at all. \n\nThe balance of the familiar with the fresh is a fascinating back and forth... a dancing knife's edge I guess.. or cat's claw? Tooth? Poop?",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_2511.jpg",
+      "media/photos/img_2512.jpg",
+      "media/photos/img_2515.jpg",
+      "media/photos/img_2509.jpg",
+      "media/photos/img_2516.jpg",
+      "media/photos/img_2501.jpg",
+      "media/photos/img_2499.jpg",
+      "media/photos/img_2498.jpg"
+    ],
+    "mood_left": "Dihongo",
+    "mood_right": "Prate",
+    "mood_value": 0.9
   }
 ]
