@@ -719,7 +719,7 @@ a:hover {
 .cork-pin__number {
   font-family: var(--font-mono);
   font-size: 0.9rem;
-  color: var(--warm-gray);
+  color: var(--near-black);
   letter-spacing: 0.04em;
 }
 
@@ -748,6 +748,15 @@ a:hover {
 /* Hide thumbnails when map is zoomed out */
 .pin-thumbs-hidden .cork-pin__thumb {
   display: none;
+}
+
+/* Older pins: hide thumb by default, show on hover or when active/highlighted */
+.cork-pin--no-thumb .cork-pin__thumb {
+  display: none;
+}
+.cork-pin--no-thumb:hover .cork-pin__thumb,
+.cork-pin--no-thumb.cork-pin--highlighted .cork-pin__thumb {
+  display: block;
 }
 
 /* Grouped pin — stacked card effect (full card+nail per extra entry) */

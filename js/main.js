@@ -215,6 +215,10 @@ const AppModule = (function () {
         MapModule.addCorkPins(entries, handlePinClick, handlePinHover);
         MapModule.addRouteFromEntries(entries);
         updateNavInfo();
+        // Show thumbs for current entry and neighbors
+        if (sortedEntries.length > 0) {
+          MapModule.updateThumbVisibility(sortedEntries[navIndex].id);
+        }
 
         // Fit map to show all entry pins, centered with room for UI overlays
         if (entries.length > 0) {
@@ -260,6 +264,7 @@ const AppModule = (function () {
     if (idx !== -1) navIndex = idx;
     updateNavInfo();
     highlightPin(displayEntry.id);
+    MapModule.updateThumbVisibility(displayEntry.id);
     MapModule.expandPinEntry(groupEntries, pinEl, displayEntry.id);
   }
 
@@ -271,6 +276,7 @@ const AppModule = (function () {
     if (idx !== -1) navIndex = idx;
     updateNavInfo();
     highlightPin(displayEntry.id);
+    MapModule.updateThumbVisibility(displayEntry.id);
   }
 
   // =====================================================================
@@ -309,6 +315,7 @@ const AppModule = (function () {
       MapModule.switchToEntryInExpandedPin(entry.id);
       highlightPin(entry.id);
       updateNavInfo();
+      MapModule.updateThumbVisibility(entry.id);
       return;
     }
 
@@ -318,6 +325,7 @@ const AppModule = (function () {
     highlightPin(entry.id);
     updateNavInfo();
     MapModule.updatePinPreview(entry.id);
+    MapModule.updateThumbVisibility(entry.id);
   }
 
   function highlightPin(entryId) {

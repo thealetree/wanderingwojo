@@ -74,9 +74,9 @@ const MapModule = (function () {
       var zoom = map.getZoom();
       var refZoom = 7;
       // Dampened scale: each zoom level adjusts strongly
-      var scale = Math.pow(2, (zoom - refZoom) * 0.88);
-      // Clamp: 0.4 at very zoomed out, 1.3 at very zoomed in
-      scale = Math.max(0.4, Math.min(1.3, scale));
+      var scale = Math.pow(2, (zoom - refZoom) * 1.0);
+      // Clamp: 0.25 at very zoomed out, 1.3 at very zoomed in
+      scale = Math.max(0.25, Math.min(1.3, scale)) * 0.75;
       var mapEl = document.getElementById('map');
       mapEl.style.setProperty('--pin-zoom-scale', scale);
       // Hide photo thumbnails when zoomed out too far
@@ -390,7 +390,7 @@ const MapModule = (function () {
       var isGrouped = groupEntries.length > 1;
 
       // Assign a per-entry angle for each entry in this group
-      var maxAngle = isGrouped ? 7 : 6;
+      var maxAngle = isGrouped ? 3.5 : 6;
       var entryAngles = {};
       groupEntries.forEach(function (e, i) {
         var r = seededRandom(groupIndex * 100 + i);
@@ -427,6 +427,8 @@ const MapModule = (function () {
       if (thumbPhoto) {
         thumbHtml = '<div class="cork-pin__thumb"><img src="' + escapeHtml(thumbPhoto) + '" alt="" loading="lazy"></div>';
       }
+      // Thumb visibility is managed dynamically by updateThumbVisibility
+      pinEl.classList.add('cork-pin--no-thumb');
 
       // Build stack cards for grouped pins (N-1 fake cards behind the main, max 4)
       var stackHtml = '';
@@ -434,7 +436,7 @@ const MapModule = (function () {
         var stackCount = Math.min(groupEntries.length - 1, 4);
         pinEl.style.setProperty('--stack-count', stackCount);
         // Seeded angles: alternate direction, playful messy spread
-        var angles = [-8, 10, -13, 15];
+        var angles = [-4, 5, -6.5, 7.5];
         for (var si = 0; si < stackCount; si++) {
           var angle = angles[si] || (si % 2 === 0 ? -(si * 2 + 3) : (si * 2 + 3));
           stackHtml +=
@@ -543,6 +545,33 @@ const MapModule = (function () {
     } else if (thumbEl) {
       thumbEl.remove();
     }
+  }
+
+  /**
+   * Update which pins show thumbnails based on current entry.
+   * Only the selected entry's pin and its immediate neighbors show thumbs.
+   */
+  function updateThumbVisibility(currentEntryId) {
+    if (corkPins.length === 0) return;
+
+    // Find which pin index contains the current entry
+    var curPinIdx = -1;
+    for (var i = 0; i < corkPins.length; i++) {
+      for (var j = 0; j < corkPins[i].entries.length; j++) {
+        if (corkPins[i].entries[j].id === currentEntryId) { curPinIdx = i; break; }
+      }
+      if (curPinIdx !== -1) break;
+    }
+    if (curPinIdx === -1) return;
+
+    // Show thumbs on current pin and its neighboring pins
+    corkPins.forEach(function (pinData, idx) {
+      if (idx === curPinIdx || idx === curPinIdx - 1 || idx === curPinIdx + 1) {
+        pinData.element.classList.remove('cork-pin--no-thumb');
+      } else {
+        pinData.element.classList.add('cork-pin--no-thumb');
+      }
+    });
   }
 
   /**
@@ -1176,6 +1205,7 @@ const MapModule = (function () {
     switchToEntryInExpandedPin: switchToEntryInExpandedPin,
     getExpandedPinEntryIds: getExpandedPinEntryIds,
     updatePinPreview: updatePinPreview,
+    updateThumbVisibility: updateThumbVisibility,
     getActivePreviewEntryId: getActivePreviewEntryId,
     showCorkPins: showCorkPins,
     flyToEntry: flyToEntry,
