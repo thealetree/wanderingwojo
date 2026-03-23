@@ -1588,6 +1588,7 @@ a:hover {
     width: calc(100vw - 2rem);
     max-height: calc(100dvh - 2 * var(--space-lg));
     overflow-y: auto;
+    padding-bottom: 3rem;
   }
 
   .floating-title__name {
