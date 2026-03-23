@@ -27,6 +27,7 @@ const AppModule = (function () {
    */
   async function init() {
     cacheDom();
+    checkSentRedirect();
     await loadData();
     initMap();
     initFloatingTitle();
@@ -150,56 +151,61 @@ const AppModule = (function () {
   }
 
   function initContactForm(form) {
-    var msgInput = document.getElementById('contact-msg');
-    var btn = form.querySelector('.contact-form__btn');
+    // Set form action and redirect URL
+    form.action = 'https://formsubmit.co/' + CONTACT_EMAIL;
+    var nextInput = document.getElementById('contact-next');
+    if (nextInput) {
+      nextInput.value = window.location.origin + window.location.pathname + '?sent=true';
+    }
 
+    // Show selected file name
+    var fileInput = document.getElementById('contact-photo');
+    var fileNameEl = document.getElementById('contact-file-name');
+    if (fileInput && fileNameEl) {
+      fileInput.addEventListener('change', function () {
+        if (fileInput.files.length > 0) {
+          fileNameEl.textContent = fileInput.files[0].name;
+        } else {
+          fileNameEl.textContent = '';
+        }
+      });
+    }
+
+    // Validate before submit (message required)
     form.addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      var message = msgInput.value.trim();
-      if (!message) return;
-
+      var msgInput = document.getElementById('contact-msg');
+      if (!msgInput.value.trim()) {
+        e.preventDefault();
+        return;
+      }
+      // Let the form submit naturally (traditional POST)
+      var btn = form.querySelector('.contact-form__btn');
       btn.disabled = true;
       btn.textContent = 'Sending...';
-
-      // Remove any previous status
-      var oldStatus = form.querySelector('.contact-form__status');
-      if (oldStatus) oldStatus.remove();
-
-      fetch('https://formsubmit.co/ajax/' + CONTACT_EMAIL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          message: message,
-          _subject: 'New message from Wandering Wojo',
-          _captcha: 'false',
-          _template: 'table'
-        })
-      })
-      .then(function (res) { return res.json(); })
-      .then(function (data) {
-        var status = document.createElement('span');
-        status.className = 'contact-form__status contact-form__status--ok';
-        status.textContent = 'Sent! Thanks for reaching out.';
-        form.appendChild(status);
-        msgInput.value = '';
-        btn.textContent = 'Send';
-        btn.disabled = false;
-
-        // Clear success message after a few seconds
-        setTimeout(function () { status.remove(); }, 4000);
-      })
-      .catch(function () {
-        var status = document.createElement('span');
-        status.className = 'contact-form__status contact-form__status--err';
-        status.textContent = 'Something went wrong. Try again?';
-        form.appendChild(status);
-        btn.textContent = 'Send';
-        btn.disabled = false;
-
-        setTimeout(function () { status.remove(); }, 4000);
-      });
     });
+  }
+
+  // Check for ?sent=true redirect and show success toast
+  function checkSentRedirect() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('sent') === 'true') {
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+      // Show toast
+      var toast = document.createElement('div');
+      toast.className = 'sent-toast';
+      toast.textContent = 'Message sent! Thanks for reaching out.';
+      document.body.appendChild(toast);
+      // Animate in
+      requestAnimationFrame(function () {
+        toast.classList.add('sent-toast--visible');
+      });
+      // Remove after 5 seconds
+      setTimeout(function () {
+        toast.classList.remove('sent-toast--visible');
+        setTimeout(function () { toast.remove(); }, 400);
+      }, 5000);
+    }
   }
 
   // =====================================================================

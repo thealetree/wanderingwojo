@@ -389,6 +389,62 @@ a:hover {
 .contact-form__status--ok { color: #7C9A7E; }
 .contact-form__status--err { color: #C1440E; }
 
+/* File upload button */
+.contact-form__file-label {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--charcoal);
+  background: var(--off-white);
+  border: 1.5px dashed var(--warm-gray);
+  border-radius: var(--rough-radius-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.contact-form__file-label:hover {
+  border-color: var(--charcoal);
+  background: var(--cream);
+}
+.contact-form__file-input {
+  display: none;
+}
+.contact-form__file-icon {
+  font-size: 1rem;
+}
+.contact-form__file-name {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--mid-gray);
+  margin-top: 0.25rem;
+  min-height: 0;
+}
+
+/* Sent toast (appears after redirect from Formsubmit) */
+.sent-toast {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%);
+  background: var(--near-black);
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--rough-radius-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: 10000;
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  pointer-events: none;
+}
+.sent-toast--visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
 /* RSS subscribe */
 .rss-subscribe {
   margin-top: var(--space-lg);
