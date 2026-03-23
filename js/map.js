@@ -974,6 +974,22 @@ const MapModule = (function () {
    * @param {HTMLElement} pinEl - the pin DOM element
    * @param {string} [targetEntryId] - optional entry ID to pre-select
    */
+  /**
+   * Constrain expanded entry max-height so it doesn't extend behind the bottom nav
+   */
+  function constrainExpandedHeight(expanded) {
+    requestAnimationFrame(function () {
+      var rect = expanded.getBoundingClientRect();
+      var navEl = document.querySelector('.entry-nav');
+      var navTop = navEl ? navEl.getBoundingClientRect().top : (window.innerHeight - 120);
+      var bottomClearance = 12; // gap above nav
+      var available = navTop - rect.top - bottomClearance;
+      if (available > 100) {
+        expanded.style.maxHeight = Math.floor(available) + 'px';
+      }
+    });
+  }
+
   function expandPinEntry(entries, pinEl, targetEntryId) {
     closeExpandedPin();
 
@@ -1028,6 +1044,9 @@ const MapModule = (function () {
     // Insert into pin
     pinEl.appendChild(expanded);
     expandedPinEl = pinEl;
+
+    // Constrain max-height so expanded entry doesn't overflow behind bottom nav
+    constrainExpandedHeight(expanded);
 
     // Hide other pins so they don't show through expanded entry
     corkPins.forEach(function (p) {
