@@ -231,21 +231,9 @@ const AppModule = (function () {
           var isMobile = window.innerWidth < 768;
           var latestEntry = sortedEntries[sortedEntries.length - 1];
 
-          if (isMobile) {
-            // On mobile, center on the most recent entry at a comfortable zoom
-            var lngLat = [latestEntry.coordinates[1], latestEntry.coordinates[0]];
-            map.flyTo({ center: lngLat, zoom: 5, duration: 500 });
-          } else {
-            // On desktop, fit all entries in view
-            var bounds = new mapboxgl.LngLatBounds();
-            entries.forEach(function (e) {
-              bounds.extend([e.coordinates[1], e.coordinates[0]]);
-            });
-            map.fitBounds(bounds, {
-              padding: { top: 100, right: 80, bottom: 280, left: 80 },
-              maxZoom: 10
-            });
-          }
+          // Center on the most recent entry at a comfortable zoom
+          var lngLat = [latestEntry.coordinates[1], latestEntry.coordinates[0]];
+          map.flyTo({ center: lngLat, zoom: 5, duration: 500 });
 
           // After initial positioning finishes, start the route draw-in animation
           map.once('moveend', function () {
