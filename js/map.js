@@ -978,15 +978,18 @@ const MapModule = (function () {
    * Constrain expanded entry max-height so it doesn't extend behind the bottom nav
    */
   function constrainExpandedHeight(expanded) {
-    requestAnimationFrame(function () {
-      var rect = expanded.getBoundingClientRect();
-      var navEl = document.querySelector('.entry-nav');
-      var navTop = navEl ? navEl.getBoundingClientRect().top : (window.innerHeight - 120);
-      var bottomClearance = 12; // gap above nav
-      var available = navTop - rect.top - bottomClearance;
-      if (available > 100) {
-        expanded.style.maxHeight = Math.floor(available) + 'px';
-      }
+    // Wait for pan animation to finish before measuring position
+    map.once('moveend', function () {
+      requestAnimationFrame(function () {
+        var rect = expanded.getBoundingClientRect();
+        var navEl = document.querySelector('.entry-nav');
+        var navTop = navEl ? navEl.getBoundingClientRect().top : (window.innerHeight - 120);
+        var bottomClearance = 12; // gap above nav
+        var available = navTop - rect.top - bottomClearance;
+        if (available > 100) {
+          expanded.style.maxHeight = Math.floor(available) + 'px';
+        }
+      });
     });
   }
 
