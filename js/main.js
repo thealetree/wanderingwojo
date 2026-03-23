@@ -226,22 +226,28 @@ const AppModule = (function () {
           MapModule.updateThumbVisibility(sortedEntries[navIndex].id);
         }
 
-        // Fit map to show all entry pins, centered with room for UI overlays
+        // Position map to show entries
         if (entries.length > 0) {
-          var bounds = new mapboxgl.LngLatBounds();
-          entries.forEach(function (e) {
-            bounds.extend([e.coordinates[1], e.coordinates[0]]);
-          });
-
           var isMobile = window.innerWidth < 768;
-          map.fitBounds(bounds, {
-            padding: isMobile
-              ? { top: 80, right: 20, bottom: 200, left: 20 }
-              : { top: 100, right: 80, bottom: 280, left: 80 },
-            maxZoom: 10
-          });
+          var latestEntry = sortedEntries[sortedEntries.length - 1];
 
-          // After fitBounds finishes, start the route draw-in animation
+          if (isMobile) {
+            // On mobile, center on the most recent entry at a comfortable zoom
+            var lngLat = [latestEntry.coordinates[1], latestEntry.coordinates[0]];
+            map.flyTo({ center: lngLat, zoom: 5, duration: 500 });
+          } else {
+            // On desktop, fit all entries in view
+            var bounds = new mapboxgl.LngLatBounds();
+            entries.forEach(function (e) {
+              bounds.extend([e.coordinates[1], e.coordinates[0]]);
+            });
+            map.fitBounds(bounds, {
+              padding: { top: 100, right: 80, bottom: 280, left: 80 },
+              maxZoom: 10
+            });
+          }
+
+          // After initial positioning finishes, start the route draw-in animation
           map.once('moveend', function () {
             // Highlight the most recent entry's pin before animation starts
             if (sortedEntries.length > 0) {
