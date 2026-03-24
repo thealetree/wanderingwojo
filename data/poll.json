@@ -1,11 +1,11 @@
 {
-  "id": "poll-001",
-  "question": "What should Wojo snack on next?",
+  "id": "poll-20260323",
+  "question": "What's the best?",
   "options": [
-    "Salmon Treats",
-    "Chicken Crunchies",
-    "Tuna Flakes",
-    "Catnip Cookies"
+    "Fish Treats",
+    "Red Dot",
+    "Hoodie Tassles",
+    "Hugs?"
   ],
   "active": true
 }
