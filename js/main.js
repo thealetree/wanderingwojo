@@ -91,7 +91,6 @@ const AppModule = (function () {
 
     var nameEl = els.floatingTitle.querySelector('.floating-title__name');
     var closeBtn = document.getElementById('floating-title-close');
-    var form = document.getElementById('contact-form');
 
     function openAboutPanel() {
       els.floatingTitle.classList.add('floating-title--open');
@@ -141,14 +140,6 @@ const AppModule = (function () {
       closeAboutPanel();
     });
 
-    // --- Contact form ---
-    if (form) {
-      if (!CONTACT_EMAIL) {
-        form.style.display = 'none';
-        return;
-      }
-      initContactForm(form);
-    }
   }
 
   function initContactForm(form) {
@@ -254,6 +245,20 @@ const AppModule = (function () {
         panel.querySelector('[data-content="' + target + '"]').classList.add('two-cents__content--active');
       });
     });
+
+    // Init contact form (now lives in the Message tab)
+    var form = document.getElementById('contact-form');
+    if (form) {
+      if (!CONTACT_EMAIL) {
+        // Hide the Message tab entirely if no email configured
+        var msgTab = panel.querySelector('[data-tab="message"]');
+        var msgContent = panel.querySelector('[data-content="message"]');
+        if (msgTab) msgTab.style.display = 'none';
+        if (msgContent) msgContent.style.display = 'none';
+      } else {
+        initContactForm(form);
+      }
+    }
 
     // Load poll
     loadPoll();

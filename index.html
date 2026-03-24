@@ -48,21 +48,7 @@
       </div>
       <p class="floating-title__blurb">Wojo and his co-pilot Van traded four walls for the road. This map is their
       journal: every stop, every story, every nap in the sun.</p>
-      <form class="contact-form" id="contact-form" method="POST" enctype="multipart/form-data">
-        <label class="contact-form__label" for="contact-msg">Send us a message!</label>
-        <textarea class="contact-form__input" id="contact-msg" name="message" rows="3" placeholder="Say something nice (or weird)..."></textarea>
-        <label class="contact-form__file-label" for="contact-photo">
-          <span class="contact-form__file-icon">📷</span> Attach a photo
-          <input type="file" id="contact-photo" name="attachment" accept="image/*" class="contact-form__file-input">
-        </label>
-        <span class="contact-form__file-name" id="contact-file-name"></span>
-        <span class="contact-form__hint">This is 100% anonymous, unless you include your contact info. Images up to 10 MB.</span>
-        <input type="hidden" name="_subject" value="New message from Wandering Wojo">
-        <input type="hidden" name="_captcha" value="false">
-        <input type="hidden" name="_template" value="table">
-        <input type="hidden" name="_next" id="contact-next" value="">
-        <button class="contact-form__btn" type="submit">Send</button>
-      </form>
+      <p class="floating-title__blurb" style="color:var(--mid-gray);font-size:0.95rem;">Click <strong>Your 2¢</strong> above to vote in our poll, send us an anonymous message, or help fuel the adventure with a donation.</p>
       <div class="rss-subscribe">
         <a class="rss-subscribe__link" href="feed.xml" target="_blank" rel="noopener">
           <span class="rss-subscribe__icon">&#9641;</span> Subscribe via RSS
@@ -98,6 +84,7 @@
       <!-- Tab switcher -->
       <div class="two-cents__tabs">
         <button class="two-cents__tab two-cents__tab--active" data-tab="poll">Poll</button>
+        <button class="two-cents__tab" data-tab="message">Message</button>
         <button class="two-cents__tab" data-tab="donate">Donate</button>
       </div>
 
@@ -106,6 +93,25 @@
         <p class="two-cents__question" id="poll-question"></p>
         <div class="two-cents__options" id="poll-options"></div>
         <p class="two-cents__total" id="poll-total"></p>
+      </div>
+
+      <!-- Message tab -->
+      <div class="two-cents__content" data-content="message">
+        <form class="contact-form" id="contact-form" method="POST" enctype="multipart/form-data">
+          <label class="contact-form__label" for="contact-msg">Send us a message!</label>
+          <textarea class="contact-form__input" id="contact-msg" name="message" rows="3" placeholder="Say something nice (or weird)..."></textarea>
+          <label class="contact-form__file-label" for="contact-photo">
+            <span class="contact-form__file-icon">📷</span> Attach a photo
+            <input type="file" id="contact-photo" name="attachment" accept="image/*" class="contact-form__file-input">
+          </label>
+          <span class="contact-form__file-name" id="contact-file-name"></span>
+          <span class="contact-form__hint">100% anonymous, unless you include your contact info. Images up to 10 MB.</span>
+          <input type="hidden" name="_subject" value="New message from Wandering Wojo">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_next" id="contact-next" value="">
+          <button class="contact-form__btn" type="submit">Send</button>
+        </form>
       </div>
 
       <!-- Donate tab -->
