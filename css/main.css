@@ -403,7 +403,7 @@ a:hover {
   font-size: 0.8rem;
   color: var(--mid-gray);
   text-align: right;
-  margin-top: var(--space-xs);
+  margin-top: var(--space-md);
 }
 
 /* Donate tab */
