@@ -88,6 +88,37 @@
   </a>
 
   <!-- ================================================================
+       YOUR 2¢ PANEL (Poll + Donate)
+       ================================================================ -->
+  <div class="two-cents" id="two-cents">
+    <button class="two-cents__toggle" id="two-cents-toggle">Your 2¢</button>
+    <div class="two-cents__panel" id="two-cents-panel">
+      <button class="two-cents__close" id="two-cents-close" aria-label="Close panel">&times;</button>
+
+      <!-- Tab switcher -->
+      <div class="two-cents__tabs">
+        <button class="two-cents__tab two-cents__tab--active" data-tab="poll">Poll</button>
+        <button class="two-cents__tab" data-tab="donate">Donate</button>
+      </div>
+
+      <!-- Poll tab -->
+      <div class="two-cents__content two-cents__content--active" data-content="poll">
+        <p class="two-cents__question" id="poll-question"></p>
+        <div class="two-cents__options" id="poll-options"></div>
+        <p class="two-cents__total" id="poll-total"></p>
+      </div>
+
+      <!-- Donate tab -->
+      <div class="two-cents__content" data-content="donate">
+        <p class="two-cents__donate-intro">Help fuel the adventure! Every bit goes to gas, cat treats, or wherever the road takes us.</p>
+        <div class="two-cents__kofi-wrap">
+          <iframe id="kofiframe" src="https://ko-fi.com/wanderingwojo/?hidefeed=true&widget=true&embed=true&preview=true" style="border:none;width:100%;background:transparent;" height="712" title="Support Wandering Wojo on Ko-fi"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
        ENTRY NAVIGATION + JOURNEY STATS (unified bar)
        ================================================================ -->
   <div class="entry-nav" id="entry-nav">

@@ -31,6 +31,7 @@ const AppModule = (function () {
     await loadData();
     initMap();
     initFloatingTitle();
+    initTwoCents();
     initEntryNav();
     initLightbox();
     initKeyboardNav();
@@ -206,6 +207,161 @@ const AppModule = (function () {
         setTimeout(function () { toast.remove(); }, 400);
       }, 5000);
     }
+  }
+
+  // =====================================================================
+  // YOUR 2¢ PANEL (Poll + Donate)
+  // =====================================================================
+  var FIREBASE_DB = 'https://wanderingwojo-default-rtdb.firebaseio.com';
+
+  function initTwoCents() {
+    var panel = document.getElementById('two-cents');
+    var toggle = document.getElementById('two-cents-toggle');
+    var closeBtn = document.getElementById('two-cents-close');
+    var panelContent = document.getElementById('two-cents-panel');
+    if (!panel || !toggle) return;
+
+    // Toggle open/close
+    toggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      panel.classList.add('two-cents--open');
+    });
+
+    closeBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      panel.classList.remove('two-cents--open');
+    });
+
+    // Clicks inside panel don't close it
+    panelContent.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+
+    // Click outside closes
+    document.addEventListener('click', function () {
+      panel.classList.remove('two-cents--open');
+    });
+
+    // Tab switching
+    var tabs = panel.querySelectorAll('.two-cents__tab');
+    var contents = panel.querySelectorAll('.two-cents__content');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) { t.classList.remove('two-cents__tab--active'); });
+        contents.forEach(function (c) { c.classList.remove('two-cents__content--active'); });
+        tab.classList.add('two-cents__tab--active');
+        var target = tab.getAttribute('data-tab');
+        panel.querySelector('[data-content="' + target + '"]').classList.add('two-cents__content--active');
+      });
+    });
+
+    // Load poll
+    loadPoll();
+  }
+
+  function loadPoll() {
+    fetch('data/poll.json?t=' + Date.now())
+      .then(function (r) { return r.json(); })
+      .then(function (poll) {
+        if (!poll || !poll.active) return;
+        renderPoll(poll);
+      })
+      .catch(function (err) {
+        console.warn('Could not load poll:', err);
+      });
+  }
+
+  function renderPoll(poll) {
+    var questionEl = document.getElementById('poll-question');
+    var optionsEl = document.getElementById('poll-options');
+    var totalEl = document.getElementById('poll-total');
+    if (!questionEl || !optionsEl) return;
+
+    questionEl.textContent = poll.question;
+    optionsEl.innerHTML = '';
+
+    var votedPollId = localStorage.getItem('wojo_poll_voted_id');
+    var votedOption = localStorage.getItem('wojo_poll_voted_option');
+    var hasVoted = (votedPollId === poll.id);
+
+    // Fetch current vote counts from Firebase
+    fetch(FIREBASE_DB + '/polls/' + poll.id + '.json')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var votes = data || {};
+        renderPollOptions(poll, votes, hasVoted, votedOption, optionsEl, totalEl);
+      })
+      .catch(function () {
+        // If Firebase is down, still render (just no counts)
+        renderPollOptions(poll, {}, hasVoted, votedOption, optionsEl, totalEl);
+      });
+  }
+
+  function renderPollOptions(poll, votes, hasVoted, votedOption, optionsEl, totalEl) {
+    var totalVotes = 0;
+    poll.options.forEach(function (opt, i) {
+      totalVotes += (votes['opt' + i] || 0);
+    });
+
+    poll.options.forEach(function (opt, i) {
+      var key = 'opt' + i;
+      var count = votes[key] || 0;
+      var pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+
+      var btn = document.createElement('button');
+      btn.className = 'two-cents__option';
+      if (hasVoted) btn.classList.add('two-cents__option--voted');
+      if (hasVoted && votedOption === key) btn.classList.add('two-cents__option--selected');
+
+      var barHtml = hasVoted
+        ? '<div class="two-cents__option-bar" style="width:' + pct + '%"></div>'
+        : '';
+      var countHtml = hasVoted
+        ? '<span class="two-cents__option-count">' + pct + '%</span>'
+        : '';
+
+      btn.innerHTML = barHtml +
+        '<span class="two-cents__option-label">' + opt + '</span>' +
+        countHtml;
+
+      if (!hasVoted) {
+        btn.addEventListener('click', function () {
+          castVote(poll, key, i);
+        });
+      }
+
+      optionsEl.appendChild(btn);
+    });
+
+    if (totalEl) {
+      totalEl.textContent = hasVoted ? totalVotes + ' vote' + (totalVotes !== 1 ? 's' : '') : '';
+    }
+  }
+
+  function castVote(poll, optKey, optIndex) {
+    // Optimistic UI: mark as voted immediately
+    localStorage.setItem('wojo_poll_voted_id', poll.id);
+    localStorage.setItem('wojo_poll_voted_option', optKey);
+
+    // Read current count, increment, write back (tiny race window, fine for a blog)
+    fetch(FIREBASE_DB + '/polls/' + poll.id + '/' + optKey + '.json')
+      .then(function (r) { return r.json(); })
+      .then(function (current) {
+        var newCount = (current || 0) + 1;
+        return fetch(FIREBASE_DB + '/polls/' + poll.id + '/' + optKey + '.json', {
+          method: 'PUT',
+          body: JSON.stringify(newCount)
+        });
+      })
+      .then(function () {
+        // Re-render with updated counts
+        renderPoll(poll);
+      })
+      .catch(function (err) {
+        console.warn('Vote failed:', err);
+        // Still re-render (vote is saved locally)
+        renderPoll(poll);
+      });
   }
 
   // =====================================================================

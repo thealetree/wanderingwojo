@@ -1,0 +1,11 @@
+{
+  "id": "poll-001",
+  "question": "What should Wojo snack on next?",
+  "options": [
+    "Salmon Treats",
+    "Chicken Crunchies",
+    "Tuna Flakes",
+    "Catnip Cookies"
+  ],
+  "active": true
+}

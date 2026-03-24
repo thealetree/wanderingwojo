@@ -29,6 +29,7 @@ PORT = 5555
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 ENTRIES_FILE = os.path.join(PROJECT_ROOT, 'data', 'entries.json')
+POLL_FILE = os.path.join(PROJECT_ROOT, 'data', 'poll.json')
 
 # ---------------------------------------------------------------------------
 # Embedded HTML page
@@ -704,6 +705,39 @@ HTML_PAGE = r"""<!DOCTYPE html>
         </div>
       </div>
     </div>
+
+    <!-- Poll Management -->
+    <div class="entry-list-section" style="margin-top:1.5rem;">
+      <div class="entry-list-header" id="poll-section-header" style="cursor:pointer;">
+        <span class="entry-list-title">Poll Manager</span>
+        <span class="entry-list-toggle" id="poll-section-toggle">&#9660;</span>
+      </div>
+      <div id="poll-section" style="display:none; padding:1rem; background:var(--off-white); border:1px solid var(--beige-dark); border-top:none; border-radius:0 0 8px 8px;">
+        <div style="margin-bottom:1rem;">
+          <label class="form-label" for="poll-question">Poll Question *</label>
+          <input class="form-input" id="poll-question" type="text" placeholder="What should Wojo snack on next?">
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label class="form-label">Options (at least 2)</label>
+          <div id="poll-options-list">
+            <input class="form-input" style="margin-bottom:0.5rem;" type="text" placeholder="Option 1" data-poll-option>
+            <input class="form-input" style="margin-bottom:0.5rem;" type="text" placeholder="Option 2" data-poll-option>
+            <input class="form-input" style="margin-bottom:0.5rem;" type="text" placeholder="Option 3" data-poll-option>
+            <input class="form-input" style="margin-bottom:0.5rem;" type="text" placeholder="Option 4" data-poll-option>
+          </div>
+          <button class="btn btn-secondary" id="poll-add-option" style="font-size:0.85rem;padding:0.3rem 0.75rem;">+ Add Option</button>
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label style="font-size:0.9rem;color:var(--charcoal);cursor:pointer;">
+            <input type="checkbox" id="poll-active" checked> Active
+          </label>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="poll-save">Save Poll & Push</button>
+        </div>
+        <div class="status" id="poll-status" style="margin-top:0.75rem;"></div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -1328,6 +1362,95 @@ HTML_PAGE = r"""<!DOCTYPE html>
     });
 
     // ==================================================================
+    // POLL MANAGER
+    // ==================================================================
+    var pollHeader = document.getElementById('poll-section-header');
+    var pollSection = document.getElementById('poll-section');
+    var pollToggle = document.getElementById('poll-section-toggle');
+    var pollSaveBtn = document.getElementById('poll-save');
+    var pollStatus = document.getElementById('poll-status');
+    var pollAddOption = document.getElementById('poll-add-option');
+
+    pollHeader.addEventListener('click', function() {
+      var open = pollSection.style.display !== 'none';
+      pollSection.style.display = open ? 'none' : 'block';
+      pollToggle.textContent = open ? '\u25BC' : '\u25B2';
+    });
+
+    pollAddOption.addEventListener('click', function() {
+      var list = document.getElementById('poll-options-list');
+      var count = list.querySelectorAll('[data-poll-option]').length;
+      var inp = document.createElement('input');
+      inp.className = 'form-input';
+      inp.style.marginBottom = '0.5rem';
+      inp.type = 'text';
+      inp.placeholder = 'Option ' + (count + 1);
+      inp.setAttribute('data-poll-option', '');
+      list.appendChild(inp);
+    });
+
+    // Load existing poll
+    fetch('/api/poll')
+      .then(function(r) { return r.json(); })
+      .then(function(poll) {
+        if (poll && poll.question) {
+          document.getElementById('poll-question').value = poll.question;
+          document.getElementById('poll-active').checked = poll.active !== false;
+          var opts = document.querySelectorAll('[data-poll-option]');
+          (poll.options || []).forEach(function(o, i) {
+            if (i < opts.length) {
+              opts[i].value = o;
+            } else {
+              pollAddOption.click();
+              var allOpts = document.querySelectorAll('[data-poll-option]');
+              allOpts[allOpts.length - 1].value = o;
+            }
+          });
+        }
+      });
+
+    pollSaveBtn.addEventListener('click', function() {
+      var question = document.getElementById('poll-question').value.trim();
+      var optInputs = document.querySelectorAll('[data-poll-option]');
+      var options = [];
+      optInputs.forEach(function(inp) {
+        if (inp.value.trim()) options.push(inp.value.trim());
+      });
+      var active = document.getElementById('poll-active').checked;
+
+      if (!question || options.length < 2) {
+        pollStatus.innerHTML = '<div style="color:var(--terracotta);">Need a question and at least 2 options.</div>';
+        return;
+      }
+
+      pollSaveBtn.disabled = true;
+      pollSaveBtn.textContent = 'Saving...';
+
+      fetch('/api/save-poll', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ question: question, options: options, active: active })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(result) {
+        if (result.saved) {
+          var html = '<div style="color:#7C9A7E;">\u2713 Poll saved!</div>';
+          if (result.pushed) html += '<div style="color:#7C9A7E;">\u2713 Pushed to GitHub</div>';
+          pollStatus.innerHTML = html;
+        } else {
+          pollStatus.innerHTML = '<div style="color:var(--terracotta);">' + (result.save_error || 'Unknown error') + '</div>';
+        }
+        pollSaveBtn.disabled = false;
+        pollSaveBtn.textContent = 'Save Poll & Push';
+      })
+      .catch(function() {
+        pollStatus.innerHTML = '<div style="color:var(--terracotta);">Network error</div>';
+        pollSaveBtn.disabled = false;
+        pollSaveBtn.textContent = 'Save Poll & Push';
+      });
+    });
+
+    // ==================================================================
     // INIT
     // ==================================================================
     updateMoodPreview();
@@ -1356,6 +1479,8 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(HTML_PAGE.encode('utf-8'))
         elif self.path == '/api/entries':
             self.handle_list_entries()
+        elif self.path == '/api/poll':
+            self.handle_get_poll()
         elif self.path.startswith('/api/geocode'):
             self.handle_geocode()
         elif self.path.startswith('/media/photos/'):
@@ -1372,6 +1497,8 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.handle_update_entry()
         elif self.path == '/api/delete-entry':
             self.handle_delete_entry()
+        elif self.path == '/api/save-poll':
+            self.handle_save_poll()
         else:
             self.send_error(404)
 
@@ -1673,6 +1800,61 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
 
         self._regenerate_feed()
         self._git_commit_and_push(result, f"Delete entry: {title}")
+        self.send_json(200, result)
+
+    def handle_get_poll(self):
+        """Return current poll config as JSON."""
+        try:
+            with open(POLL_FILE, 'r', encoding='utf-8') as f:
+                poll = json.load(f)
+            self.send_json(200, poll)
+        except (FileNotFoundError, json.JSONDecodeError):
+            self.send_json(200, {'active': False})
+
+    def handle_save_poll(self):
+        """Save a new poll to data/poll.json and push."""
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length)
+        result = {'saved': False, 'committed': False, 'pushed': False}
+
+        try:
+            data = json.loads(body)
+        except json.JSONDecodeError as e:
+            result['save_error'] = f'Invalid JSON: {e}'
+            self.send_json(400, result)
+            return
+
+        question = data.get('question', '').strip()
+        options = data.get('options', [])
+        active = data.get('active', True)
+
+        if not question or len(options) < 2:
+            result['save_error'] = 'Need a question and at least 2 options'
+            self.send_json(400, result)
+            return
+
+        # Generate poll ID from timestamp
+        poll_id = 'poll-' + date.today().isoformat().replace('-', '')
+
+        poll = {
+            'id': poll_id,
+            'question': question,
+            'options': [o.strip() for o in options if o.strip()],
+            'active': active,
+        }
+
+        try:
+            with open(POLL_FILE, 'w', encoding='utf-8') as f:
+                json.dump(poll, f, indent=2, ensure_ascii=False)
+                f.write('\n')
+            result['saved'] = True
+            print(f"  \u2713 Saved poll: {question}")
+        except OSError as e:
+            result['save_error'] = str(e)
+            self.send_json(500, result)
+            return
+
+        self._git_commit_and_push(result, f"Update poll: {question}")
         self.send_json(200, result)
 
     def _regenerate_feed(self):
