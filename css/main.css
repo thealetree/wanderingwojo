@@ -601,7 +601,7 @@ a:hover {
 .contact-form__file-label {
   display: inline-block;
   margin-top: 0;
-  padding: 0.35rem 0.75rem;
+  padding: 0.7rem 0.75rem;
   font-family: var(--font-display);
   font-size: 0.95rem;
   color: var(--charcoal);
