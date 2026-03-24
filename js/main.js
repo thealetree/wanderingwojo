@@ -276,8 +276,10 @@ const AppModule = (function () {
     if (idx !== -1) navIndex = idx;
     updateNavInfo();
     highlightPin(displayEntry.id);
-    // Don't update thumb visibility on hover — it causes the pin to resize
-    // mid-click, requiring a second click. Thumbs update on nav button clicks only.
+    // Defer thumb update so the hovered pin doesn't resize under the cursor mid-click
+    requestAnimationFrame(function () {
+      MapModule.updateThumbVisibility(displayEntry.id);
+    });
   }
 
   // =====================================================================
