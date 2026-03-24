@@ -245,5 +245,30 @@
     "mood_left": "Dihongo",
     "mood_right": "Prate",
     "mood_value": 0.9
+  },
+  {
+    "id": "2026-03-24-haht-t-day",
+    "date": "2026-03-24",
+    "title": "Haht T'day",
+    "type": "field-notes",
+    "location_name": "Lone Pine, CA",
+    "coordinates": [
+      36.583176,
+      -118.0783265
+    ],
+    "body": "We gaht haht t'day. Had to make plenty of use of that cold air in side the truck... And plenty of lazy laying around in the shade, with the breeze. Holy cow. \n\nBut, the big guy had to do his screen work and it was otherwise low key. He painted our journal's web address on the tent for others to see. Not sure why tbh... But, why not? Who knows what random connections come of it 🤷‍♂️\n\nBeen thinking about that feeling of being rushed a lot. Seems like a lot of it has to do with whatever is going on outside (heat, cold, loud, the pressures of AI making everyone obsolete and the impetus it puts on people to do MORE, FASTER, NOW or face financial ruin)... \n\nThat feeling sucks. Enjoying a fresh breeze, a bird, clean cool water, someone showing you how much you mean to them, the smell of spring wildflowers, shelter when it's needed, and freedom otherwise.\n\nBut so many of those pleasantries are bought with funds. Funds that may go away.... Seems like a tribe of great people are the way through that... trading, supporting, loving. And here we are, far from them, cooking. Maybe we have to fling ourselves far out away from our loves in order to someday offer them more, if we're lucky enough to find them again. \n\nOr maybe we're just here, doing this, and that's ok. Come what may.",
+    "video_url": "https://youtu.be/XhoITOtjoz0",
+    "photos": [
+      "media/photos/img_2539.jpg",
+      "media/photos/img_2555.jpeg",
+      "media/photos/img_2558.jpg",
+      "media/photos/img_2546.jpg",
+      "media/photos/img_2554.jpg",
+      "media/photos/img_2551.jpg"
+    ],
+    "preview_photo": 5,
+    "mood_left": "Spherical",
+    "mood_right": "Denatured",
+    "mood_value": 0.2
   }
 ]
