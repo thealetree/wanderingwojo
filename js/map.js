@@ -421,12 +421,13 @@ const MapModule = (function () {
       pinEl.style.setProperty('--pin-angle', displayAngle.toFixed(1) + 'deg');
 
       var numberDisplay;
-      if (isGrouped) {
+      if (isGrouped && displayEntry.id === groupEntries[groupEntries.length - 1].id) {
+        // Showing latest in cluster — display range
         var firstNum = entryNumber[groupEntries[0].id] || '';
         var lastNum = entryNumber[groupEntries[groupEntries.length - 1].id] || '';
-        numberDisplay = firstNum + '-' + lastNum + '/' + total;
+        numberDisplay = firstNum + '-' + lastNum;
       } else {
-        numberDisplay = (entryNumber[displayEntry.id] || '') + '/' + total;
+        numberDisplay = '' + (entryNumber[displayEntry.id] || '');
       }
 
       // Find first available photo from group (try most recent first)
@@ -539,7 +540,18 @@ const MapModule = (function () {
 
     if (titleEl) titleEl.textContent = entry.title;
     if (dateEl) dateEl.textContent = formatDate(entry.date);
-    if (numberEl) numberEl.textContent = (entryNumberMap[entry.id] || '') + '/' + totalEntries;
+    // Show range if viewing latest entry in a cluster, otherwise just the number
+    if (numberEl) {
+      var isLatestInGroup = pinData.entries.length > 1 &&
+        entry.id === pinData.entries[pinData.entries.length - 1].id;
+      if (isLatestInGroup) {
+        var firstNum = entryNumberMap[pinData.entries[0].id] || '';
+        var lastNum = entryNumberMap[pinData.entries[pinData.entries.length - 1].id] || '';
+        numberEl.textContent = firstNum + '-' + lastNum;
+      } else {
+        numberEl.textContent = '' + (entryNumberMap[entry.id] || '');
+      }
+    }
 
     // Update pin angle for this entry
     var angle = (pinData.entryAngles && pinData.entryAngles[entryId]) || 0;
