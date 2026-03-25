@@ -103,7 +103,8 @@ const AppModule = (function () {
 
     function openAboutPanel() {
       els.floatingTitle.classList.add('floating-title--open');
-      hideTwoCents();
+      // Hide 2¢ panel on mobile only (desktop keeps it visible)
+      if (window.innerWidth <= 768) hideTwoCents();
       // Hide swag button and bottom nav on mobile only
       if (window.innerWidth <= 768) {
         var floatingShop = document.querySelector('.floating-shop');
