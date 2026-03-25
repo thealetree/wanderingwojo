@@ -291,9 +291,11 @@
       "media/photos/img_2568.jpg",
       "media/photos/img_2572.jpg",
       "media/photos/img_2573.jpg",
-      "media/photos/img_2574.jpg"
+      "media/photos/img_2574.jpg",
+      "media/photos/img_2584.jpg",
+      "media/photos/img_2588.jpg"
     ],
-    "preview_photo": null,
+    "preview_photo": 9,
     "mood_left": "Donut",
     "mood_right": "Ribosaurus",
     "mood_value": 1
