@@ -5,8 +5,15 @@
     <link>https://wanderingwojo.com</link>
     <description>A travel journal. Southwest to Alaska. Wojo the cat and his co-pilot Van on the road.</description>
     <language>en-us</language>
-    <lastBuildDate>Tue, 24 Mar 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 25 Mar 2026 00:00:00 GMT</lastBuildDate>
     <atom:link href="https://wanderingwojo.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Death Valley Tomorrow</title>
+      <link>https://wanderingwojo.com/#death-valley-tomorrow</link>
+      <guid isPermaLink="true">https://wanderingwojo.com/#death-valley-tomorrow</guid>
+      <pubDate>Wed, 25 Mar 2026 00:00:00 GMT</pubDate>
+      <description>Lone Pine, CA — Today was a chill as they come. Warm but not too hot. The big guy really tested out the solar/starlink setup and its not too shabby (i.e. no...</description>
+    </item>
     <item>
       <title>Haht T'day</title>
       <link>https://wanderingwojo.com/#haht-t-day</link>
