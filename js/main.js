@@ -7,9 +7,8 @@ const AppModule = (function () {
   'use strict';
 
   // --- Config ---
-  // Set your email here to enable the anonymous contact form.
-  // Uses Formsubmit.co — first submission triggers a confirmation email.
-  var CONTACT_EMAIL = 'thealetree@gmail.com';
+  // Contact email (encoded to avoid scrapers). Decode at runtime.
+  var CONTACT_EMAIL = atob('dGhlYWxldHJlZUBnbWFpbC5jb20=');
 
   // --- State ---
   let entries = [];
@@ -21,6 +20,16 @@ const AppModule = (function () {
 
   // --- DOM refs ---
   const els = {};
+
+  // --- Helper: hide/show 2¢ panel ---
+  function hideTwoCents() {
+    var tc = document.getElementById('two-cents');
+    if (tc) tc.style.display = 'none';
+  }
+  function showTwoCents() {
+    var tc = document.getElementById('two-cents');
+    if (tc) tc.style.display = '';
+  }
 
   /**
    * Initialize the application
@@ -94,6 +103,7 @@ const AppModule = (function () {
 
     function openAboutPanel() {
       els.floatingTitle.classList.add('floating-title--open');
+      hideTwoCents();
       // Hide swag button and bottom nav on mobile only
       if (window.innerWidth <= 768) {
         var floatingShop = document.querySelector('.floating-shop');
@@ -105,6 +115,7 @@ const AppModule = (function () {
 
     function closeAboutPanel() {
       els.floatingTitle.classList.remove('floating-title--open');
+      showTwoCents();
       // Restore swag button and bottom nav
       var floatingShop = document.querySelector('.floating-shop');
       var entryNav = document.getElementById('entry-nav');
@@ -426,6 +437,7 @@ const AppModule = (function () {
     updateNavInfo();
     highlightPin(displayEntry.id);
     MapModule.updateThumbVisibility(displayEntry.id);
+    hideTwoCents();
     MapModule.expandPinEntry(groupEntries, pinEl, displayEntry.id);
   }
 
@@ -569,6 +581,7 @@ const AppModule = (function () {
           closeLightbox();
         } else {
           MapModule.closeExpandedPin();
+          showTwoCents();
         }
       }
 

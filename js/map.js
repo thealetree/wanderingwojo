@@ -77,6 +77,9 @@ const MapModule = (function () {
       // Only close if click is on the map itself, not on a marker/pin
       if (e.originalEvent.target === map.getCanvas()) {
         closeExpandedPin();
+        // Restore 2¢ panel
+        var tc = document.getElementById('two-cents');
+        if (tc) tc.style.display = '';
       }
     });
 
@@ -651,7 +654,7 @@ const MapModule = (function () {
       // Convert YouTube URLs to embed format and extract video ID
       var videoSrc = entry.video_url;
       var videoId = null;
-      var ytMatch = videoSrc.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+      var ytMatch = videoSrc.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)/);
       if (ytMatch) {
         videoId = ytMatch[1];
         videoSrc = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1';
@@ -1071,6 +1074,9 @@ const MapModule = (function () {
     expanded.querySelector('.entry-expanded__close').addEventListener('click', function (e) {
       e.stopPropagation();
       closeExpandedPin();
+      // Restore 2¢ panel
+      var tc = document.getElementById('two-cents');
+      if (tc) tc.style.display = '';
     });
 
     // Tab click handlers
