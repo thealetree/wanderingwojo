@@ -444,6 +444,21 @@ const MapModule = (function () {
   }
 
   /**
+   * Haversine distance in km between two [lng, lat] points.
+   */
+  function haversineKm(a, b) {
+    var R = 6371;
+    var dLat = (b[1] - a[1]) * Math.PI / 180;
+    var dLng = (b[0] - a[0]) * Math.PI / 180;
+    var sinLat = Math.sin(dLat / 2);
+    var sinLng = Math.sin(dLng / 2);
+    var h = sinLat * sinLat + Math.cos(a[1] * Math.PI / 180) * Math.cos(b[1] * Math.PI / 180) * sinLng * sinLng;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  var MAX_CLUSTER_DISTANCE_KM = 30; // never merge locations more than 30km apart
+
+  /**
    * Cluster location groups by screen-space pixel proximity.
    * Returns array of clusters, each with: { groupIndices, entries, centroid }
    */
@@ -456,7 +471,8 @@ const MapModule = (function () {
       return {
         groupIndices: [i],
         x: pt.x,
-        y: pt.y
+        y: pt.y,
+        centroid: g.centroid
       };
     });
 
@@ -469,6 +485,10 @@ const MapModule = (function () {
 
       for (var i = 0; i < clusters.length; i++) {
         for (var j = i + 1; j < clusters.length; j++) {
+          // Check geographic distance first — skip if too far apart
+          var geoDist = haversineKm(clusters[i].centroid, clusters[j].centroid);
+          if (geoDist > MAX_CLUSTER_DISTANCE_KM) continue;
+
           var dx = clusters[i].x - clusters[j].x;
           var dy = clusters[i].y - clusters[j].y;
           var dist = Math.sqrt(dx * dx + dy * dy);
@@ -485,6 +505,11 @@ const MapModule = (function () {
         var ni = ci.groupIndices.length, nj = cj.groupIndices.length;
         ci.x = (ci.x * ni + cj.x * nj) / (ni + nj);
         ci.y = (ci.y * ni + cj.y * nj) / (ni + nj);
+        // Update centroid to weighted average
+        ci.centroid = [
+          (ci.centroid[0] * ni + cj.centroid[0] * nj) / (ni + nj),
+          (ci.centroid[1] * ni + cj.centroid[1] * nj) / (ni + nj)
+        ];
         ci.groupIndices = ci.groupIndices.concat(cj.groupIndices);
         clusters.splice(bestJ, 1);
         merged = true;
