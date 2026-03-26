@@ -5,8 +5,15 @@
     <link>https://wanderingwojo.com</link>
     <description>A travel journal. Southwest to Alaska. Wojo the cat and his co-pilot Van on the road.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 25 Mar 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 26 Mar 2026 00:00:00 GMT</lastBuildDate>
     <atom:link href="https://wanderingwojo.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Las Vegas</title>
+      <link>https://wanderingwojo.com/#las-vegas</link>
+      <guid isPermaLink="true">https://wanderingwojo.com/#las-vegas</guid>
+      <pubDate>Thu, 26 Mar 2026 00:00:00 GMT</pubDate>
+      <description>Las Vegas, NV — The big guy thought he'd be clever and drive in the evenings after work. He thought he'd even push through Death Valley, thinking it wouldn't...</description>
+    </item>
     <item>
       <title>Death Valley Tomorrow</title>
       <link>https://wanderingwojo.com/#death-valley-tomorrow</link>
