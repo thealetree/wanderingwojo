@@ -839,6 +839,8 @@ const MapModule = (function () {
           pin.element.classList.add('cork-pin--highlighted');
         }
       });
+      // Re-apply thumb visibility after pin content rebuild
+      updateThumbVisibility(activePreviewEntryId);
     }
   }
 

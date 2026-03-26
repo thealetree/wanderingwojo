@@ -419,8 +419,9 @@ const AppModule = (function () {
         MapModule.addCorkPins(entries, handlePinClick, handlePinHover);
         MapModule.addRouteFromEntries(entries);
         updateNavInfo();
-        // Show thumbs for current entry and neighbors
+        // Set initial active entry and show thumbs for current entry and neighbors
         if (sortedEntries.length > 0) {
+          MapModule.updatePinPreview(sortedEntries[navIndex].id);
           MapModule.updateThumbVisibility(sortedEntries[navIndex].id);
         }
 
@@ -475,6 +476,7 @@ const AppModule = (function () {
     if (idx !== -1) navIndex = idx;
     updateNavInfo();
     highlightPin(displayEntry.id);
+    MapModule.updatePinPreview(displayEntry.id);
     // Defer thumb update so the hovered pin doesn't resize under the cursor mid-click
     requestAnimationFrame(function () {
       MapModule.updateThumbVisibility(displayEntry.id);
