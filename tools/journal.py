@@ -1934,11 +1934,16 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
     def _git_commit_and_push(self, result, message):
         """Shared git commit + push logic — robust version."""
         try:
-            # Stage entries.json, photos, and feed.xml
+            # Stage entries.json, poll.json, photos, and feed.xml
             subprocess.run(
                 ['git', 'add', 'data/entries.json'],
                 cwd=PROJECT_ROOT,
                 capture_output=True, text=True, check=True
+            )
+            subprocess.run(
+                ['git', 'add', 'data/poll.json'],
+                cwd=PROJECT_ROOT,
+                capture_output=True, text=True
             )
             subprocess.run(
                 ['git', 'add', 'media/photos/'],
