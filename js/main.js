@@ -661,6 +661,7 @@ const AppModule = (function () {
           return sortedEntries.find(function (se) { return se.id === id; });
         }).filter(Boolean);
 
+        hideTwoCents();
         MapModule.expandPinEntry(groupEntries, pin, entry.id);
       }
     }, 1400);
