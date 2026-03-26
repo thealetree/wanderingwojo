@@ -1014,13 +1014,27 @@ a:hover {
   display: none;
 }
 
-/* Older pins: hide thumb by default, show on hover or when active/highlighted */
+/* Older pins: hide thumb, shrink card, scale down */
 .cork-pin--no-thumb .cork-pin__thumb {
   display: none;
+}
+.cork-pin--no-thumb .cork-pin__card {
+  min-width: 0;
+}
+.cork-pin--no-thumb {
+  transform: scale(calc(var(--pin-zoom-scale, 1) * 0.75));
+}
+.cork-pin--no-thumb:hover,
+.cork-pin--no-thumb.cork-pin--highlighted {
+  transform: scale(var(--pin-zoom-scale, 1));
 }
 .cork-pin--no-thumb:hover .cork-pin__thumb,
 .cork-pin--no-thumb.cork-pin--highlighted .cork-pin__thumb {
   display: block;
+}
+.cork-pin--no-thumb:hover .cork-pin__card,
+.cork-pin--no-thumb.cork-pin--highlighted .cork-pin__card {
+  min-width: 220px;
 }
 
 /* Grouped pin — stacked card effect (full card+nail per extra entry) */
@@ -1069,7 +1083,6 @@ a:hover {
   background: var(--stack-card-bg, var(--beige-dark));
   border: 2px solid var(--border-subtle);
   border-radius: var(--rough-radius);
-  min-width: 220px;
   min-height: 80px;
   height: 100%;
   box-shadow: var(--shadow-md);
