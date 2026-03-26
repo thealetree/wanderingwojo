@@ -224,9 +224,18 @@ const AppModule = (function () {
     var panelContent = document.getElementById('two-cents-panel');
     if (!panel || !toggle) return;
 
-    // Toggle open/close
+    // Toggle open/close — always reset to Message tab
     toggle.addEventListener('click', function (e) {
       e.stopPropagation();
+      // Reset to Message tab
+      var tabs = panel.querySelectorAll('.two-cents__tab');
+      var contents = panel.querySelectorAll('.two-cents__content');
+      tabs.forEach(function (t) { t.classList.remove('two-cents__tab--active'); });
+      contents.forEach(function (c) { c.classList.remove('two-cents__content--active'); });
+      var msgTab = panel.querySelector('[data-tab="message"]');
+      var msgContent = panel.querySelector('[data-content="message"]');
+      if (msgTab) msgTab.classList.add('two-cents__tab--active');
+      if (msgContent) msgContent.classList.add('two-cents__content--active');
       panel.classList.add('two-cents--open');
     });
 

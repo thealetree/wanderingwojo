@@ -83,20 +83,20 @@
 
       <!-- Tab switcher -->
       <div class="two-cents__tabs">
-        <button class="two-cents__tab two-cents__tab--active" data-tab="poll">Poll</button>
-        <button class="two-cents__tab" data-tab="message">Message Us</button>
+        <button class="two-cents__tab" data-tab="poll">Poll</button>
+        <button class="two-cents__tab two-cents__tab--active" data-tab="message">Message Us</button>
         <button class="two-cents__tab" data-tab="donate">Donate</button>
       </div>
 
       <!-- Poll tab -->
-      <div class="two-cents__content two-cents__content--active" data-content="poll">
+      <div class="two-cents__content" data-content="poll">
         <p class="two-cents__question" id="poll-question"></p>
         <div class="two-cents__options" id="poll-options"></div>
         <p class="two-cents__total" id="poll-total"></p>
       </div>
 
       <!-- Message tab -->
-      <div class="two-cents__content" data-content="message">
+      <div class="two-cents__content two-cents__content--active" data-content="message">
         <form class="contact-form" id="contact-form" method="POST" enctype="multipart/form-data">
           <label class="contact-form__label" for="contact-msg">Send us a message!</label>
           <textarea class="contact-form__input" id="contact-msg" name="message" rows="3" placeholder="Say something nice (or weird)..."></textarea>
