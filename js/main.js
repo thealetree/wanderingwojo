@@ -45,6 +45,8 @@ const AppModule = (function () {
     initLightbox();
     initKeyboardNav();
     initJourneyStats();
+    centerTwoCentsButton();
+    window.addEventListener('resize', centerTwoCentsButton);
   }
 
   /**
@@ -216,6 +218,20 @@ const AppModule = (function () {
   // YOUR 2¢ PANEL (Poll + Donate)
   // =====================================================================
   var FIREBASE_DB = 'https://wanderingwojo-default-rtdb.firebaseio.com';
+
+  function centerTwoCentsButton() {
+    // On mobile, center the 2¢ button between the shop and title buttons
+    if (window.innerWidth > 768) return;
+    var shop = document.querySelector('.floating-shop');
+    var title = document.querySelector('.floating-title');
+    var twoCentsEl = document.getElementById('two-cents');
+    if (!shop || !title || !twoCentsEl) return;
+    var shopRight = shop.getBoundingClientRect().right;
+    var titleLeft = title.getBoundingClientRect().left;
+    var midpoint = (shopRight + titleLeft) / 2;
+    twoCentsEl.style.left = midpoint + 'px';
+    twoCentsEl.style.transform = 'translateX(-50%)';
+  }
 
   function initTwoCents() {
     var panel = document.getElementById('two-cents');

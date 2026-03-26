@@ -1774,13 +1774,17 @@ a:hover {
   .floating-shop {
     top: var(--space-sm);
     left: var(--space-sm);
-    padding: 0.375rem 0.75rem;
+    padding: 0 0.75rem;
+    height: 36px;
+    line-height: 36px;
   }
 
   .floating-title {
     top: var(--space-sm);
     right: var(--space-sm);
-    padding: 0.375rem 0.75rem;
+    padding: 0 0.75rem;
+    height: 36px;
+    line-height: 36px;
     max-width: calc(100vw - 2rem);
     transition: box-shadow var(--transition-fast), max-width var(--transition-med),
                 left var(--transition-med), right var(--transition-med),
@@ -1871,11 +1875,16 @@ a:hover {
 
   .two-cents {
     top: var(--space-sm);
+    /* Center between shop and title buttons instead of viewport center */
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .two-cents__toggle {
     font-size: 1rem;
-    padding: 0.375rem 0.75rem;
+    padding: 0 0.75rem;
+    height: 36px;
+    line-height: 36px;
   }
 
   .two-cents__panel {
