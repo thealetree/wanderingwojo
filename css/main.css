@@ -1180,6 +1180,38 @@ a:hover {
   transform: scale(0.8) rotate(var(--stack-angle, 0deg));
 }
 
+/* Cluster merge/split animations */
+.cork-pin--merging {
+  transform: scale(calc(var(--pin-zoom-scale, 1) * 0.5)) !important;
+  opacity: 0 !important;
+  transition: transform 0.35s ease-in, opacity 0.3s ease-in !important;
+  pointer-events: none !important;
+}
+
+.cork-pin--splitting {
+  animation: pinSplitIn 0.35s ease-out forwards;
+}
+
+@keyframes pinSplitIn {
+  from {
+    transform: scale(calc(var(--pin-zoom-scale, 1) * 0.5));
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.cork-pin--absorb {
+  animation: pinAbsorb 0.3s ease-out;
+}
+
+@keyframes pinAbsorb {
+  0%   { transform: scale(var(--pin-zoom-scale, 1)); }
+  50%  { transform: scale(calc(var(--pin-zoom-scale, 1) * 1.1)); }
+  100% { transform: scale(var(--pin-zoom-scale, 1)); }
+}
+
 /* ==========================================================================
    Expanded Entry (Cork Board & Linear)
    ========================================================================== */

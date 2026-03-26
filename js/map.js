@@ -20,7 +20,8 @@ const MapModule = (function () {
 
   let map = null;
   let markers = [];
-  let corkPins = [];
+  let corkPins = [];          // visible pins after clustering
+  let allLocationPins = [];   // one pin per location group (persistent)
   let activePopup = null;
   let expandedPinEl = null;
   let expandedPinEntries = [];
@@ -28,6 +29,15 @@ const MapModule = (function () {
   let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   let entryNumberMap = {};  // entry id -> 1-based number
   let totalEntries = 0;
+
+  // Clustering state
+  var locationGroups = [];     // atomic groups by location_name
+  var currentClusterSig = '';  // signature string for diff detection
+  var storedOnPinClick = null;
+  var storedOnPinHover = null;
+  var clusterDebounceTimer = null;
+  var initialAnimationComplete = false;
+  var CLUSTER_THRESHOLD_PX = 150;
 
   /**
    * Get the preview/thumbnail photo for an entry.
@@ -44,6 +54,7 @@ const MapModule = (function () {
   // Route coordinates — built dynamically from entries
   let routeCoords = [];
   let waypointIndices = []; // routeCoords index for each entry waypoint
+  let waypointToGroupIndex = {}; // maps entry waypoint index to locationGroups index
 
   /**
    * Initialize the map. Returns false if no valid token.
@@ -98,6 +109,14 @@ const MapModule = (function () {
         mapEl.classList.add('pin-thumbs-hidden');
       } else {
         mapEl.classList.remove('pin-thumbs-hidden');
+      }
+
+      // Debounced re-clustering
+      if (initialAnimationComplete) {
+        clearTimeout(clusterDebounceTimer);
+        clusterDebounceTimer = setTimeout(function () {
+          renderClusters();
+        }, 200);
       }
     }
     map.on('zoom', updatePinScale);
@@ -266,6 +285,8 @@ const MapModule = (function () {
     var duration = 1250;
     var revealedPins = {};
 
+    // Map waypoint indices to location group indices for reveal
+    // During initial animation, we reveal by location group order
     function step(timestamp) {
       if (!startTime) startTime = timestamp;
       var elapsed = timestamp - startTime;
@@ -295,21 +316,31 @@ const MapModule = (function () {
         });
       }
 
-      // Reveal pins whose waypoint the route has reached
+      // Reveal location group pins as the route reaches their first entry's waypoint
       for (var wi = 0; wi < waypointIndices.length; wi++) {
-        if (!revealedPins[wi] && endIndex >= waypointIndices[wi] && wi < corkPins.length) {
+        if (!revealedPins[wi] && endIndex >= waypointIndices[wi]) {
           revealedPins[wi] = true;
-          (function (pin) {
-            setTimeout(function () {
-              pin.element.classList.remove('cork-pin--pending');
-              pin.element.classList.add('cork-pin--reveal');
-            }, 80);
-          })(corkPins[wi]);
+          // Map this waypoint (entry index) to its location group
+          var groupIdx = waypointToGroupIndex[wi];
+          if (groupIdx !== undefined && !revealedPins['g' + groupIdx]) {
+            revealedPins['g' + groupIdx] = true;
+            (function (pin) {
+              setTimeout(function () {
+                pin.element.classList.remove('cork-pin--pending');
+                pin.element.classList.add('cork-pin--reveal');
+              }, 80);
+            })(allLocationPins[groupIdx]);
+          }
         }
       }
 
       if (progress < 1) {
         requestAnimationFrame(step);
+      } else {
+        // Animation complete — enable clustering
+        initialAnimationComplete = true;
+        // Run initial clustering
+        renderClusters();
       }
     }
 
@@ -361,142 +392,457 @@ const MapModule = (function () {
     });
   }
 
-  /**
-   * Add cork board pins for journal entries, grouped by location_name
-   */
-  function addCorkPins(entries, onPinClick, onPinHover) {
-    if (!map) return;
+  // =======================================================================
+  // CLUSTERING
+  // =======================================================================
 
-    // Sort all entries chronologically
+  /**
+   * Seeded pseudo-random for deterministic pin angles
+   */
+  function seededRandom(seed) {
+    var x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+    return x - Math.floor(x);
+  }
+
+  /**
+   * Group entries by location_name into atomic units.
+   * Returns array sorted chronologically by earliest entry.
+   */
+  function buildLocationGroups(entries) {
     var sorted = entries.slice().sort(function (a, b) {
       return new Date(a.date) - new Date(b.date);
     });
-    var entryNumber = {};
-    sorted.forEach(function (e, i) { entryNumber[e.id] = i + 1; });
-    var total = sorted.length;
-    entryNumberMap = entryNumber;
-    totalEntries = total;
 
-    // Group entries by location_name
     var groups = {};
-    var groupOrder = [];
+    var order = [];
     sorted.forEach(function (entry) {
       var key = entry.location_name;
       if (!groups[key]) {
         groups[key] = [];
-        groupOrder.push(key);
+        order.push(key);
       }
       groups[key].push(entry);
     });
 
-    // Seeded pseudo-random for deterministic pin angles
-    function seededRandom(seed) {
-      var x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
-      return x - Math.floor(x);
+    return order.map(function (name) {
+      var entries = groups[name];
+      // Centroid in [lng, lat] (Mapbox convention)
+      var avgLng = 0, avgLat = 0;
+      entries.forEach(function (e) {
+        avgLng += e.coordinates[1];
+        avgLat += e.coordinates[0];
+      });
+      avgLng /= entries.length;
+      avgLat /= entries.length;
+
+      return {
+        locationName: name,
+        entries: entries,
+        centroid: [avgLng, avgLat]
+      };
+    });
+  }
+
+  /**
+   * Cluster location groups by screen-space pixel proximity.
+   * Returns array of clusters, each with: { groupIndices, entries, centroid }
+   */
+  function clusterLocationGroups(groups, thresholdPx) {
+    if (!map || groups.length === 0) return [];
+
+    // Project each group's centroid to screen pixels
+    var clusters = groups.map(function (g, i) {
+      var pt = map.project(g.centroid);
+      return {
+        groupIndices: [i],
+        x: pt.x,
+        y: pt.y
+      };
+    });
+
+    // Greedy agglomerative merge
+    var merged = true;
+    while (merged) {
+      merged = false;
+      var bestDist = thresholdPx;
+      var bestI = -1, bestJ = -1;
+
+      for (var i = 0; i < clusters.length; i++) {
+        for (var j = i + 1; j < clusters.length; j++) {
+          var dx = clusters[i].x - clusters[j].x;
+          var dy = clusters[i].y - clusters[j].y;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestI = i;
+            bestJ = j;
+          }
+        }
+      }
+
+      if (bestI !== -1) {
+        var ci = clusters[bestI], cj = clusters[bestJ];
+        var ni = ci.groupIndices.length, nj = cj.groupIndices.length;
+        ci.x = (ci.x * ni + cj.x * nj) / (ni + nj);
+        ci.y = (ci.y * ni + cj.y * nj) / (ni + nj);
+        ci.groupIndices = ci.groupIndices.concat(cj.groupIndices);
+        clusters.splice(bestJ, 1);
+        merged = true;
+      }
     }
 
-    // Create one pin per location group
-    var groupIndex = 0;
-    groupOrder.forEach(function (locationName) {
-      var groupEntries = groups[locationName]; // already chronological
-      var displayEntry = groupEntries[groupEntries.length - 1]; // most recent for display
-      var positionEntry = groupEntries[0]; // earliest for map position
-      var isGrouped = groupEntries.length > 1;
+    // Build final cluster objects
+    return clusters.map(function (c) {
+      // Sort group indices to maintain chronological order
+      c.groupIndices.sort(function (a, b) { return a - b; });
 
-      // Assign a per-entry angle for each entry in this group
-      var maxAngle = isGrouped ? 3.5 : 6;
-      var entryAngles = {};
-      groupEntries.forEach(function (e, i) {
-        var r = seededRandom(groupIndex * 100 + i);
-        entryAngles[e.id] = (r - 0.5) * 2 * maxAngle;
+      var allEntries = [];
+      c.groupIndices.forEach(function (gi) {
+        allEntries = allEntries.concat(groups[gi].entries);
       });
+      allEntries.sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
 
-      var pinEl = document.createElement('div');
-      pinEl.className = 'cork-pin cork-pin--pending';
-      if (isGrouped) pinEl.classList.add('cork-pin--grouped');
-      pinEl.setAttribute('data-entry-ids', groupEntries.map(function (e) { return e.id; }).join(','));
+      return {
+        groupIndices: c.groupIndices,
+        entries: allEntries,
+        primaryIndex: c.groupIndices[0],  // first group is primary (visible marker)
+        locationNames: c.groupIndices.map(function (gi) { return groups[gi].locationName; })
+      };
+    });
+  }
 
-      // Set initial angle for the display entry
-      var displayAngle = entryAngles[displayEntry.id] || 0;
-      pinEl.style.setProperty('--pin-angle', displayAngle.toFixed(1) + 'deg');
+  /**
+   * Generate a cluster signature string for diff detection
+   */
+  function clusterSignature(clusters) {
+    return clusters.map(function (c) {
+      return c.groupIndices.join(',');
+    }).join(';;');
+  }
 
-      var numberDisplay;
-      if (isGrouped && displayEntry.id === groupEntries[groupEntries.length - 1].id) {
-        // Showing latest in cluster — display range
-        var firstNum = entryNumber[groupEntries[0].id] || '';
-        var lastNum = entryNumber[groupEntries[groupEntries.length - 1].id] || '';
-        numberDisplay = firstNum + '-' + lastNum;
-      } else {
-        numberDisplay = '' + (entryNumber[displayEntry.id] || '');
+  /**
+   * Build pin HTML for a group of entries
+   */
+  function buildPinHtml(pinEl, groupEntries, groupIndex) {
+    var displayEntry = groupEntries[groupEntries.length - 1];
+    var isGrouped = groupEntries.length > 1;
+
+    // Assign per-entry angles
+    var maxAngle = isGrouped ? 3.5 : 6;
+    var entryAngles = {};
+    groupEntries.forEach(function (e, i) {
+      var r = seededRandom(groupIndex * 100 + i);
+      entryAngles[e.id] = (r - 0.5) * 2 * maxAngle;
+    });
+
+    // Preserve mapbox marker classes when rebuilding
+    var mapboxClasses = [];
+    pinEl.classList.forEach(function (cls) {
+      if (cls.indexOf('mapboxgl-') === 0) mapboxClasses.push(cls);
+    });
+    pinEl.className = 'cork-pin cork-pin--pending ' + mapboxClasses.join(' ');
+    if (isGrouped) pinEl.classList.add('cork-pin--grouped');
+    pinEl.setAttribute('data-entry-ids', groupEntries.map(function (e) { return e.id; }).join(','));
+
+    var displayAngle = entryAngles[displayEntry.id] || 0;
+    pinEl.style.setProperty('--pin-angle', displayAngle.toFixed(1) + 'deg');
+
+    var numberDisplay;
+    if (isGrouped && displayEntry.id === groupEntries[groupEntries.length - 1].id) {
+      var firstNum = entryNumberMap[groupEntries[0].id] || '';
+      var lastNum = entryNumberMap[groupEntries[groupEntries.length - 1].id] || '';
+      numberDisplay = firstNum + '-' + lastNum;
+    } else {
+      numberDisplay = '' + (entryNumberMap[displayEntry.id] || '');
+    }
+
+    var thumbPhoto = null;
+    for (var gi = groupEntries.length - 1; gi >= 0; gi--) {
+      if (groupEntries[gi].photos && groupEntries[gi].photos.length > 0) {
+        thumbPhoto = getPreviewPhoto(groupEntries[gi]);
+        break;
       }
-
-      // Find first available photo from group (try most recent first)
-      var thumbPhoto = null;
-      for (var gi = groupEntries.length - 1; gi >= 0; gi--) {
-        if (groupEntries[gi].photos && groupEntries[gi].photos.length > 0) {
-          thumbPhoto = getPreviewPhoto(groupEntries[gi]);
-          break;
-        }
-      }
-      var thumbHtml = '';
-      if (thumbPhoto) {
-        thumbHtml = '<div class="cork-pin__thumb"><img src="' + escapeHtml(thumbPhoto) + '" alt="" loading="lazy"></div>';
-      }
-      // Thumb visibility is managed dynamically by updateThumbVisibility
+    }
+    var thumbHtml = '';
+    if (thumbPhoto) {
+      thumbHtml = '<div class="cork-pin__thumb"><img src="' + escapeHtml(thumbPhoto) + '" alt="" loading="lazy"></div>';
+    } else {
       pinEl.classList.add('cork-pin--no-thumb');
+    }
 
-      // Build stack cards for grouped pins (N-1 fake cards behind the main, max 4)
-      var stackHtml = '';
-      if (isGrouped) {
-        var stackCount = Math.min(groupEntries.length - 1, 4);
-        pinEl.style.setProperty('--stack-count', stackCount);
-        // Seeded angles: alternate direction, playful messy spread
-        var angles = [-4, 5, -6.5, 7.5];
-        for (var si = 0; si < stackCount; si++) {
-          var angle = angles[si] || (si % 2 === 0 ? -(si * 2 + 3) : (si * 2 + 3));
-          stackHtml +=
-            '<div class="cork-pin__stack-layer" style="--stack-i:' + si + ';--stack-angle:' + angle + 'deg">' +
-              '<div class="cork-pin__stack-nail"></div>' +
-              '<div class="cork-pin__stack-card"></div>' +
-            '</div>';
-        }
+    var stackHtml = '';
+    if (isGrouped) {
+      var stackCount = Math.min(groupEntries.length - 1, 4);
+      pinEl.style.setProperty('--stack-count', stackCount);
+      var angles = [-4, 5, -6.5, 7.5];
+      for (var si = 0; si < stackCount; si++) {
+        var angle = angles[si] || (si % 2 === 0 ? -(si * 2 + 3) : (si * 2 + 3));
+        stackHtml +=
+          '<div class="cork-pin__stack-layer" style="--stack-i:' + si + ';--stack-angle:' + angle + 'deg">' +
+            '<div class="cork-pin__stack-nail"></div>' +
+            '<div class="cork-pin__stack-card"></div>' +
+          '</div>';
       }
+    }
 
-      pinEl.innerHTML =
-        stackHtml +
-        '<div class="cork-pin__nail"></div>' +
-        '<div class="cork-pin__card">' +
-          '<div class="cork-pin__title">' + escapeHtml(displayEntry.title) + '</div>' +
-          '<div class="cork-pin__meta-row">' +
-            '<span class="cork-pin__date">' + formatDate(displayEntry.date) + '</span>' +
-            '<span class="cork-pin__number">' + numberDisplay + '</span>' +
-          '</div>' +
-          thumbHtml +
+    pinEl.innerHTML =
+      stackHtml +
+      '<div class="cork-pin__nail"></div>' +
+      '<div class="cork-pin__card">' +
+        '<div class="cork-pin__title">' + escapeHtml(displayEntry.title) + '</div>' +
+        '<div class="cork-pin__meta-row">' +
+          '<span class="cork-pin__date">' + formatDate(displayEntry.date) + '</span>' +
+          '<span class="cork-pin__number">' + numberDisplay + '</span>' +
         '</div>' +
-        '';
+        thumbHtml +
+      '</div>';
 
-      var lngLat = [positionEntry.coordinates[1], positionEntry.coordinates[0]];
+    return entryAngles;
+  }
+
+  /**
+   * Add cork board pins for journal entries.
+   * Creates one persistent marker per location group, then clusters dynamically.
+   */
+  function addCorkPins(entries, onPinClick, onPinHover) {
+    if (!map) return;
+
+    storedOnPinClick = onPinClick;
+    storedOnPinHover = onPinHover;
+
+    // Sort all entries chronologically and build number map
+    var sorted = entries.slice().sort(function (a, b) {
+      return new Date(a.date) - new Date(b.date);
+    });
+    sorted.forEach(function (e, i) { entryNumberMap[e.id] = i + 1; });
+    totalEntries = sorted.length;
+
+    // Build location groups (atomic units)
+    locationGroups = buildLocationGroups(entries);
+
+    // Build waypointToGroupIndex: map each sorted entry index to its location group index
+    waypointToGroupIndex = {};
+    var groupIndexByLocation = {};
+    locationGroups.forEach(function (g, gi) {
+      groupIndexByLocation[g.locationName] = gi;
+    });
+    sorted.forEach(function (entry, entryIdx) {
+      waypointToGroupIndex[entryIdx] = groupIndexByLocation[entry.location_name];
+    });
+
+    // Create one persistent marker per location group
+    allLocationPins = [];
+    locationGroups.forEach(function (group, groupIndex) {
+      var pinEl = document.createElement('div');
+      var entryAngles = buildPinHtml(pinEl, group.entries, groupIndex);
 
       var marker = new mapboxgl.Marker({
         element: pinEl,
         anchor: 'top',
         offset: [0, -7],
       })
-        .setLngLat(lngLat)
+        .setLngLat(group.centroid)
         .addTo(map);
 
       pinEl.addEventListener('click', function (e) {
         e.stopPropagation();
-        if (onPinClick) onPinClick(groupEntries, pinEl, marker);
+        // Find which cluster this group belongs to and pass all cluster entries
+        var clusterEntries = getClusterEntriesForGroup(groupIndex);
+        if (onPinClick) onPinClick(clusterEntries, pinEl, marker);
       });
 
       pinEl.addEventListener('mouseenter', function () {
-        if (onPinHover) onPinHover(groupEntries, pinEl, marker);
+        var clusterEntries = getClusterEntriesForGroup(groupIndex);
+        if (onPinHover) onPinHover(clusterEntries, pinEl, marker);
       });
 
-      corkPins.push({ marker: marker, element: pinEl, entries: groupEntries, entryAngles: entryAngles });
-      groupIndex++;
+      allLocationPins.push({
+        marker: marker,
+        element: pinEl,
+        entries: group.entries,
+        entryAngles: entryAngles,
+        groupIndex: groupIndex
+      });
     });
+
+    // Set initial corkPins to allLocationPins (before clustering kicks in)
+    corkPins = allLocationPins.slice();
+  }
+
+  /**
+   * Get all entries in the cluster that contains a given group index
+   */
+  function getClusterEntriesForGroup(groupIndex) {
+    // Find which cluster contains this group
+    for (var i = 0; i < currentClusters.length; i++) {
+      if (currentClusters[i].groupIndices.indexOf(groupIndex) !== -1) {
+        return currentClusters[i].entries;
+      }
+    }
+    // Fallback: just the group's own entries
+    return locationGroups[groupIndex] ? locationGroups[groupIndex].entries : [];
+  }
+
+  // Current cluster state
+  var currentClusters = [];
+
+  /**
+   * Re-cluster pins based on current zoom level.
+   * Animates merge/split transitions.
+   */
+  function renderClusters() {
+    if (!map || locationGroups.length === 0) return;
+    if (expandedPinEl) return; // Don't re-cluster while expanded
+
+    var newClusters = clusterLocationGroups(locationGroups, CLUSTER_THRESHOLD_PX);
+    var newSig = clusterSignature(newClusters);
+
+    // Skip if clustering hasn't changed
+    if (newSig === currentClusterSig) return;
+
+    var oldClusters = currentClusters;
+    currentClusters = newClusters;
+    currentClusterSig = newSig;
+
+    // Build sets of which groups are primary (visible) vs secondary (hidden)
+    var newPrimaryGroups = {};  // groupIndex -> cluster index
+    var newSecondaryGroups = {}; // groupIndex -> primaryGroupIndex
+    newClusters.forEach(function (cluster, ci) {
+      var primary = cluster.primaryIndex;
+      newPrimaryGroups[primary] = ci;
+      cluster.groupIndices.forEach(function (gi) {
+        if (gi !== primary) {
+          newSecondaryGroups[gi] = primary;
+        }
+      });
+    });
+
+    // Build old state for comparison
+    var oldPrimaryGroups = {};
+    var oldSecondaryGroups = {};
+    oldClusters.forEach(function (cluster) {
+      var primary = cluster.primaryIndex;
+      oldPrimaryGroups[primary] = true;
+      cluster.groupIndices.forEach(function (gi) {
+        if (gi !== primary) {
+          oldSecondaryGroups[gi] = primary;
+        }
+      });
+    });
+
+    // Process each location pin
+    allLocationPins.forEach(function (pin, gi) {
+      var isPrimaryNow = gi in newPrimaryGroups;
+      var wasSecondary = gi in oldSecondaryGroups;
+      var isSecondaryNow = gi in newSecondaryGroups;
+      var wasPrimary = gi in oldPrimaryGroups;
+
+      if (isPrimaryNow) {
+        // This group is a primary pin — update its content and show it
+        var cluster = newClusters[newPrimaryGroups[gi]];
+        updatePrimaryPin(pin, cluster, gi);
+
+        if (wasSecondary) {
+          // Was hidden, now splitting out — animate in
+          pin.element.style.display = '';
+          pin.element.style.visibility = '';
+          pin.element.classList.remove('cork-pin--merging');
+          pin.element.classList.add('cork-pin--splitting');
+          pin.element.addEventListener('animationend', function handler() {
+            pin.element.classList.remove('cork-pin--splitting');
+            pin.element.removeEventListener('animationend', handler);
+          });
+        } else {
+          // Was already primary — check if it absorbed new groups
+          pin.element.style.display = '';
+          pin.element.style.visibility = '';
+          pin.element.classList.remove('cork-pin--merging');
+          // Pulse if cluster membership changed
+          var oldClusterGroups = [];
+          oldClusters.forEach(function (oc) {
+            if (oc.primaryIndex === gi) oldClusterGroups = oc.groupIndices;
+          });
+          if (cluster.groupIndices.length > oldClusterGroups.length) {
+            pin.element.classList.add('cork-pin--absorb');
+            pin.element.addEventListener('animationend', function handler() {
+              pin.element.classList.remove('cork-pin--absorb');
+              pin.element.removeEventListener('animationend', handler);
+            });
+          }
+        }
+      } else if (isSecondaryNow) {
+        // This group is absorbed into another cluster — hide it
+        if (!wasSecondary) {
+          // Was visible, now merging — animate out
+          pin.element.classList.add('cork-pin--merging');
+          // After animation, hide completely
+          setTimeout(function () {
+            if (pin.element.classList.contains('cork-pin--merging')) {
+              pin.element.style.display = 'none';
+            }
+          }, 350);
+        } else {
+          // Was already hidden
+          pin.element.style.display = 'none';
+          pin.element.classList.remove('cork-pin--splitting');
+        }
+      }
+    });
+
+    // Rebuild corkPins array to only contain primary (visible) pins
+    corkPins = [];
+    newClusters.forEach(function (cluster) {
+      var pin = allLocationPins[cluster.primaryIndex];
+      // Update the pin's entries to include all cluster entries
+      corkPins.push({
+        marker: pin.marker,
+        element: pin.element,
+        entries: cluster.entries,
+        entryAngles: pin.entryAngles
+      });
+    });
+
+    // Re-apply highlight if there's an active entry
+    if (activePreviewEntryId) {
+      // Re-highlight
+      document.querySelectorAll('.cork-pin--highlighted').forEach(function (el) {
+        el.classList.remove('cork-pin--highlighted');
+      });
+      allLocationPins.forEach(function (pin) {
+        var ids = (pin.element.getAttribute('data-entry-ids') || '').split(',');
+        if (ids.indexOf(activePreviewEntryId) !== -1 && pin.element.style.display !== 'none') {
+          pin.element.classList.add('cork-pin--highlighted');
+        }
+      });
+    }
+  }
+
+  /**
+   * Update a primary pin's content to reflect its cluster's entries
+   */
+  function updatePrimaryPin(pin, cluster, groupIndex) {
+    var allEntries = cluster.entries;
+    var isGrouped = allEntries.length > 1;
+
+    // Update data-entry-ids to include all cluster entries
+    pin.element.setAttribute('data-entry-ids', allEntries.map(function (e) { return e.id; }).join(','));
+
+    // Update grouped class
+    if (isGrouped) {
+      pin.element.classList.add('cork-pin--grouped');
+    } else {
+      pin.element.classList.remove('cork-pin--grouped');
+    }
+
+    // Rebuild the pin HTML with cluster entries
+    var entryAngles = buildPinHtml(pin.element, allEntries, groupIndex);
+    pin.entryAngles = entryAngles;
+    pin.entries = allEntries;
+
+    // Preserve reveal state (don't add pending if already revealed)
+    if (initialAnimationComplete) {
+      pin.element.classList.remove('cork-pin--pending');
+    }
   }
 
   /**
@@ -747,7 +1093,6 @@ const MapModule = (function () {
         // Modern clipboard API (needs secure context)
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(url).then(onCopied).catch(function () {
-            // Fallback: hidden textarea trick
             var ta = document.createElement('textarea');
             ta.value = url;
             ta.style.position = 'fixed';
@@ -759,7 +1104,6 @@ const MapModule = (function () {
             onCopied();
           });
         } else {
-          // Legacy fallback
           var ta = document.createElement('textarea');
           ta.value = url;
           ta.style.position = 'fixed';
@@ -1067,7 +1411,7 @@ const MapModule = (function () {
     constrainExpandedHeight(expanded);
 
     // Hide other pins so they don't show through expanded entry
-    corkPins.forEach(function (p) {
+    allLocationPins.forEach(function (p) {
       if (p.element !== pinEl) p.element.style.visibility = 'hidden';
     });
 
@@ -1160,8 +1504,8 @@ const MapModule = (function () {
     expandedPinEntries = [];
     expandedTabIndex = 0;
 
-    // Restore other pins
-    corkPins.forEach(function (p) {
+    // Restore all pins
+    allLocationPins.forEach(function (p) {
       p.element.style.visibility = '';
     });
 
@@ -1173,6 +1517,11 @@ const MapModule = (function () {
 
     // Clear URL hash
     history.replaceState(null, '', window.location.pathname);
+
+    // Re-cluster since zoom may have changed while expanded
+    if (initialAnimationComplete) {
+      renderClusters();
+    }
   }
 
   /**
