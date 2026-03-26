@@ -37,7 +37,7 @@ const MapModule = (function () {
   var storedOnPinHover = null;
   var clusterDebounceTimer = null;
   var initialAnimationComplete = false;
-  var CLUSTER_THRESHOLD_PX = 150;
+  var CLUSTER_THRESHOLD_PX = 70;
 
   /**
    * Get the preview/thumbnail photo for an entry.

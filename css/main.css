@@ -1180,11 +1180,11 @@ a:hover {
   transform: scale(0.8) rotate(var(--stack-angle, 0deg));
 }
 
-/* Cluster merge/split animations */
+/* Cluster merge/split animations — only animate opacity on the marker element
+   (Mapbox uses transform:translate for positioning, so we can't touch transform here) */
 .cork-pin--merging {
-  transform: scale(calc(var(--pin-zoom-scale, 1) * 0.5)) !important;
   opacity: 0 !important;
-  transition: transform 0.35s ease-in, opacity 0.3s ease-in !important;
+  transition: opacity 0.3s ease-in !important;
   pointer-events: none !important;
 }
 
@@ -1193,23 +1193,21 @@ a:hover {
 }
 
 @keyframes pinSplitIn {
-  from {
-    transform: scale(calc(var(--pin-zoom-scale, 1) * 0.5));
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-.cork-pin--absorb {
-  animation: pinAbsorb 0.3s ease-out;
+/* Absorb pulse on inner elements (not the marker itself) */
+.cork-pin--absorb .cork-pin__card,
+.cork-pin--absorb .cork-pin__nail,
+.cork-pin--absorb .cork-pin__stack-layer {
+  animation: pinAbsorbInner 0.3s ease-out;
 }
 
-@keyframes pinAbsorb {
-  0%   { transform: scale(var(--pin-zoom-scale, 1)); }
-  50%  { transform: scale(calc(var(--pin-zoom-scale, 1) * 1.1)); }
-  100% { transform: scale(var(--pin-zoom-scale, 1)); }
+@keyframes pinAbsorbInner {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 
 /* ==========================================================================
