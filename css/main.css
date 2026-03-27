@@ -1157,6 +1157,13 @@ a:hover {
               opacity 0.4s ease;
 }
 
+.cork-pin--no-transition,
+.cork-pin--no-transition .cork-pin__card,
+.cork-pin--no-transition .cork-pin__nail,
+.cork-pin--no-transition .cork-pin__stack-layer {
+  transition: none !important;
+}
+
 .cork-pin:not(.cork-pin--highlighted):not(.cork-pin--pending) .cork-pin__card,
 .cork-pin:not(.cork-pin--highlighted):not(.cork-pin--pending) .cork-pin__nail {
   transform: scale(0.667) rotate(var(--pin-angle, 0deg));

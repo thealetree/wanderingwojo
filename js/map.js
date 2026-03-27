@@ -337,15 +337,13 @@ const MapModule = (function () {
       if (progress < 1) {
         requestAnimationFrame(step);
       } else {
-        // Animation complete — remove reveal classes before clustering
-        // (otherwise renderClusters → buildPinHtml creates new inner elements
-        // that re-trigger the reveal animation)
+        // Animation complete — just remove reveal classes and enable clustering
+        // Don't call renderClusters() here — pins are already correct.
+        // The zoom handler will trigger clustering when the user zooms.
         allLocationPins.forEach(function (pin) {
           pin.element.classList.remove('cork-pin--reveal');
         });
         initialAnimationComplete = true;
-        // Run initial clustering
-        renderClusters();
       }
     }
 
@@ -565,12 +563,12 @@ const MapModule = (function () {
       entryAngles[e.id] = (r - 0.5) * 2 * maxAngle;
     });
 
-    // Preserve mapbox marker classes when rebuilding
-    var mapboxClasses = [];
+    // Preserve mapbox marker classes and no-transition when rebuilding
+    var preserveClasses = [];
     pinEl.classList.forEach(function (cls) {
-      if (cls.indexOf('mapboxgl-') === 0) mapboxClasses.push(cls);
+      if (cls.indexOf('mapboxgl-') === 0 || cls === 'cork-pin--no-transition' || cls === 'cork-pin--no-thumb') preserveClasses.push(cls);
     });
-    pinEl.className = 'cork-pin cork-pin--pending ' + mapboxClasses.join(' ');
+    pinEl.className = 'cork-pin ' + (initialAnimationComplete ? '' : 'cork-pin--pending ') + preserveClasses.join(' ');
     if (isGrouped) pinEl.classList.add('cork-pin--grouped');
     pinEl.setAttribute('data-entry-ids', groupEntries.map(function (e) { return e.id; }).join(','));
 
@@ -691,6 +689,18 @@ const MapModule = (function () {
 
     // Set initial corkPins to allLocationPins (before clustering kicks in)
     corkPins = allLocationPins.slice();
+
+    // Initialize cluster state to match as-built (each group = its own cluster)
+    // This prevents renderClusters from needlessly rebuilding on first call
+    currentClusters = locationGroups.map(function (group, idx) {
+      return {
+        groupIndices: [idx],
+        entries: group.entries,
+        primaryIndex: idx,
+        locationNames: [group.locationName]
+      };
+    });
+    currentClusterSig = clusterSignature(currentClusters);
 
     // Event delegation on the map container for pin click and hover
     var mapContainer = map.getContainer();
