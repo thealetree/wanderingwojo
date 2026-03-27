@@ -326,5 +326,31 @@
     "mood_left": "HOT",
     "mood_right": "TIRED",
     "mood_value": 0.7
+  },
+  {
+    "id": "2026-03-27-din-today",
+    "date": "2026-03-27",
+    "title": "Diné Today",
+    "type": "field-notes",
+    "location_name": "Grand Canyon",
+    "coordinates": [
+      36.0980405,
+      -112.0962787
+    ],
+    "body": "5 years ago today, the big guy's step dad passed. He was an amazing guy, with a wild story, and a huge heart. Five years ago the big guy couldn't be there in person as Nakaii passed, but he dug a grave for him for when his ashes came back home to Resurrection Bay. \n\nToday the big guy's fam is back home in Alaska and we're out here in the middle of nowhere just south of the Grand Canyon's South entrance. \n\nFrom what Grandma says Nakaii was the coyote, but also came to people in dreams as a white horse or riding a white horse...\n\n Tonight, after the big dude gets all set up in his tent, I hear footsteps nearby and then he shouts out \"hello?? Someone out there?\"\n\nHe unzips his tent flaps and shines a light but it just lights up the screen... can't see anything. So as the footsteps continue he unzips the main tent door flap and sees a moonlit white horse walking off into the dark. \n\nThere was one time Nakaii did the big dude an incredibly huge favor and said \"You're Diné today.\" he'll forever be grateful. \n\nTonight we sleep with the coyotes and horses, and the sound of people yelling at them in the distance. We remember and love Nakaii.",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_2668.jpg",
+      "media/photos/img_2683.jpg",
+      "media/photos/img_2688.jpg",
+      "media/photos/img_2696.jpg",
+      "media/photos/img_2699.jpg",
+      "media/photos/img_2714.jpg",
+      "media/photos/img_2721.jpg"
+    ],
+    "preview_photo": 4,
+    "mood_left": "Grateful",
+    "mood_right": "Honored",
+    "mood_value": 0.5
   }
 ]
