@@ -880,7 +880,7 @@ a:hover {
 .cork-pin {
   cursor: pointer;
   transform: scale(var(--pin-zoom-scale, 1));
-  transition: transform var(--transition-fast);
+  transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
   z-index: 1;
   position: relative;
 }
@@ -1016,10 +1016,14 @@ a:hover {
 
 /* Older pins: hide thumb, shrink card, scale down */
 .cork-pin--no-thumb .cork-pin__thumb {
-  display: none;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.4s ease, max-height 0.4s ease;
 }
 .cork-pin--no-thumb .cork-pin__card {
   min-width: 0;
+  transition: min-width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
 .cork-pin--no-thumb {
   transform: scale(calc(var(--pin-zoom-scale, 1) * 0.75));
@@ -1030,7 +1034,8 @@ a:hover {
 }
 .cork-pin--no-thumb:hover .cork-pin__thumb,
 .cork-pin--no-thumb.cork-pin--highlighted .cork-pin__thumb {
-  display: block;
+  opacity: 1;
+  max-height: 200px;
 }
 .cork-pin--no-thumb:hover .cork-pin__card,
 .cork-pin--no-thumb.cork-pin--highlighted .cork-pin__card {
@@ -1103,24 +1108,24 @@ a:hover {
   transform: scale(0);
 }
 
-/* Cork pin reveal — bounce in when route arrives (inactive = half size) */
+/* Cork pin reveal — smooth fade in when route arrives */
 .cork-pin--reveal .cork-pin__nail,
 .cork-pin--reveal .cork-pin__card {
-  animation: pinBounceInSmall 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: pinBounceInSmall 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .cork-pin--reveal .cork-pin__stack-layer {
-  animation: pinBounceInSmallRotated 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: pinBounceInSmallRotated 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Highlighted pin reveals at full size */
 .cork-pin--highlighted.cork-pin--reveal .cork-pin__nail,
 .cork-pin--highlighted.cork-pin--reveal .cork-pin__card {
-  animation: pinBounceInFull 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: pinBounceInFull 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .cork-pin--highlighted.cork-pin--reveal .cork-pin__stack-layer {
-  animation: pinBounceInFullRotated 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: pinBounceInFullRotated 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes pinBounceInSmall {
@@ -1148,8 +1153,8 @@ a:hover {
 .cork-pin__nail,
 .cork-pin__stack-layer {
   transform-origin: top center;
-  transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1),
-              opacity 0.3s ease;
+  transition: transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1),
+              opacity 0.4s ease;
 }
 
 .cork-pin:not(.cork-pin--highlighted):not(.cork-pin--pending) .cork-pin__card,
@@ -1184,29 +1189,56 @@ a:hover {
    (Mapbox uses transform:translate for positioning, so we can't touch transform here) */
 .cork-pin--merging {
   opacity: 0 !important;
-  transition: opacity 0.3s ease-in !important;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
   pointer-events: none !important;
 }
 
+.cork-pin--merging .cork-pin__card,
+.cork-pin--merging .cork-pin__nail,
+.cork-pin--merging .cork-pin__stack-layer {
+  transform: scale(0.6);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .cork-pin--splitting {
-  animation: pinSplitIn 0.35s ease-out forwards;
+  animation: pinSplitIn 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
 }
 
 @keyframes pinSplitIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  0%   { opacity: 0; }
+  30%  { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.cork-pin--splitting .cork-pin__card,
+.cork-pin--splitting .cork-pin__nail {
+  animation: pinSplitInner 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+.cork-pin--splitting .cork-pin__stack-layer {
+  animation: pinSplitInnerRotated 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+@keyframes pinSplitInner {
+  0%   { transform: scale(0.5); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pinSplitInnerRotated {
+  0%   { transform: scale(0.5) rotate(var(--stack-angle, 0deg)); }
+  100% { transform: scale(1) rotate(var(--stack-angle, 0deg)); }
 }
 
 /* Absorb pulse on inner elements (not the marker itself) */
 .cork-pin--absorb .cork-pin__card,
 .cork-pin--absorb .cork-pin__nail,
 .cork-pin--absorb .cork-pin__stack-layer {
-  animation: pinAbsorbInner 0.3s ease-out;
+  animation: pinAbsorbInner 0.45s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
 @keyframes pinAbsorbInner {
   0%   { transform: scale(1); }
-  50%  { transform: scale(1.08); }
+  40%  { transform: scale(1.12); }
   100% { transform: scale(1); }
 }
 

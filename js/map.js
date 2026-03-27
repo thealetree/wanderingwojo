@@ -337,7 +337,12 @@ const MapModule = (function () {
       if (progress < 1) {
         requestAnimationFrame(step);
       } else {
-        // Animation complete — enable clustering
+        // Animation complete — remove reveal classes before clustering
+        // (otherwise renderClusters → buildPinHtml creates new inner elements
+        // that re-trigger the reveal animation)
+        allLocationPins.forEach(function (pin) {
+          pin.element.classList.remove('cork-pin--reveal');
+        });
         initialAnimationComplete = true;
         // Run initial clustering
         renderClusters();
@@ -456,7 +461,7 @@ const MapModule = (function () {
     return 2 * R * Math.asin(Math.sqrt(h));
   }
 
-  var MAX_CLUSTER_DISTANCE_KM = 30; // never merge locations more than 30km apart
+  var MAX_CLUSTER_DISTANCE_KM = 40; // never merge locations more than 40km apart
 
   /**
    * Cluster location groups by screen-space pixel proximity.
@@ -622,6 +627,10 @@ const MapModule = (function () {
         thumbHtml +
       '</div>';
 
+    // Inline event handlers — more reliable than addEventListener on Mapbox markers
+    pinEl.onmouseover = function () { if (window.__wojoHover) window.__wojoHover(pinEl.getAttribute('data-group-index')); };
+    pinEl.onclick = function (evt) { evt.stopPropagation(); if (window.__wojoClick) window.__wojoClick(pinEl.getAttribute('data-group-index'), evt); };
+
     return entryAngles;
   }
 
@@ -669,17 +678,7 @@ const MapModule = (function () {
         .setLngLat(group.centroid)
         .addTo(map);
 
-      pinEl.addEventListener('click', function (e) {
-        e.stopPropagation();
-        // Find which cluster this group belongs to and pass all cluster entries
-        var clusterEntries = getClusterEntriesForGroup(groupIndex);
-        if (onPinClick) onPinClick(clusterEntries, pinEl, marker);
-      });
-
-      pinEl.addEventListener('mouseenter', function () {
-        var clusterEntries = getClusterEntriesForGroup(groupIndex);
-        if (onPinHover) onPinHover(clusterEntries, pinEl, marker);
-      });
+      pinEl.setAttribute('data-group-index', groupIndex);
 
       allLocationPins.push({
         marker: marker,
@@ -692,6 +691,35 @@ const MapModule = (function () {
 
     // Set initial corkPins to allLocationPins (before clustering kicks in)
     corkPins = allLocationPins.slice();
+
+    // Event delegation on the map container for pin click and hover
+    var mapContainer = map.getContainer();
+
+    // Expose hover/click handlers globally for inline event attributes
+    window.__wojoHover = function (gi) {
+      try {
+        gi = parseInt(gi, 10);
+        if (isNaN(gi)) return;
+        var clusterEntries = getClusterEntriesForGroup(gi);
+        var pinData = allLocationPins[gi];
+        if (onPinHover && pinData) onPinHover(clusterEntries, pinData.element, pinData.marker);
+      } catch (err) {
+        document.title = 'HOVER_ERR:' + err.message;
+      }
+    };
+
+    window.__wojoClick = function (gi, evt) {
+      try {
+        if (evt) evt.stopPropagation();
+        gi = parseInt(gi, 10);
+        if (isNaN(gi)) return;
+        var clusterEntries = getClusterEntriesForGroup(gi);
+        var pinData = allLocationPins[gi];
+        if (onPinClick && pinData) onPinClick(clusterEntries, pinData.element, pinData.marker);
+      } catch (err) {
+        document.title = 'CLICK_ERR:' + err.message;
+      }
+    };
   }
 
   /**
@@ -805,7 +833,7 @@ const MapModule = (function () {
             if (pin.element.classList.contains('cork-pin--merging')) {
               pin.element.style.display = 'none';
             }
-          }, 350);
+          }, 550);
         } else {
           // Was already hidden
           pin.element.style.display = 'none';
