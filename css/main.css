@@ -777,6 +777,183 @@ a:hover {
 }
 
 /* ==========================================================================
+   KLADG Radio Mini Player
+   ========================================================================== */
+.kladg-player {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.kladg-player__header {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mid-gray);
+  text-decoration: none;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  line-height: 1.4;
+  align-self: stretch;
+  transition: color var(--transition-fast);
+}
+
+.kladg-player__header-text {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.kladg-player__header:hover {
+  color: var(--charcoal);
+}
+
+.kladg-player__sub {
+  font-weight: 400;
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  display: block;
+  text-transform: none;
+  text-decoration: none;
+  color: var(--warm-gray);
+}
+
+.kladg-player--mobile .kladg-player__sub {
+  display: inline;
+  font-size: 0.7rem;
+  margin-left: 0.3em;
+}
+
+.kladg-player__art {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--beige-dark);
+}
+
+.kladg-player__title {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--mid-gray);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--transition-fast);
+}
+
+.kladg-player__title:hover {
+  color: var(--charcoal);
+}
+
+.kladg-player__controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.kladg-player__btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--mid-gray);
+  font-size: 0.85rem;
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kladg-player__btn:hover {
+  color: var(--charcoal);
+}
+
+.kladg-player__btn--play {
+  font-size: 1rem;
+  color: var(--charcoal);
+}
+
+.kladg-player__btn--play:hover {
+  color: var(--near-black);
+}
+
+/* Mobile player — in about panel */
+.kladg-player--mobile {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--beige-dark);
+}
+
+.kladg-player--mobile .kladg-player__header {
+  writing-mode: horizontal-tb;
+  transform: none;
+  font-size: 0.75rem;
+}
+
+.kladg-player--mobile .kladg-player__row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.kladg-player--mobile .kladg-player__art {
+  width: 52px;
+  height: 52px;
+}
+
+.kladg-player--mobile .kladg-player__title {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  font-size: 0.95rem;
+}
+
+.kladg-player--mobile .kladg-player__controls {
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.kladg-player--mobile .kladg-player__btn {
+  font-size: 1.1rem;
+  padding: 4px 6px;
+}
+
+.kladg-player--mobile .kladg-player__btn--play {
+  font-size: 1.3rem;
+}
+
+/* Hide mobile player on desktop, hide desktop player on mobile */
+@media (min-width: 769px) {
+  .kladg-player--mobile {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  #kladg-player {
+    display: none;
+  }
+  .kladg-player--mobile {
+    display: flex;
+  }
+}
+
+/* ==========================================================================
    Entry Navigation + Journey Stats (unified bar)
    ========================================================================== */
 .entry-nav {

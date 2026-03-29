@@ -61,7 +61,18 @@
         <span class="other-projects__label">Other projects by Van:</span>
         <a class="other-projects__link" href="https://repsim.live" target="_blank" rel="noopener">Repsim — Natural Selection Sim</a>
         <a class="other-projects__link" href="https://mustardandmilk.com" target="_blank" rel="noopener">Mustard &amp; Milk — Nonsense Generator &amp; Book</a>
-        <a class="other-projects__link" href="https://kladg.com" target="_blank" rel="noopener">KLADG — Original Music by Van</a>
+      </div>
+      <div class="kladg-player kladg-player--mobile" id="kladg-player-mobile">
+        <a class="kladg-player__header" href="https://kladg.com" target="_blank" rel="noopener"><span class="kladg-player__header-text">KLADG RADIO</span> <span class="kladg-player__sub">Original tracks by Van</span></a>
+        <div class="kladg-player__row">
+          <img class="kladg-player__art" src="" alt="Album art">
+          <a class="kladg-player__title" href="https://kladg.com" target="_blank" rel="noopener">Loading...</a>
+          <div class="kladg-player__controls">
+            <button class="kladg-player__btn" data-kladg="prev" aria-label="Previous track">&#9198;</button>
+            <button class="kladg-player__btn kladg-player__btn--play" data-kladg="play" aria-label="Play">&#9654;</button>
+            <button class="kladg-player__btn" data-kladg="next" aria-label="Next track">&#9197;</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -142,7 +153,16 @@
       </div>
     </div>
     <div class="footer-links footer-links--right">
-      <a class="footer-links__link" href="https://kladg.com" target="_blank" rel="noopener"><span class="footer-links__title">KLADG</span><span class="footer-links__desc">Original Music by Van</span></a>
+      <div class="kladg-player" id="kladg-player">
+        <a class="kladg-player__header" id="kladg-header" href="https://kladg.com" target="_blank" rel="noopener"><span class="kladg-player__header-text">KLADG RADIO</span> <span class="kladg-player__sub">Original tracks by Van</span></a>
+        <img class="kladg-player__art" id="kladg-art" src="" alt="Album art">
+        <a class="kladg-player__title" id="kladg-title" href="https://kladg.com" target="_blank" rel="noopener">Loading...</a>
+        <div class="kladg-player__controls">
+          <button class="kladg-player__btn" id="kladg-prev" aria-label="Previous track">&#9198;</button>
+          <button class="kladg-player__btn kladg-player__btn--play" id="kladg-play" aria-label="Play">&#9654;</button>
+          <button class="kladg-player__btn" id="kladg-next" aria-label="Next track">&#9197;</button>
+        </div>
+      </div>
     </div>
   </div>
 

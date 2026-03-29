@@ -45,6 +45,7 @@ const AppModule = (function () {
     initLightbox();
     initKeyboardNav();
     initJourneyStats();
+    initKladgPlayer();
     centerTwoCentsButton();
     window.addEventListener('resize', centerTwoCentsButton);
   }
@@ -787,6 +788,153 @@ const AppModule = (function () {
     loadGiscus: loadGiscus,
     onTabSwitch: onTabSwitch,
   };
+
+  /* ========================================================================
+     KLADG Radio Mini Player
+     ======================================================================== */
+  function initKladgPlayer() {
+    var tracks = [];
+    var artMap = {};
+    var history = [];
+    var historyIndex = -1;
+    var audio = new Audio();
+    audio.preload = 'auto';
+    var isPlaying = false;
+
+    // DOM references — desktop
+    var dArt = document.getElementById('kladg-art');
+    var dTitle = document.getElementById('kladg-title');
+    var dPlay = document.getElementById('kladg-play');
+    var dPrev = document.getElementById('kladg-prev');
+    var dNext = document.getElementById('kladg-next');
+    var dHeader = document.getElementById('kladg-header');
+
+    // DOM references — mobile
+    var mPlayer = document.getElementById('kladg-player-mobile');
+    var mArt = mPlayer ? mPlayer.querySelector('.kladg-player__art') : null;
+    var mTitle = mPlayer ? mPlayer.querySelector('.kladg-player__title') : null;
+    var mPlay = mPlayer ? mPlayer.querySelector('[data-kladg="play"]') : null;
+    var mPrev = mPlayer ? mPlayer.querySelector('[data-kladg="prev"]') : null;
+    var mNext = mPlayer ? mPlayer.querySelector('[data-kladg="next"]') : null;
+
+    // Load data
+    Promise.all([
+      fetch('data/kladg-tracks.json').then(function(r) { return r.json(); }),
+      fetch('data/kladg-art.json').then(function(r) { return r.json(); })
+    ]).then(function(results) {
+      tracks = results[0];
+      results[1].forEach(function(a) { artMap[a.id] = a.filename; });
+      // Load a random track but don't autoplay
+      loadTrack(pickRandom(), false);
+    }).catch(function() {
+      updateUI('KLADG Radio', '', 'https://kladg.com');
+    });
+
+    function pickRandom() {
+      if (tracks.length === 0) return null;
+      var recent = history.slice(-10).map(function(h) { return h.id; });
+      var candidates = tracks.filter(function(t) { return recent.indexOf(t.id) === -1; });
+      if (candidates.length === 0) candidates = tracks;
+      return candidates[Math.floor(Math.random() * candidates.length)];
+    }
+
+    function loadTrack(track, autoplay) {
+      if (!track) return;
+      var src = 'https://kladg.com' + (track.archiveUrl || track.localUrl);
+      audio.src = src;
+      audio.load();
+
+      // Add to history
+      if (historyIndex < 0 || history[historyIndex].id !== track.id) {
+        history = history.slice(0, historyIndex + 1);
+        history.push(track);
+        historyIndex = history.length - 1;
+      }
+
+      var artFile = artMap[track.artId] || '';
+      var artUrl = artFile ? 'https://kladg.com/art/' + artFile : '';
+      var trackUrl = 'https://kladg.com/#/track/' + track.id;
+      updateUI(track.title, artUrl, trackUrl);
+
+      if (autoplay) {
+        audio.play().then(function() {
+          isPlaying = true;
+          updatePlayBtn();
+        }).catch(function() {});
+      }
+    }
+
+    function updateUI(title, artUrl, trackUrl) {
+      [dTitle, mTitle].forEach(function(el) {
+        if (!el) return;
+        el.textContent = title;
+        el.href = trackUrl;
+      });
+      [dArt, mArt].forEach(function(el) {
+        if (!el) return;
+        if (artUrl) {
+          el.src = artUrl;
+          el.style.display = '';
+        } else {
+          el.style.display = 'none';
+        }
+      });
+      [dHeader].forEach(function(el) {
+        if (el) el.href = trackUrl;
+      });
+      if (mPlayer) {
+        var mHeader = mPlayer.querySelector('.kladg-player__header');
+        if (mHeader) mHeader.href = trackUrl;
+      }
+    }
+
+    function updatePlayBtn() {
+      var icon = isPlaying ? '\u23F8' : '\u25B6';
+      if (dPlay) dPlay.textContent = icon;
+      if (mPlay) mPlay.textContent = icon;
+    }
+
+    function togglePlay() {
+      if (!audio.src) return;
+      if (isPlaying) {
+        audio.pause();
+        isPlaying = false;
+      } else {
+        audio.play().catch(function() {});
+        isPlaying = true;
+      }
+      updatePlayBtn();
+    }
+
+    function skipNext() {
+      var track = pickRandom();
+      if (track) loadTrack(track, true);
+    }
+
+    function skipPrev() {
+      if (historyIndex > 0) {
+        historyIndex--;
+        loadTrack(history[historyIndex], true);
+      }
+    }
+
+    // Event listeners — desktop
+    if (dPlay) dPlay.addEventListener('click', function(e) { e.stopPropagation(); togglePlay(); });
+    if (dNext) dNext.addEventListener('click', function(e) { e.stopPropagation(); skipNext(); });
+    if (dPrev) dPrev.addEventListener('click', function(e) { e.stopPropagation(); skipPrev(); });
+
+    // Event listeners — mobile
+    if (mPlay) mPlay.addEventListener('click', function(e) { e.stopPropagation(); togglePlay(); });
+    if (mNext) mNext.addEventListener('click', function(e) { e.stopPropagation(); skipNext(); });
+    if (mPrev) mPrev.addEventListener('click', function(e) { e.stopPropagation(); skipPrev(); });
+
+    // Auto-advance on track end
+    audio.addEventListener('ended', function() {
+      isPlaying = false;
+      updatePlayBtn();
+      skipNext();
+    });
+  }
 })();
 
 // Make AppModule accessible globally for MapModule callbacks

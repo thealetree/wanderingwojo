@@ -459,7 +459,7 @@ const MapModule = (function () {
     return 2 * R * Math.asin(Math.sqrt(h));
   }
 
-  var MAX_CLUSTER_DISTANCE_KM = 40; // never merge locations more than 40km apart
+  var MAX_CLUSTER_DISTANCE_KM = 60; // never merge locations more than 60km apart
 
   /**
    * Cluster location groups by screen-space pixel proximity.
