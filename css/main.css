@@ -435,6 +435,8 @@ a:hover {
   box-shadow: var(--shadow-md);
   cursor: pointer;
   max-width: 300px;
+  max-height: calc(100dvh - var(--space-lg) - 9rem);
+  overflow-y: auto;
   transition: box-shadow var(--transition-fast), max-width var(--transition-med);
   filter: url(#roughen);
 }
@@ -716,15 +718,62 @@ a:hover {
 }
 
 .other-projects__link {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 0.95rem;
   color: var(--charcoal);
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 2px;
   transition: color var(--transition-fast);
 }
 
 .other-projects__link:hover {
   color: var(--terracotta);
+}
+
+/* Hide other-projects from about panel on desktop (shown in footer instead) */
+@media (min-width: 769px) {
+  .floating-title .other-projects {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Footer Project Links (inside entry-nav, desktop only)
+   ========================================================================== */
+.footer-links {
+  display: none;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.footer-links__link {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--mid-gray);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.footer-links__title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.footer-links__desc {
+  font-size: 0.75rem;
+  font-weight: 400;
+  display: block;
+  color: var(--warm-gray);
+}
+
+.footer-links__link:hover {
+  color: var(--charcoal);
 }
 
 /* ==========================================================================
@@ -746,6 +795,45 @@ a:hover {
   padding: 6px 14px 5px;
   box-shadow: var(--shadow-md);
   filter: url(#roughen);
+}
+
+.entry-nav__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+@media (min-width: 769px) {
+  .entry-nav {
+    flex-direction: row;
+    align-items: center;
+    width: calc(100vw - 8rem);
+    max-width: 1200px;
+    justify-content: space-between;
+    padding: 10px 2rem 8px;
+  }
+
+  .footer-links {
+    display: flex;
+    flex: 1;
+  }
+
+  .footer-links--left {
+    justify-content: space-evenly;
+  }
+
+  .footer-links--right {
+    justify-content: space-evenly;
+  }
+
+  .entry-nav__center {
+    flex-shrink: 0;
+    border-left: 1px solid var(--beige-dark);
+    border-right: 1px solid var(--beige-dark);
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
 }
 
 /* Stats row (sits above the nav controls) */
@@ -1878,11 +1966,13 @@ a:hover {
     right: auto;
     transform: translateX(-50%);
     top: var(--space-lg);
+    height: auto;
+    line-height: normal;
     max-width: calc(100vw - 2rem);
     width: calc(100vw - 2rem);
     max-height: calc(100dvh - 2 * var(--space-lg));
     overflow-y: auto;
-    padding-bottom: 3rem;
+    padding: 0.5rem 1rem 3rem;
   }
 
   .floating-title__name {
