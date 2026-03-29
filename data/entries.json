@@ -383,5 +383,35 @@
     "mood_left": "Meow",
     "mood_right": "Bah",
     "mood_value": 1
+  },
+  {
+    "id": "2026-03-29-what-a-rush",
+    "date": "2026-03-29",
+    "title": "What a Rush!",
+    "type": "field-notes",
+    "location_name": "Valle, AZ",
+    "coordinates": [
+      35.660109,
+      -112.1544404
+    ],
+    "body": "\"What a practice\" he says... so dramatic... But I do see him wound up. He was so ready to have a weekend break and what does he do? He crams as much of the Grand Canyon experience into 1.5 days, and drives/works frantically on personal projects for the other .5 days of the weekend. \n\nI'm here trying to lead by example... BE LAZY! Layabout! Stop rushing... but he doesn't seem to get it. He came home completely wiped out after his canyon hike... I just sat there and looked at him... \"really?",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_2667.jpg",
+      "media/photos/img_2831.jpg",
+      "media/photos/img_2830.jpg",
+      "media/photos/img_2826.jpg",
+      "media/photos/img_2817.jpg",
+      "media/photos/img_2815.jpg",
+      "media/photos/img_2794.jpg",
+      "media/photos/img_2789.jpg",
+      "media/photos/img_2786.jpg",
+      "media/photos/img_2784.jpg",
+      "media/photos/img_2782.jpg"
+    ],
+    "preview_photo": 3,
+    "mood_left": "Wiped",
+    "mood_right": "Out",
+    "mood_value": 0.1
   }
 ]
