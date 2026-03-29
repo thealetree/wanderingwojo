@@ -1,7 +1,7 @@
 [
   {
-    "id": "2026-03-08-beginning-in-bend",
-    "date": "2026-03-08",
+    "id": "2026-03-07-beginning-in-bend",
+    "date": "2026-03-07",
     "title": "Beginning in Bend",
     "type": "field-notes",
     "location_name": "Bend, Oregon",
@@ -19,8 +19,8 @@
     "mood_value": 0.8
   },
   {
-    "id": "2026-03-11-touching-base",
-    "date": "2026-03-11",
+    "id": "2026-03-10-touching-base",
+    "date": "2026-03-10",
     "title": "Touching Base",
     "type": "field-notes",
     "location_name": "White Salmon, WA",
@@ -38,8 +38,8 @@
     "mood_value": 0.5
   },
   {
-    "id": "2026-03-14-the-precipice",
-    "date": "2026-03-14",
+    "id": "2026-03-13-the-precipice",
+    "date": "2026-03-13",
     "title": "The Precipice",
     "type": "field-notes",
     "location_name": "Stevenson, WA",
@@ -60,8 +60,8 @@
     "mood_value": 0.5
   },
   {
-    "id": "2026-03-16-day-1-woah",
-    "date": "2026-03-16",
+    "id": "2026-03-15-day-1-woah",
+    "date": "2026-03-15",
     "title": "Day 1... Woah, Jo...",
     "type": "field-notes",
     "location_name": "Dunsmuir, CA",
@@ -87,8 +87,8 @@
     "mood_value": 1
   },
   {
-    "id": "2026-03-17-oooookay",
-    "date": "2026-03-17",
+    "id": "2026-03-16-oooookay",
+    "date": "2026-03-16",
     "title": "OOoookay",
     "type": "field-notes",
     "location_name": "Dunsmuir, CA",
@@ -113,8 +113,8 @@
     "mood_value": 0.15
   },
   {
-    "id": "2026-03-18-morning-time-now",
-    "date": "2026-03-18",
+    "id": "2026-03-17-morning-time-now",
+    "date": "2026-03-17",
     "title": "Morning Time Now",
     "type": "field-notes",
     "location_name": "Dunsmuir, CA",
@@ -143,8 +143,8 @@
     "mood_value": 0.75
   },
   {
-    "id": "2026-03-19-finding-ease",
-    "date": "2026-03-19",
+    "id": "2026-03-18-finding-ease",
+    "date": "2026-03-18",
     "title": "Finding Ease",
     "type": "field-notes",
     "location_name": "Dunsmuir, CA",
@@ -171,8 +171,8 @@
     "mood_value": 0.1
   },
   {
-    "id": "2026-03-19-planning",
-    "date": "2026-03-19",
+    "id": "2026-03-18-planning",
+    "date": "2026-03-18",
     "title": "Planning...",
     "type": "field-notes",
     "location_name": "Dunsmuir, CA",
@@ -192,8 +192,8 @@
     "mood_value": 0.5
   },
   {
-    "id": "2026-03-22-family-in-nevada",
-    "date": "2026-03-22",
+    "id": "2026-03-21-family-in-nevada",
+    "date": "2026-03-21",
     "title": "Family in Nevada",
     "type": "field-notes",
     "location_name": "Carson City, NV",
@@ -217,8 +217,8 @@
     "mood_value": 0.5
   },
   {
-    "id": "2026-03-23-straddled",
-    "date": "2026-03-23",
+    "id": "2026-03-22-straddled",
+    "date": "2026-03-22",
     "title": "Straddled",
     "type": "field-notes",
     "location_name": "Lone Pine, CA",
@@ -247,8 +247,8 @@
     "mood_value": 0.9
   },
   {
-    "id": "2026-03-24-haht-t-day",
-    "date": "2026-03-24",
+    "id": "2026-03-23-haht-t-day",
+    "date": "2026-03-23",
     "title": "Haht T'day",
     "type": "field-notes",
     "location_name": "Lone Pine, CA",
@@ -272,8 +272,8 @@
     "mood_value": 0.2
   },
   {
-    "id": "2026-03-25-death-valley-tomorrow",
-    "date": "2026-03-25",
+    "id": "2026-03-24-death-valley-tomorrow",
+    "date": "2026-03-24",
     "title": "Death Valley Tomorrow",
     "type": "field-notes",
     "location_name": "Lone Pine, CA",
@@ -301,8 +301,8 @@
     "mood_value": 1
   },
   {
-    "id": "2026-03-26-las-vegas",
-    "date": "2026-03-26",
+    "id": "2026-03-25-las-vegas",
+    "date": "2026-03-25",
     "title": "Las Vegas",
     "type": "field-notes",
     "location_name": "Las Vegas, NV",
@@ -328,8 +328,8 @@
     "mood_value": 0.7
   },
   {
-    "id": "2026-03-27-din-today",
-    "date": "2026-03-27",
+    "id": "2026-03-26-din-today",
+    "date": "2026-03-26",
     "title": "Diné Today",
     "type": "field-notes",
     "location_name": "Grand Canyon",
@@ -354,8 +354,8 @@
     "mood_value": 0.5
   },
   {
-    "id": "2026-03-28-constant-change",
-    "date": "2026-03-28",
+    "id": "2026-03-27-constant-change",
+    "date": "2026-03-27",
     "title": "Constant Change",
     "type": "field-notes",
     "location_name": "Grand Canyon",

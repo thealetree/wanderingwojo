@@ -847,7 +847,8 @@ HTML_PAGE = r"""<!DOCTYPE html>
     });
 
     // ---- Set today as default date ----
-    fields.date.value = new Date().toISOString().split('T')[0];
+    var now = new Date();
+    fields.date.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
 
     // ---- Mood color interpolation (sage to terracotta) ----
     function getMoodColor(value) {
@@ -1143,7 +1144,8 @@ HTML_PAGE = r"""<!DOCTYPE html>
           f.value = '';
         }
       });
-      fields.date.value = new Date().toISOString().split('T')[0];
+      var now = new Date();
+    fields.date.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
       coordsManual = false;
       lastGeocodedLocation = '';
       setGeocodeStatus('', '');
