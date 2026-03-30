@@ -1,11 +1,12 @@
 {
-  "id": "poll-20260325",
-  "question": "For Me (Woj):",
+  "id": "poll-20260329",
+  "question": "Ok then, Where to buy a house/land?",
   "options": [
-    "More AirBnB",
-    "More Off Grid Camping",
-    "More RV Parks",
-    "Buy a House Already"
+    "Alaska",
+    "PNW Coast",
+    "The Gorge",
+    "Central Oregon",
+    "Southwest Somewhere"
   ],
   "active": true
 }
