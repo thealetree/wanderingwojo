@@ -1001,9 +1001,9 @@ const MapModule = (function () {
     }
     if (curPinIdx === -1) return;
 
-    // Show thumbs on current pin and its neighboring pins
+    // Show thumb only on the active pin
     corkPins.forEach(function (pinData, idx) {
-      if (idx === curPinIdx || idx === curPinIdx - 1 || idx === curPinIdx + 1) {
+      if (idx === curPinIdx) {
         pinData.element.classList.remove('cork-pin--no-thumb');
       } else {
         pinData.element.classList.add('cork-pin--no-thumb');
