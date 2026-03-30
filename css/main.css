@@ -1243,7 +1243,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: 1.85rem;
   font-weight: 600;
-  color: var(--near-black);
+  color: var(--link-color);
   line-height: 1.2;
   margin-bottom: 0.25rem;
 }
@@ -1685,7 +1685,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--near-black);
+  color: var(--link-color);
   line-height: 1.2;
 }
 
