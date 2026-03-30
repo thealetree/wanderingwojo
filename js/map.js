@@ -1135,7 +1135,7 @@ const MapModule = (function () {
         e.stopPropagation();
         var idx = parseInt(photoEl.getAttribute('data-photo-index'));
         if (window.AppModule && window.AppModule.openLightbox) {
-          window.AppModule.openLightbox(entry.photos, idx);
+          window.AppModule.openLightbox(entry.id, idx);
         }
       });
     });
@@ -1658,6 +1658,21 @@ const MapModule = (function () {
     return 'rgb(' + r + ',' + g + ',' + b + ')';
   }
 
+  /**
+   * Expand a pin by entry ID (used when lightbox navigates to a different entry)
+   */
+  function expandByEntryId(entryId) {
+    for (var i = 0; i < allLocationPins.length; i++) {
+      var pin = allLocationPins[i];
+      var ids = (pin.element.getAttribute('data-entry-ids') || '').split(',');
+      if (ids.indexOf(entryId) !== -1) {
+        var groupEntries = pin.entries || [];
+        expandPinEntry(groupEntries, pin.element, entryId);
+        return;
+      }
+    }
+  }
+
   // --- Public API ---
   return {
     init: init,
@@ -1666,6 +1681,7 @@ const MapModule = (function () {
     addCorkPins: addCorkPins,
     startRouteAnimation: animateRouteDrawIn,
     expandPinEntry: expandPinEntry,
+    expandByEntryId: expandByEntryId,
     closeExpandedPin: closeExpandedPin,
     switchToEntryInExpandedPin: switchToEntryInExpandedPin,
     getExpandedPinEntryIds: getExpandedPinEntryIds,

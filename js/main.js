@@ -15,8 +15,9 @@ const AppModule = (function () {
   let locations = [];
   let sortedEntries = [];   // entries sorted chronologically (oldest first)
   let navIndex = 0;         // current index in sortedEntries
-  let lightboxPhotos = [];
-  let lightboxIndex = 0;
+  let globalPhotoList = [];     // [{src, entryIndex, entryId, title}]
+  let globalPhotoIndex = 0;
+  let lightboxOriginEntryId = null;
 
   // --- DOM refs ---
   const els = {};
@@ -61,6 +62,8 @@ const AppModule = (function () {
     els.lightboxClose = document.getElementById('lightbox-close');
     els.lightboxPrev = document.getElementById('lightbox-prev');
     els.lightboxNext = document.getElementById('lightbox-next');
+    els.lightboxInfo = document.getElementById('lightbox-info');
+    els.lightboxVideo = document.getElementById('lightbox-video');
     els.navPrev = document.getElementById('nav-prev');
     els.navNext = document.getElementById('nav-next');
     els.navInfo = document.getElementById('nav-info');
@@ -86,6 +89,9 @@ const AppModule = (function () {
       });
       // Default to the most recent entry
       navIndex = Math.max(0, sortedEntries.length - 1);
+
+      // Build global photo list for cross-entry lightbox navigation
+      buildGlobalPhotoList();
     } catch (err) {
       console.error('Failed to load data:', err);
       entries = [];
@@ -568,9 +574,46 @@ const AppModule = (function () {
     });
   }
 
-  function openLightbox(photos, index) {
-    lightboxPhotos = photos;
-    lightboxIndex = index || 0;
+  function buildGlobalPhotoList() {
+    globalPhotoList = [];
+    sortedEntries.forEach(function (entry, eIdx) {
+      (entry.photos || []).forEach(function (photo) {
+        globalPhotoList.push({
+          src: photo,
+          type: 'photo',
+          entryIndex: eIdx,
+          entryId: entry.id,
+          title: entry.title
+        });
+      });
+      // Include video as a navigable item
+      if (entry.video_url) {
+        var ytMatch = entry.video_url.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)/);
+        if (ytMatch) {
+          globalPhotoList.push({
+            src: 'https://www.youtube.com/embed/' + ytMatch[1] + '?autoplay=1',
+            type: 'video',
+            entryIndex: eIdx,
+            entryId: entry.id,
+            title: entry.title
+          });
+        }
+      }
+    });
+  }
+
+  function openLightbox(entryId, photoIndex) {
+    lightboxOriginEntryId = entryId;
+    // Find position in global list
+    var found = -1;
+    var photoCount = 0;
+    for (var i = 0; i < globalPhotoList.length; i++) {
+      if (globalPhotoList[i].entryId === entryId) {
+        if (photoCount === (photoIndex || 0)) { found = i; break; }
+        photoCount++;
+      }
+    }
+    globalPhotoIndex = found !== -1 ? found : 0;
     updateLightboxImage();
     els.lightbox.classList.add('active');
     els.lightbox.setAttribute('aria-hidden', 'false');
@@ -581,21 +624,59 @@ const AppModule = (function () {
     els.lightbox.classList.remove('active');
     els.lightbox.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    // Stop any playing video
+    els.lightboxVideo.src = '';
+    els.lightboxVideo.style.display = 'none';
+    els.lightboxImg.style.display = '';
+
+    if (globalPhotoList.length > 0) {
+      var currentItem = globalPhotoList[globalPhotoIndex];
+      if (currentItem.entryId !== lightboxOriginEntryId) {
+        // User navigated to a different entry — fly there and expand
+        navIndex = currentItem.entryIndex;
+        var entryId = currentItem.entryId;
+        updateNavInfo();
+        MapModule.closeExpandedPin();
+        MapModule.flyToEntry(sortedEntries[navIndex]);
+        highlightPin(entryId);
+        MapModule.updateThumbVisibility(entryId);
+        hideTwoCents();
+        // Expand after fly animation completes
+        setTimeout(function () {
+          hideTwoCents();
+          MapModule.expandByEntryId(entryId);
+        }, 1300);
+      }
+    }
   }
 
   function navLightbox(dir) {
-    lightboxIndex = (lightboxIndex + dir + lightboxPhotos.length) % lightboxPhotos.length;
+    globalPhotoIndex = (globalPhotoIndex + dir + globalPhotoList.length) % globalPhotoList.length;
     updateLightboxImage();
   }
 
   function updateLightboxImage() {
-    if (lightboxPhotos.length === 0) return;
-    els.lightboxImg.src = lightboxPhotos[lightboxIndex];
-    els.lightboxImg.alt = 'Photo ' + (lightboxIndex + 1) + ' of ' + lightboxPhotos.length;
+    if (globalPhotoList.length === 0) return;
+    var item = globalPhotoList[globalPhotoIndex];
 
-    var showNav = lightboxPhotos.length > 1;
+    if (item.type === 'video') {
+      els.lightboxImg.style.display = 'none';
+      els.lightboxVideo.style.display = 'block';
+      els.lightboxVideo.src = item.src;
+    } else {
+      els.lightboxVideo.style.display = 'none';
+      els.lightboxVideo.src = '';
+      els.lightboxImg.style.display = '';
+      els.lightboxImg.src = item.src;
+      els.lightboxImg.alt = item.title;
+    }
+
+    var showNav = globalPhotoList.length > 1;
     els.lightboxPrev.style.display = showNav ? '' : 'none';
     els.lightboxNext.style.display = showNav ? '' : 'none';
+
+    // Update info overlay
+    els.lightboxInfo.textContent = item.title + '  \u00b7  ' + (item.entryIndex + 1) + ' / ' + sortedEntries.length;
   }
 
   // =====================================================================

@@ -1910,6 +1910,16 @@ a:hover {
   box-shadow: var(--shadow-xl);
 }
 
+.lightbox__video {
+  width: min(90vw, 960px);
+  height: min(70vh, 540px);
+  border-radius: var(--rough-radius-sm);
+  box-shadow: var(--shadow-xl);
+  display: none;
+  z-index: 1;
+  background: #000;
+}
+
 .lightbox__close {
   position: absolute;
   top: var(--space-lg);
@@ -1962,6 +1972,25 @@ a:hover {
 
 .lightbox__nav--prev { left: var(--space-lg); }
 .lightbox__nav--next { right: var(--space-lg); }
+
+.lightbox__info {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-family: var(--font-display);
+  color: var(--near-black);
+  background: var(--bg-card);
+  border: 1.5px solid var(--beige-dark);
+  border-radius: var(--rough-radius-sm);
+  padding: 0.4rem 1rem;
+  box-shadow: var(--shadow-md);
+  font-size: 1.1rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10001;
+}
 
 /* ==========================================================================
    Map Markers
