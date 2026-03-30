@@ -734,7 +734,9 @@ HTML_PAGE = r"""<!DOCTYPE html>
         </div>
         <div class="btn-group">
           <button class="btn btn-primary" id="poll-save">Save Poll & Push</button>
+          <button class="btn btn-secondary" id="poll-results-btn" style="margin-left:0.5rem;">View Results</button>
         </div>
+        <div id="poll-results" style="margin-top:1rem;display:none;"></div>
         <div class="status" id="poll-status" style="margin-top:0.75rem;"></div>
       </div>
     </div>
@@ -1450,6 +1452,59 @@ HTML_PAGE = r"""<!DOCTYPE html>
         pollSaveBtn.disabled = false;
         pollSaveBtn.textContent = 'Save Poll & Push';
       });
+    });
+
+    // ==================================================================
+    // POLL RESULTS
+    // ==================================================================
+    var FIREBASE_DB = 'https://wanderingwojo-default-rtdb.firebaseio.com';
+    document.getElementById('poll-results-btn').addEventListener('click', function() {
+      var resultsDiv = document.getElementById('poll-results');
+      // Toggle off if already showing
+      if (resultsDiv.style.display !== 'none') {
+        resultsDiv.style.display = 'none';
+        return;
+      }
+      // Read poll ID from current form state
+      fetch('/api/poll')
+        .then(function(r) { return r.json(); })
+        .then(function(poll) {
+          if (!poll || !poll.id) {
+            resultsDiv.innerHTML = '<div style="color:var(--terracotta);">No poll found.</div>';
+            resultsDiv.style.display = 'block';
+            return;
+          }
+          return fetch(FIREBASE_DB + '/polls/' + poll.id + '.json')
+            .then(function(r) { return r.json(); })
+            .then(function(votes) {
+              votes = votes || {};
+              var totalVotes = 0;
+              (poll.options || []).forEach(function(opt, i) {
+                totalVotes += (votes['opt' + i] || 0);
+              });
+              var html = '<div style="font-weight:600;margin-bottom:0.5rem;color:var(--charcoal);">' +
+                poll.question + ' (' + totalVotes + ' vote' + (totalVotes !== 1 ? 's' : '') + ')</div>';
+              (poll.options || []).forEach(function(opt, i) {
+                var count = votes['opt' + i] || 0;
+                var pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+                html += '<div style="margin-bottom:0.4rem;">' +
+                  '<div style="display:flex;justify-content:space-between;font-size:0.9rem;margin-bottom:2px;">' +
+                    '<span>' + opt + '</span>' +
+                    '<span style="color:var(--mid-gray);">' + count + ' (' + pct + '%)</span>' +
+                  '</div>' +
+                  '<div style="background:var(--beige-dark);border-radius:4px;height:8px;overflow:hidden;">' +
+                    '<div style="background:var(--sage);height:100%;width:' + pct + '%;border-radius:4px;transition:width 0.3s;"></div>' +
+                  '</div>' +
+                '</div>';
+              });
+              resultsDiv.innerHTML = html;
+              resultsDiv.style.display = 'block';
+            });
+        })
+        .catch(function(err) {
+          resultsDiv.innerHTML = '<div style="color:var(--terracotta);">Error fetching results: ' + err.message + '</div>';
+          resultsDiv.style.display = 'block';
+        });
     });
 
     // ==================================================================
