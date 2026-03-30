@@ -213,7 +213,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 600;
-  color: var(--charcoal);
+  color: var(--link-color);
   letter-spacing: 0.01em;
 }
 
@@ -236,7 +236,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 600;
-  color: var(--charcoal);
+  color: var(--link-color);
   background: var(--bg-card);
   border: 2px solid var(--beige-dark);
   border-radius: var(--rough-radius-sm);
@@ -454,7 +454,7 @@ a:hover {
   font-weight: 700;
   font-size: 1.3rem;
   letter-spacing: -0.01em;
-  color: var(--near-black);
+  color: var(--link-color);
   user-select: none;
 }
 
@@ -754,7 +754,7 @@ a:hover {
   font-family: var(--font-body);
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--mid-gray);
+  color: var(--link-color);
   text-decoration: none;
   transition: color var(--transition-fast);
   white-space: nowrap;
@@ -777,7 +777,7 @@ a:hover {
 }
 
 .footer-links__link:hover {
-  color: var(--charcoal);
+  color: var(--link-hover);
 }
 
 /* ==========================================================================
@@ -795,7 +795,7 @@ a:hover {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--mid-gray);
+  color: var(--link-color);
   text-decoration: none;
   white-space: nowrap;
   display: flex;
@@ -813,7 +813,7 @@ a:hover {
 }
 
 .kladg-player__header:hover {
-  color: var(--charcoal);
+  color: var(--link-hover);
 }
 
 .kladg-player__sub {
@@ -845,7 +845,7 @@ a:hover {
   font-family: var(--font-body);
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--mid-gray);
+  color: var(--link-color);
   text-decoration: underline;
   text-underline-offset: 2px;
   white-space: nowrap;
@@ -856,7 +856,7 @@ a:hover {
 }
 
 .kladg-player__title:hover {
-  color: var(--charcoal);
+  color: var(--link-hover);
 }
 
 .kladg-player__controls {
@@ -869,7 +869,7 @@ a:hover {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--mid-gray);
+  color: var(--link-color);
   font-size: 0.85rem;
   padding: 2px 4px;
   line-height: 1;
@@ -880,16 +880,16 @@ a:hover {
 }
 
 .kladg-player__btn:hover {
-  color: var(--charcoal);
+  color: var(--link-hover);
 }
 
 .kladg-player__btn--play {
   font-size: 1rem;
-  color: var(--charcoal);
+  color: var(--link-color);
 }
 
 .kladg-player__btn--play:hover {
-  color: var(--near-black);
+  color: var(--link-hover);
 }
 
 /* Mobile player — in about panel */
@@ -1082,7 +1082,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--charcoal);
+  color: var(--link-color);
   padding: 0 0.75rem;
   white-space: nowrap;
   user-select: none;
