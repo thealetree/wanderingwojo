@@ -413,5 +413,31 @@
     "mood_left": "Wiped",
     "mood_right": "Out",
     "mood_value": 0.1
+  },
+  {
+    "id": "2026-03-29-red-red-red-all-over",
+    "date": "2026-03-29",
+    "title": "Red Red & Red All Over",
+    "type": "field-notes",
+    "location_name": "Flagstaff, AZ",
+    "coordinates": [
+      35.1987522,
+      -111.651822
+    ],
+    "body": "Well, I'm REALLY relaxing. Really. Big guy got us a little motel room on old Route 66 near Downtown Flagstaff for a few nights, took off my harness and SHEEEheeeesh does that feel good. Not too shabby at all. NO shab...\n\nJust a quick drive today from the canyon down to Sedona for a little lunch, he got a massage, and a tiny \"hike\" up a hill for a view. \n\nIt's so RED around there. Beautiful. \"The Red Road\" Nakaii would always talk about walking along, a good path. Anyway, a few days to recharge, let the big dude focus on work, visit some friends nearby, watch Gunsmoke and just lay around, stretch my legs, maybe even get the zoomies if I feel like it. I don't even give a care.\n\nI've mentioned it a few times (it may be an ongoing theme in this journal, not sure), but I think the big dude is starting to really try to relax. He's not there yet, but he is really trying. A massage was a nice start, but he needs to find time to read like he did just a month ago. I guess reading time turned into driving time, and that's ok. But also meditation, maybe even naps would be helpful? It's only 6:30 on Sunday and he's committed to just hanging in the room with me rather than cramming more activities into his day. Baby steps.",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_2866.jpg",
+      "media/photos/img_2864.jpg",
+      "media/photos/img_2859.jpg",
+      "media/photos/img_2857.jpg",
+      "media/photos/img_2858.jpg",
+      "media/photos/img_2839.jpg",
+      "media/photos/img_2861.jpg"
+    ],
+    "preview_photo": 5,
+    "mood_left": "Bronto",
+    "mood_right": "Lopen",
+    "mood_value": 1
   }
 ]
