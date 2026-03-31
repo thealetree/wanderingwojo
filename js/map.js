@@ -72,7 +72,7 @@ const MapModule = (function () {
       container: 'map',
       style: isDark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11',
       center: [-112, 35],   // initial center, overridden by latest entry
-      zoom: 6.5,
+      zoom: 5.5,
       pitch: 0,
       bearing: 0,
       attributionControl: false,

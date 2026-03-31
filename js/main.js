@@ -439,7 +439,9 @@ const AppModule = (function () {
 
           // Center on the most recent entry at a comfortable zoom
           var lngLat = [latestEntry.coordinates[1], latestEntry.coordinates[0]];
-          map.flyTo({ center: lngLat, zoom: 6.5, duration: 500 });
+          // Offset center downward so entry appears vertically centered
+          // between the top buttons and the bottom dock
+          map.flyTo({ center: lngLat, zoom: 5.5, duration: 500, offset: [0, -73] });
 
           // After initial positioning finishes, start the route draw-in animation
           map.once('moveend', function () {
