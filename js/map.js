@@ -71,8 +71,8 @@ const MapModule = (function () {
     map = new mapboxgl.Map({
       container: 'map',
       style: isDark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11',
-      center: [-112, 40],   // roughly center of the SW route
-      zoom: 5,
+      center: [-112, 35],   // initial center, overridden by latest entry
+      zoom: 6.5,
       pitch: 0,
       bearing: 0,
       attributionControl: false,
