@@ -50,6 +50,8 @@ const MapModule = (function () {
     return entry.photos[idx];
   }
   let activePreviewEntryId = null; // which entry is currently shown in a pin preview
+  let placementCallback = null;    // function(lngLat) called when map is clicked in placement mode
+  let suggestionMarkers = [];      // Mapbox markers for user suggestion pins
 
   // Route coordinates — built dynamically from entries
   let routeCoords = [];
@@ -83,15 +85,22 @@ const MapModule = (function () {
 
     // Route is added later via addRouteFromEntries()
 
-    // Close expanded pin when clicking the map background
+    // Close expanded pin or handle placement mode when clicking the map background
     map.on('click', function (e) {
-      // Only close if click is on the map itself, not on a marker/pin
-      if (e.originalEvent.target === map.getCanvas()) {
-        closeExpandedPin();
-        // Restore 2¢ panel
-        var tc = document.getElementById('two-cents');
-        if (tc) tc.style.display = '';
+      // Only act if click is on the map itself, not on a marker/pin
+      if (e.originalEvent.target !== map.getCanvas()) return;
+
+      // Placement mode: call the callback with coordinates
+      if (placementCallback) {
+        var cb = placementCallback;
+        placementCallback = null;
+        cb(e.lngLat);
+        return;
       }
+
+      closeExpandedPin();
+      var dock = document.getElementById('dock');
+      if (dock) dock.style.display = '';
     });
 
     // Zoom-based pin scaling — pins shrink when zoomed out, grow when zoomed in
@@ -1480,11 +1489,9 @@ const MapModule = (function () {
       if (p.element !== pinEl) p.element.style.visibility = 'hidden';
     });
 
-    // Hide floating title and shop link
-    var floatingTitle = document.getElementById('floating-title');
-    if (floatingTitle) floatingTitle.style.display = 'none';
-    var floatingShop = document.querySelector('.floating-shop');
-    if (floatingShop) floatingShop.style.display = 'none';
+    // Hide dock
+    var dock = document.getElementById('dock');
+    if (dock) dock.style.display = 'none';
 
     // Prevent scroll/touch events from reaching the map
     ['touchstart', 'touchmove', 'touchend', 'wheel'].forEach(function (evt) {
@@ -1495,9 +1502,9 @@ const MapModule = (function () {
     expanded.querySelector('.entry-expanded__close').addEventListener('click', function (e) {
       e.stopPropagation();
       closeExpandedPin();
-      // Restore 2¢ panel
-      var tc = document.getElementById('two-cents');
-      if (tc) tc.style.display = '';
+      // Restore dock
+      var dock = document.getElementById('dock');
+      if (dock) dock.style.display = '';
     });
 
     // Tab click handlers
@@ -1574,11 +1581,9 @@ const MapModule = (function () {
       p.element.style.visibility = '';
     });
 
-    // Restore floating title and shop link
-    var floatingTitle = document.getElementById('floating-title');
-    if (floatingTitle) floatingTitle.style.display = '';
-    var floatingShop = document.querySelector('.floating-shop');
-    if (floatingShop) floatingShop.style.display = '';
+    // Restore dock
+    var dock = document.getElementById('dock');
+    if (dock) dock.style.display = '';
 
     // Clear URL hash
     history.replaceState(null, '', window.location.pathname);
@@ -1673,6 +1678,60 @@ const MapModule = (function () {
     }
   }
 
+  // --- Suggestion Pins ---
+
+  var SUGGEST_COLORS = {
+    'food': '#E8913A', 'hikes': '#5B8C3E', 'hot-springs': '#4A9BD9',
+    'people': '#C06AB8', 'camping': '#8B6F47'
+  };
+  var SUGGEST_LABELS = {
+    'food': 'Food', 'hikes': 'Hikes', 'hot-springs': 'Hot Springs',
+    'people': 'People', 'camping': 'Camping'
+  };
+
+  function setPlacementCallback(fn) {
+    placementCallback = fn;
+  }
+
+  function addSuggestionPin(pin) {
+    if (!map || !pin || typeof pin.lng !== 'number' || typeof pin.lat !== 'number') return;
+    var el = document.createElement('div');
+    el.className = 'suggestion-pin' + (pin.isOwn ? ' suggestion-pin--own' : '');
+
+    var html = '';
+    if (pin.isOwn) {
+      html += '<button class="suggestion-pin__delete" aria-label="Delete pin">\u00d7</button>';
+    }
+    html += '<div class="suggestion-pin__label" style="--pin-color:' + (SUGGEST_COLORS[pin.type] || '#888') + ';background:' + (SUGGEST_COLORS[pin.type] || '#888') + '">' +
+      (SUGGEST_LABELS[pin.type] || pin.type) +
+    '</div>' +
+    '<div class="suggestion-pin__point"></div>';
+    el.innerHTML = html;
+
+    var marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat([pin.lng, pin.lat])
+      .addTo(map);
+    marker._wojoKey = pin.key || null;
+    suggestionMarkers.push(marker);
+
+    if (pin.isOwn && pin.onDelete) {
+      el.querySelector('.suggestion-pin__delete').addEventListener('click', function (e) {
+        e.stopPropagation();
+        pin.onDelete(pin.key, marker);
+      });
+    }
+  }
+
+  function removeSuggestionMarker(marker) {
+    marker.remove();
+    var idx = suggestionMarkers.indexOf(marker);
+    if (idx !== -1) suggestionMarkers.splice(idx, 1);
+  }
+
+  function addSuggestionPins(pins) {
+    pins.forEach(addSuggestionPin);
+  }
+
   // --- Public API ---
   return {
     init: init,
@@ -1691,6 +1750,10 @@ const MapModule = (function () {
     showCorkPins: showCorkPins,
     flyToEntry: flyToEntry,
     getCurrentLocation: getCurrentLocation,
+    setPlacementCallback: setPlacementCallback,
+    addSuggestionPin: addSuggestionPin,
+    addSuggestionPins: addSuggestionPins,
+    removeSuggestionMarker: removeSuggestionMarker,
     getMap: function () { return map; },
     escapeHtml: escapeHtml,
     formatDate: formatDate,

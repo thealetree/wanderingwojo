@@ -37,78 +37,64 @@
 <body>
 
   <!-- ================================================================
-       FLOATING TITLE
+       UNIFIED DOCK (About, Poll, Message, Suggest, Donate, Swag)
        ================================================================ -->
-  <div class="floating-title" id="floating-title">
-    <span class="floating-title__name">Wandering Wojo</span>
-    <div class="floating-title__desc">
-      <button class="floating-title__close" id="floating-title-close" aria-label="Close about panel">&times;</button>
-      <div class="floating-title__hero">
-        <img src="media/photos/img_2336.jpg" alt="Van and Wojo" class="floating-title__hero-img">
-      </div>
-      <p class="floating-title__blurb">Wojo and his co-pilot Van traded four walls for the road. This map is their
-      journal: every stop, every story, every nap in the sun.</p>
-      <p class="floating-title__blurb" style="color:var(--mid-gray);font-size:0.95rem;">Click <strong>Your 2¢</strong> above to vote in our poll, send us an anonymous message, or help fuel the adventure with a donation.</p>
-      <div class="rss-subscribe">
-        <a class="rss-subscribe__link" href="feed.xml" target="_blank" rel="noopener">
-          <span class="rss-subscribe__icon">&#9641;</span> Subscribe via RSS
-        </a>
-        <span class="rss-subscribe__hint">Get notified when new entries are posted. Copy the link and paste it into an RSS reader like
-          <a href="https://feedly.com" target="_blank" rel="noopener">Feedly</a> or
-          <a href="https://netnewswire.com" target="_blank" rel="noopener">NetNewsWire</a>.</span>
-      </div>
-      <div class="other-projects">
-        <span class="other-projects__label">Other projects by Van:</span>
-        <a class="other-projects__link" href="https://repsim.live" target="_blank" rel="noopener">Repsim — Natural Selection Sim</a>
-        <a class="other-projects__link" href="https://mustardandmilk.com" target="_blank" rel="noopener">Mustard &amp; Milk — Nonsense Generator &amp; Book</a>
-      </div>
-      <div class="kladg-player kladg-player--mobile" id="kladg-player-mobile">
-        <a class="kladg-player__header" href="https://kladg.com" target="_blank" rel="noopener"><span class="kladg-player__header-text">KLADG RADIO</span> <span class="kladg-player__sub">Original tracks by Van</span></a>
-        <div class="kladg-player__row">
-          <img class="kladg-player__art" src="" alt="Album art">
-          <a class="kladg-player__title" href="https://kladg.com" target="_blank" rel="noopener">Loading...</a>
-          <div class="kladg-player__controls">
-            <button class="kladg-player__btn" data-kladg="prev" aria-label="Previous track">&#9198;</button>
-            <button class="kladg-player__btn kladg-player__btn--play" data-kladg="play" aria-label="Play">&#9654;</button>
-            <button class="kladg-player__btn" data-kladg="next" aria-label="Next track">&#9197;</button>
+  <div class="dock" id="dock">
+    <div class="dock__bar">
+      <button class="dock__tab" data-dock="about">About</button>
+      <button class="dock__tab" data-dock="poll">Poll</button>
+      <button class="dock__tab" data-dock="message">Message</button>
+      <div class="dock__stats" id="journey-stats"></div>
+      <button class="dock__tab" data-dock="suggest">Suggest</button>
+      <button class="dock__tab" data-dock="donate">Donate</button>
+      <a class="dock__tab dock__tab--link" href="https://wanderingwojo.redbubble.com" target="_blank" rel="noopener">Swag</a>
+    </div>
+    <div class="dock__panel" id="dock-panel">
+
+      <!-- About tab -->
+      <div class="dock__content" data-dock-content="about">
+        <div class="dock__hero">
+          <img src="media/photos/img_2336.jpg" alt="Van and Wojo" class="dock__hero-img">
+        </div>
+        <p class="dock__blurb">Wojo and his co-pilot Van traded four walls for the road. This map is their
+        journal: every stop, every story, every nap in the sun.</p>
+        <p class="dock__blurb dock__blurb--muted">Use the tabs above to vote in our poll, send us a message, suggest places to visit, or help fuel the adventure.</p>
+        <div class="rss-subscribe">
+          <a class="rss-subscribe__link" href="feed.xml" target="_blank" rel="noopener">
+            <span class="rss-subscribe__icon">&#9641;</span> Subscribe via RSS
+          </a>
+          <span class="rss-subscribe__hint">Get notified when new entries are posted. Copy the link and paste it into an RSS reader like
+            <a href="https://feedly.com" target="_blank" rel="noopener">Feedly</a> or
+            <a href="https://netnewswire.com" target="_blank" rel="noopener">NetNewsWire</a>.</span>
+        </div>
+        <div class="other-projects">
+          <span class="other-projects__label">Other projects by Van:</span>
+          <a class="other-projects__link" href="https://repsim.live" target="_blank" rel="noopener">Repsim — Natural Selection Sim</a>
+          <a class="other-projects__link" href="https://mustardandmilk.com" target="_blank" rel="noopener">Mustard &amp; Milk — Nonsense Generator &amp; Book</a>
+        </div>
+        <div class="kladg-player kladg-player--mobile" id="kladg-player-mobile">
+          <a class="kladg-player__header" href="https://kladg.com" target="_blank" rel="noopener"><span class="kladg-player__header-text">KLADG RADIO</span> <span class="kladg-player__sub">Original tracks by Van</span></a>
+          <div class="kladg-player__row">
+            <img class="kladg-player__art" src="" alt="Album art">
+            <a class="kladg-player__title" href="https://kladg.com" target="_blank" rel="noopener">Loading...</a>
+            <div class="kladg-player__controls">
+              <button class="kladg-player__btn" data-kladg="prev" aria-label="Previous track">&#9198;</button>
+              <button class="kladg-player__btn kladg-player__btn--play" data-kladg="play" aria-label="Play">&#9654;</button>
+              <button class="kladg-player__btn" data-kladg="next" aria-label="Next track">&#9197;</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- ================================================================
-       SHOP LINK
-       ================================================================ -->
-  <a class="floating-shop" href="https://wanderingwojo.redbubble.com" target="_blank" rel="noopener">
-    <span class="floating-shop__icon">&#128722;</span>
-    <span class="floating-shop__text">Get Swag!</span>
-  </a>
-
-  <!-- ================================================================
-       YOUR 2¢ PANEL (Poll + Donate)
-       ================================================================ -->
-  <div class="two-cents" id="two-cents">
-    <button class="two-cents__toggle" id="two-cents-toggle">Your 2¢</button>
-    <div class="two-cents__panel" id="two-cents-panel">
-      <button class="two-cents__close" id="two-cents-close" aria-label="Close panel">&times;</button>
-
-      <!-- Tab switcher -->
-      <div class="two-cents__tabs">
-        <button class="two-cents__tab" data-tab="poll">Poll</button>
-        <button class="two-cents__tab two-cents__tab--active" data-tab="message">Message Us</button>
-        <button class="two-cents__tab" data-tab="donate">Donate</button>
-      </div>
 
       <!-- Poll tab -->
-      <div class="two-cents__content" data-content="poll">
-        <p class="two-cents__question" id="poll-question"></p>
-        <div class="two-cents__options" id="poll-options"></div>
-        <p class="two-cents__total" id="poll-total"></p>
+      <div class="dock__content" data-dock-content="poll">
+        <p class="dock__poll-question" id="poll-question"></p>
+        <div class="dock__poll-options" id="poll-options"></div>
+        <p class="dock__poll-total" id="poll-total"></p>
       </div>
 
       <!-- Message tab -->
-      <div class="two-cents__content two-cents__content--active" data-content="message">
+      <div class="dock__content" data-dock-content="message">
         <form class="contact-form" id="contact-form" method="POST" enctype="multipart/form-data">
           <label class="contact-form__label" for="contact-msg">Send us a message!</label>
           <textarea class="contact-form__input" id="contact-msg" name="message" rows="3" placeholder="Say something nice (or weird)..."></textarea>
@@ -126,13 +112,28 @@
         </form>
       </div>
 
+      <!-- Suggest tab -->
+      <div class="dock__content" data-dock-content="suggest">
+        <p class="suggest__intro">Drop a pin to suggest a spot!</p>
+        <div class="suggest__types" id="suggest-types">
+          <button class="suggest__type-btn" data-pin-type="food" style="--pin-color:#E8913A">🍽 Food</button>
+          <button class="suggest__type-btn" data-pin-type="hikes" style="--pin-color:#5B8C3E">🥾 Hikes</button>
+          <button class="suggest__type-btn" data-pin-type="hot-springs" style="--pin-color:#4A9BD9">♨ Hot Springs</button>
+          <button class="suggest__type-btn" data-pin-type="people" style="--pin-color:#C06AB8">👋 People</button>
+          <button class="suggest__type-btn" data-pin-type="camping" style="--pin-color:#8B6F47">⛺ Camping</button>
+        </div>
+        <p class="suggest__status" id="suggest-status"></p>
+        <p class="suggest__remaining" id="suggest-remaining"></p>
+      </div>
+
       <!-- Donate tab -->
-      <div class="two-cents__content" data-content="donate">
-        <p class="two-cents__donate-intro">Help fuel the adventure! Every bit goes to gas, cat treats, or wherever the road takes us.</p>
-        <div class="two-cents__kofi-wrap">
+      <div class="dock__content" data-dock-content="donate">
+        <p class="dock__donate-intro">Help fuel the adventure! Every bit goes to gas, cat treats, or wherever the road takes us.</p>
+        <div class="dock__kofi-wrap">
           <iframe id="kofiframe" src="https://ko-fi.com/wanderingwojo/?hidefeed=true&widget=true&embed=true&preview=true" style="border:none;width:100%;background:transparent;" height="712" title="Support Wandering Wojo on Ko-fi"></iframe>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -145,7 +146,6 @@
       <a class="footer-links__link" href="https://mustardandmilk.com" target="_blank" rel="noopener"><span class="footer-links__title">Mustard &amp; Milk</span><span class="footer-links__desc">Nonsense Generator &amp; Book</span></a>
     </div>
     <div class="entry-nav__center">
-      <div class="entry-nav__stats" id="journey-stats"></div>
       <div class="entry-nav__controls">
         <button class="entry-nav__btn" id="nav-prev" aria-label="Previous entry">&lsaquo;</button>
         <span class="entry-nav__info" id="nav-info"></span>

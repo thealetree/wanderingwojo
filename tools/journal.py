@@ -740,6 +740,23 @@ HTML_PAGE = r"""<!DOCTYPE html>
         <div class="status" id="poll-status" style="margin-top:0.75rem;"></div>
       </div>
     </div>
+
+    <!-- Suggestion Pins Management -->
+    <div style="margin-top:1.5rem;">
+      <div class="entry-list-header" id="suggestions-section-header" style="cursor:pointer;">
+        <span class="entry-list-title">Suggestion Pins</span>
+        <span class="entry-list-toggle" id="suggestions-section-toggle">&#9660;</span>
+      </div>
+      <div id="suggestions-section" style="display:none; padding:1rem; background:var(--off-white); border:1px solid var(--beige-dark); border-top:none; border-radius:0 0 8px 8px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+          <label style="font-size:0.85rem;"><input type="checkbox" id="suggest-select-all"> Select All</label>
+          <button class="btn btn-secondary" id="suggest-delete-selected" style="font-size:0.85rem; padding:0.3rem 0.75rem; background:var(--terracotta); color:#fff; border:none;" disabled>Delete Selected</button>
+        </div>
+        <div id="suggestions-list" style="max-height:400px; overflow-y:auto;"></div>
+        <div id="suggestions-count" style="margin-top:0.5rem; font-size:0.85rem; color:var(--mid-gray);"></div>
+        <div class="status" id="suggestions-status" style="margin-top:0.5rem;"></div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -1508,6 +1525,143 @@ HTML_PAGE = r"""<!DOCTYPE html>
     });
 
     // ==================================================================
+    // SUGGESTION PINS MANAGEMENT
+    // ==================================================================
+    var SUGGEST_COLORS = {
+      'food': '#E8913A', 'hikes': '#5B8C3E', 'hot-springs': '#4A9BD9',
+      'people': '#C06AB8', 'camping': '#8B6F47'
+    };
+    var SUGGEST_LABELS = {
+      'food': 'Food', 'hikes': 'Hikes', 'hot-springs': 'Hot Springs',
+      'people': 'People', 'camping': 'Camping'
+    };
+    var suggestionsData = {}; // { firebaseKey: pinData }
+
+    var suggestHeader = document.getElementById('suggestions-section-header');
+    var suggestSection = document.getElementById('suggestions-section');
+    var suggestToggle = document.getElementById('suggestions-section-toggle');
+    var suggestSelectAll = document.getElementById('suggest-select-all');
+    var suggestDeleteBtn = document.getElementById('suggest-delete-selected');
+    var suggestList = document.getElementById('suggestions-list');
+    var suggestCount = document.getElementById('suggestions-count');
+    var suggestStatus = document.getElementById('suggestions-status');
+
+    suggestHeader.addEventListener('click', function() {
+      var open = suggestSection.style.display !== 'none';
+      suggestSection.style.display = open ? 'none' : 'block';
+      suggestToggle.textContent = open ? '\u25BC' : '\u25B2';
+      if (!open) loadSuggestions();
+    });
+
+    function loadSuggestions() {
+      suggestList.innerHTML = '<div style="color:var(--mid-gray);font-size:0.9rem;">Loading...</div>';
+      fetch('/api/suggestions')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          suggestionsData = data || {};
+          renderSuggestions();
+        })
+        .catch(function(err) {
+          suggestList.innerHTML = '<div style="color:var(--terracotta);">Error: ' + err.message + '</div>';
+        });
+    }
+
+    function renderSuggestions() {
+      var keys = Object.keys(suggestionsData);
+      if (keys.length === 0) {
+        suggestList.innerHTML = '<div style="color:var(--mid-gray);font-size:0.9rem;">No suggestion pins yet.</div>';
+        suggestCount.textContent = '';
+        return;
+      }
+      // Sort by timestamp descending
+      keys.sort(function(a, b) {
+        return (suggestionsData[b].ts || 0) - (suggestionsData[a].ts || 0);
+      });
+      suggestCount.textContent = keys.length + ' pin' + (keys.length !== 1 ? 's' : '');
+      var html = '';
+      keys.forEach(function(key) {
+        var pin = suggestionsData[key];
+        var color = SUGGEST_COLORS[pin.type] || '#888';
+        var label = SUGGEST_LABELS[pin.type] || pin.type;
+        var dateStr = pin.ts ? new Date(pin.ts).toLocaleDateString() : '?';
+        var coords = (typeof pin.lat === 'number' && typeof pin.lng === 'number')
+          ? pin.lat.toFixed(3) + ', ' + pin.lng.toFixed(3) : '?';
+        html += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;border-bottom:1px solid var(--beige-dark);font-size:0.85rem;">' +
+          '<input type="checkbox" class="suggest-checkbox" data-key="' + key + '">' +
+          '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + color + ';flex-shrink:0;"></span>' +
+          '<span style="min-width:80px;font-weight:500;">' + label + '</span>' +
+          '<span style="color:var(--mid-gray);flex:1;">' + coords + '</span>' +
+          '<span style="color:var(--mid-gray);min-width:80px;text-align:right;">' + dateStr + '</span>' +
+          '<button class="btn btn-secondary suggest-delete-one" data-key="' + key + '" style="font-size:0.75rem;padding:0.15rem 0.5rem;color:var(--terracotta);border-color:var(--terracotta);">&#10005;</button>' +
+        '</div>';
+      });
+      suggestList.innerHTML = html;
+
+      // Individual delete buttons
+      suggestList.querySelectorAll('.suggest-delete-one').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if (confirm('Delete this ' + (SUGGEST_LABELS[(suggestionsData[btn.dataset.key] || {}).type] || '') + ' pin?')) {
+            deleteSuggestions([btn.dataset.key]);
+          }
+        });
+      });
+
+      // Checkbox change → update delete button state
+      suggestList.querySelectorAll('.suggest-checkbox').forEach(function(cb) {
+        cb.addEventListener('change', updateDeleteBtnState);
+      });
+    }
+
+    function updateDeleteBtnState() {
+      var checked = suggestList.querySelectorAll('.suggest-checkbox:checked');
+      suggestDeleteBtn.disabled = checked.length === 0;
+      suggestDeleteBtn.textContent = checked.length > 0
+        ? 'Delete Selected (' + checked.length + ')'
+        : 'Delete Selected';
+    }
+
+    suggestSelectAll.addEventListener('change', function() {
+      suggestList.querySelectorAll('.suggest-checkbox').forEach(function(cb) {
+        cb.checked = suggestSelectAll.checked;
+      });
+      updateDeleteBtnState();
+    });
+
+    suggestDeleteBtn.addEventListener('click', function() {
+      var checked = suggestList.querySelectorAll('.suggest-checkbox:checked');
+      var keys = [];
+      checked.forEach(function(cb) { keys.push(cb.dataset.key); });
+      if (keys.length === 0) return;
+      if (!confirm('Delete ' + keys.length + ' suggestion pin' + (keys.length !== 1 ? 's' : '') + '?')) return;
+      deleteSuggestions(keys);
+    });
+
+    function deleteSuggestions(keys) {
+      suggestStatus.innerHTML = '<div style="color:var(--mid-gray);">Deleting ' + keys.length + ' pin' + (keys.length !== 1 ? 's' : '') + '...</div>';
+      fetch('/api/delete-suggestions', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ ids: keys })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(result) {
+        if (result.deleted) {
+          suggestStatus.innerHTML = '<div style="color:#7C9A7E;">\u2713 Deleted ' + result.deleted + ' pin' + (result.deleted !== 1 ? 's' : '') + '</div>';
+          // Remove from local data and re-render
+          keys.forEach(function(k) { delete suggestionsData[k]; });
+          renderSuggestions();
+          suggestSelectAll.checked = false;
+          updateDeleteBtnState();
+        } else {
+          suggestStatus.innerHTML = '<div style="color:var(--terracotta);">' + (result.error || 'Delete failed') + '</div>';
+        }
+      })
+      .catch(function(err) {
+        suggestStatus.innerHTML = '<div style="color:var(--terracotta);">Error: ' + err.message + '</div>';
+      });
+    }
+
+    // ==================================================================
     // INIT
     // ==================================================================
     updateMoodPreview();
@@ -1538,6 +1692,8 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.handle_list_entries()
         elif self.path == '/api/poll':
             self.handle_get_poll()
+        elif self.path == '/api/suggestions':
+            self.handle_get_suggestions()
         elif self.path.startswith('/api/geocode'):
             self.handle_geocode()
         elif self.path.startswith('/media/photos/'):
@@ -1556,6 +1712,8 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.handle_delete_entry()
         elif self.path == '/api/save-poll':
             self.handle_save_poll()
+        elif self.path == '/api/delete-suggestions':
+            self.handle_delete_suggestions()
         else:
             self.send_error(404)
 
@@ -1912,6 +2070,53 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             return
 
         self._git_commit_and_push(result, f"Update poll: {question}")
+        self.send_json(200, result)
+
+    def handle_get_suggestions(self):
+        """Proxy fetch suggestion pins from Firebase."""
+        firebase_url = 'https://wanderingwojo-default-rtdb.firebaseio.com/suggestions.json'
+        try:
+            req = urllib.request.Request(firebase_url)
+            ssl_ctx = ssl._create_unverified_context()
+            with urllib.request.urlopen(req, timeout=10, context=ssl_ctx) as resp:
+                data = json.loads(resp.read().decode('utf-8'))
+            self.send_json(200, data or {})
+        except Exception as e:
+            self.send_json(500, {'error': str(e)})
+
+    def handle_delete_suggestions(self):
+        """Delete suggestion pins from Firebase by key."""
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length)
+
+        try:
+            data = json.loads(body)
+        except json.JSONDecodeError as e:
+            self.send_json(400, {'error': f'Invalid JSON: {e}'})
+            return
+
+        ids = data.get('ids', [])
+        if not ids:
+            self.send_json(400, {'error': 'No IDs provided'})
+            return
+
+        deleted = 0
+        errors = []
+        ssl_ctx = ssl._create_unverified_context()
+        for pin_id in ids:
+            try:
+                url = f'https://wanderingwojo-default-rtdb.firebaseio.com/suggestions/{pin_id}.json'
+                req = urllib.request.Request(url, method='DELETE')
+                with urllib.request.urlopen(req, timeout=10, context=ssl_ctx) as resp:
+                    resp.read()
+                deleted += 1
+            except Exception as e:
+                errors.append(f'{pin_id}: {e}')
+
+        result = {'deleted': deleted}
+        if errors:
+            result['errors'] = errors
+        print(f"  ✓ Deleted {deleted} suggestion pin(s)")
         self.send_json(200, result)
 
     def _regenerate_feed(self):

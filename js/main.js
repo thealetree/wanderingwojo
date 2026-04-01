@@ -22,14 +22,14 @@ const AppModule = (function () {
   // --- DOM refs ---
   const els = {};
 
-  // --- Helper: hide/show 2¢ panel ---
-  function hideTwoCents() {
-    var tc = document.getElementById('two-cents');
-    if (tc) tc.style.display = 'none';
+  // --- Helper: hide/show dock ---
+  function hideDock() {
+    var dock = document.getElementById('dock');
+    if (dock) dock.style.display = 'none';
   }
-  function showTwoCents() {
-    var tc = document.getElementById('two-cents');
-    if (tc) tc.style.display = '';
+  function showDock() {
+    var dock = document.getElementById('dock');
+    if (dock) dock.style.display = '';
   }
 
   /**
@@ -40,15 +40,13 @@ const AppModule = (function () {
     checkSentRedirect();
     await loadData();
     initMap();
-    initFloatingTitle();
-    initTwoCents();
+    initDock();
     initEntryNav();
     initLightbox();
     initKeyboardNav();
     initJourneyStats();
     initKladgPlayer();
-    centerTwoCentsButton();
-    window.addEventListener('resize', centerTwoCentsButton);
+    loadSuggestionPins();
   }
 
   /**
@@ -56,7 +54,7 @@ const AppModule = (function () {
    */
   function cacheDom() {
     els.mapContainer = document.getElementById('map-container');
-    els.floatingTitle = document.getElementById('floating-title');
+    els.dock = document.getElementById('dock');
     els.lightbox = document.getElementById('lightbox');
     els.lightboxImg = document.getElementById('lightbox-img');
     els.lightboxClose = document.getElementById('lightbox-close');
@@ -101,66 +99,92 @@ const AppModule = (function () {
   }
 
   // =====================================================================
-  // FLOATING TITLE (expandable description)
+  // UNIFIED DOCK
   // =====================================================================
 
-  function initFloatingTitle() {
-    if (!els.floatingTitle) return;
+  var placementMode = null; // null or { type: 'food'|'hikes'|... }
+  var SUGGEST_MAX = 10;
+  var SUGGEST_LABELS = {
+    'food': 'Food', 'hikes': 'Hikes', 'hot-springs': 'Hot Springs',
+    'people': 'People', 'camping': 'Camping'
+  };
+  var SUGGEST_COLORS = {
+    'food': '#E8913A', 'hikes': '#5B8C3E', 'hot-springs': '#4A9BD9',
+    'people': '#C06AB8', 'camping': '#8B6F47'
+  };
 
-    var nameEl = els.floatingTitle.querySelector('.floating-title__name');
-    var closeBtn = document.getElementById('floating-title-close');
+  function initDock() {
+    var dock = document.getElementById('dock');
+    var panel = document.getElementById('dock-panel');
+    if (!dock) return;
 
-    function openAboutPanel() {
-      els.floatingTitle.classList.add('floating-title--open');
-      // Hide 2¢ panel on mobile only (desktop keeps it visible)
-      if (window.innerWidth <= 768) hideTwoCents();
-      // Hide swag button and bottom nav on mobile only
-      if (window.innerWidth <= 768) {
-        var floatingShop = document.querySelector('.floating-shop');
-        var entryNav = document.getElementById('entry-nav');
-        if (floatingShop) floatingShop.style.display = 'none';
-        if (entryNav) entryNav.style.display = 'none';
-      }
+    var tabs = dock.querySelectorAll('.dock__tab[data-dock]');
+    var contents = dock.querySelectorAll('.dock__content');
+
+    function openTab(tabName) {
+      tabs.forEach(function (t) { t.classList.remove('dock__tab--active'); });
+      contents.forEach(function (c) { c.classList.remove('dock__content--active'); });
+      var tab = dock.querySelector('[data-dock="' + tabName + '"]');
+      var content = dock.querySelector('[data-dock-content="' + tabName + '"]');
+      if (tab) tab.classList.add('dock__tab--active');
+      if (content) content.classList.add('dock__content--active');
+      dock.classList.add('dock--open');
+
+      // Update suggest remaining when opening suggest tab
+      if (tabName === 'suggest') updateSuggestUI();
     }
 
-    function closeAboutPanel() {
-      els.floatingTitle.classList.remove('floating-title--open');
-      showTwoCents();
-      // Restore swag button and bottom nav
-      var floatingShop = document.querySelector('.floating-shop');
-      var entryNav = document.getElementById('entry-nav');
-      if (floatingShop) floatingShop.style.display = '';
-      if (entryNav) entryNav.style.display = '';
+    function closeDock() {
+      dock.classList.remove('dock--open');
+      tabs.forEach(function (t) { t.classList.remove('dock__tab--active'); });
+      contents.forEach(function (c) { c.classList.remove('dock__content--active'); });
     }
 
-    // Only the title text toggles open/close
-    nameEl.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (els.floatingTitle.classList.contains('floating-title--open')) {
-        closeAboutPanel();
-      } else {
-        openAboutPanel();
-      }
-    });
-
-    // Close button inside the panel
-    if (closeBtn) {
-      closeBtn.addEventListener('click', function (e) {
+    // Tab click: toggle if already active, otherwise switch
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function (e) {
         e.stopPropagation();
-        closeAboutPanel();
-      });
-    }
+        var tabName = tab.getAttribute('data-dock');
+        if (!tabName) return; // Swag link has no data-dock
 
-    // Clicks anywhere inside the panel (desc, form, etc.) do nothing
-    els.floatingTitle.addEventListener('click', function (e) {
+        if (tab.classList.contains('dock__tab--active')) {
+          closeDock();
+        } else {
+          // Cancel placement mode if switching tabs
+          if (placementMode) cancelPlacementMode();
+          openTab(tabName);
+        }
+      });
+    });
+
+    // Clicks inside panel don't close it
+    panel.addEventListener('click', function (e) {
       e.stopPropagation();
     });
 
-    // Close when clicking outside the panel
+    // Click outside closes dock
     document.addEventListener('click', function () {
-      closeAboutPanel();
+      closeDock();
     });
 
+    // Init contact form
+    var form = document.getElementById('contact-form');
+    if (form) {
+      if (!CONTACT_EMAIL) {
+        var msgTab = dock.querySelector('[data-dock="message"]');
+        var msgContent = dock.querySelector('[data-dock-content="message"]');
+        if (msgTab) msgTab.style.display = 'none';
+        if (msgContent) msgContent.style.display = 'none';
+      } else {
+        initContactForm(form);
+      }
+    }
+
+    // Load poll
+    loadPoll();
+
+    // Init suggest tab
+    initSuggestTab(dock);
   }
 
   function initContactForm(form) {
@@ -246,91 +270,9 @@ const AppModule = (function () {
   }
 
   // =====================================================================
-  // YOUR 2¢ PANEL (Poll + Donate)
+  // POLL + FIREBASE
   // =====================================================================
   var FIREBASE_DB = 'https://wanderingwojo-default-rtdb.firebaseio.com';
-
-  function centerTwoCentsButton() {
-    // On mobile, center the 2¢ button between the shop and title buttons
-    if (window.innerWidth > 768) return;
-    var shop = document.querySelector('.floating-shop');
-    var title = document.querySelector('.floating-title');
-    var twoCentsEl = document.getElementById('two-cents');
-    if (!shop || !title || !twoCentsEl) return;
-    var shopRight = shop.getBoundingClientRect().right;
-    var titleLeft = title.getBoundingClientRect().left;
-    var midpoint = (shopRight + titleLeft) / 2;
-    twoCentsEl.style.left = midpoint + 'px';
-    twoCentsEl.style.transform = 'translateX(-50%)';
-  }
-
-  function initTwoCents() {
-    var panel = document.getElementById('two-cents');
-    var toggle = document.getElementById('two-cents-toggle');
-    var closeBtn = document.getElementById('two-cents-close');
-    var panelContent = document.getElementById('two-cents-panel');
-    if (!panel || !toggle) return;
-
-    // Toggle open/close — always reset to Message tab
-    toggle.addEventListener('click', function (e) {
-      e.stopPropagation();
-      // Reset to Message tab
-      var tabs = panel.querySelectorAll('.two-cents__tab');
-      var contents = panel.querySelectorAll('.two-cents__content');
-      tabs.forEach(function (t) { t.classList.remove('two-cents__tab--active'); });
-      contents.forEach(function (c) { c.classList.remove('two-cents__content--active'); });
-      var msgTab = panel.querySelector('[data-tab="message"]');
-      var msgContent = panel.querySelector('[data-content="message"]');
-      if (msgTab) msgTab.classList.add('two-cents__tab--active');
-      if (msgContent) msgContent.classList.add('two-cents__content--active');
-      panel.classList.add('two-cents--open');
-    });
-
-    closeBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      panel.classList.remove('two-cents--open');
-    });
-
-    // Clicks inside panel don't close it
-    panelContent.addEventListener('click', function (e) {
-      e.stopPropagation();
-    });
-
-    // Click outside closes
-    document.addEventListener('click', function () {
-      panel.classList.remove('two-cents--open');
-    });
-
-    // Tab switching
-    var tabs = panel.querySelectorAll('.two-cents__tab');
-    var contents = panel.querySelectorAll('.two-cents__content');
-    tabs.forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        tabs.forEach(function (t) { t.classList.remove('two-cents__tab--active'); });
-        contents.forEach(function (c) { c.classList.remove('two-cents__content--active'); });
-        tab.classList.add('two-cents__tab--active');
-        var target = tab.getAttribute('data-tab');
-        panel.querySelector('[data-content="' + target + '"]').classList.add('two-cents__content--active');
-      });
-    });
-
-    // Init contact form (now lives in the Message tab)
-    var form = document.getElementById('contact-form');
-    if (form) {
-      if (!CONTACT_EMAIL) {
-        // Hide the Message tab entirely if no email configured
-        var msgTab = panel.querySelector('[data-tab="message"]');
-        var msgContent = panel.querySelector('[data-content="message"]');
-        if (msgTab) msgTab.style.display = 'none';
-        if (msgContent) msgContent.style.display = 'none';
-      } else {
-        initContactForm(form);
-      }
-    }
-
-    // Load poll
-    loadPoll();
-  }
 
   function loadPoll() {
     fetch('data/poll.json?t=' + Date.now())
@@ -382,19 +324,19 @@ const AppModule = (function () {
       var pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
 
       var btn = document.createElement('button');
-      btn.className = 'two-cents__option';
-      if (hasVoted) btn.classList.add('two-cents__option--voted');
-      if (hasVoted && votedOption === key) btn.classList.add('two-cents__option--selected');
+      btn.className = 'dock__poll-option';
+      if (hasVoted) btn.classList.add('dock__poll-option--voted');
+      if (hasVoted && votedOption === key) btn.classList.add('dock__poll-option--selected');
 
       var barHtml = hasVoted
-        ? '<div class="two-cents__option-bar" style="width:' + pct + '%"></div>'
+        ? '<div class="dock__poll-option-bar" style="width:' + pct + '%"></div>'
         : '';
       var countHtml = hasVoted
-        ? '<span class="two-cents__option-count">' + pct + '%</span>'
+        ? '<span class="dock__poll-option-count">' + pct + '%</span>'
         : '';
 
       btn.innerHTML = barHtml +
-        '<span class="two-cents__option-label">' + opt + '</span>' +
+        '<span class="dock__poll-option-label">' + opt + '</span>' +
         countHtml;
 
       if (!hasVoted) {
@@ -435,6 +377,181 @@ const AppModule = (function () {
         // Still re-render (vote is saved locally)
         renderPoll(poll);
       });
+  }
+
+  // =====================================================================
+  // SUGGESTION PINS
+  // =====================================================================
+
+  function initSuggestTab(dock) {
+    var typeBtns = dock.querySelectorAll('.suggest__type-btn');
+    typeBtns.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var type = btn.getAttribute('data-pin-type');
+        if (!canSuggest()) return;
+
+        if (placementMode && placementMode.type === type) {
+          cancelPlacementMode();
+          return;
+        }
+
+        // Activate this type
+        typeBtns.forEach(function (b) { b.classList.remove('suggest__type-btn--active'); });
+        btn.classList.add('suggest__type-btn--active');
+
+        placementMode = { type: type };
+        document.body.classList.add('placement-mode');
+
+        // Close dock panel so user can see the map
+        dock.classList.remove('dock--open');
+
+        showToast('Tap the map to place a ' + SUGGEST_LABELS[type] + ' pin', 4000);
+
+        // Set up map click callback
+        MapModule.setPlacementCallback(function (lngLat) {
+          placeSuggestionPin(lngLat, type);
+        });
+      });
+    });
+
+    updateSuggestUI();
+  }
+
+  function cancelPlacementMode() {
+    placementMode = null;
+    document.body.classList.remove('placement-mode');
+    MapModule.setPlacementCallback(null);
+    var typeBtns = document.querySelectorAll('.suggest__type-btn');
+    typeBtns.forEach(function (b) { b.classList.remove('suggest__type-btn--active'); });
+  }
+
+  function placeSuggestionPin(lngLat, type) {
+    if (!canSuggest()) {
+      cancelPlacementMode();
+      return;
+    }
+
+    var pinData = {
+      type: type,
+      lng: lngLat.lng,
+      lat: lngLat.lat,
+      ts: Date.now()
+    };
+
+    incrementSuggestCount();
+    cancelPlacementMode();
+    showToast(SUGGEST_LABELS[type] + ' pin placed!', 3000);
+
+    // Write to Firebase, then render with the key
+    fetch(FIREBASE_DB + '/suggestions.json', {
+      method: 'POST',
+      body: JSON.stringify(pinData)
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (result) {
+      var key = result.name; // Firebase returns { name: "<key>" }
+      saveOwnPinKey(key);
+      pinData.key = key;
+      pinData.isOwn = true;
+      pinData.onDelete = handleDeleteOwnPin;
+      MapModule.addSuggestionPin(pinData);
+    })
+    .catch(function (err) {
+      console.warn('Failed to save suggestion pin:', err);
+      // Still render optimistically without delete capability
+      MapModule.addSuggestionPin(pinData);
+    });
+  }
+
+  function handleDeleteOwnPin(key, marker) {
+    MapModule.removeSuggestionMarker(marker);
+    decrementSuggestCount();
+    updateSuggestUI();
+    removeOwnPinKey(key);
+    showToast('Pin removed', 2000);
+
+    // Delete from Firebase
+    fetch(FIREBASE_DB + '/suggestions/' + key + '.json', {
+      method: 'DELETE'
+    }).catch(function (err) {
+      console.warn('Failed to delete suggestion pin:', err);
+    });
+  }
+
+  function loadSuggestionPins() {
+    fetch(FIREBASE_DB + '/suggestions.json')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data) return;
+        var ownKeys = getOwnPinKeys();
+        var pins = Object.keys(data).map(function (key) {
+          var pin = data[key];
+          pin.key = key;
+          if (ownKeys.indexOf(key) !== -1) {
+            pin.isOwn = true;
+            pin.onDelete = handleDeleteOwnPin;
+          }
+          return pin;
+        });
+        MapModule.addSuggestionPins(pins);
+      })
+      .catch(function (err) {
+        console.warn('Failed to load suggestion pins:', err);
+      });
+  }
+
+  function getSuggestCount() {
+    return parseInt(localStorage.getItem('wojo_suggest_count') || '0', 10);
+  }
+  function incrementSuggestCount() {
+    var count = getSuggestCount() + 1;
+    localStorage.setItem('wojo_suggest_count', String(count));
+    return count;
+  }
+  function decrementSuggestCount() {
+    var count = Math.max(0, getSuggestCount() - 1);
+    localStorage.setItem('wojo_suggest_count', String(count));
+    return count;
+  }
+  function canSuggest() {
+    return getSuggestCount() < SUGGEST_MAX;
+  }
+
+  function getOwnPinKeys() {
+    try {
+      return JSON.parse(localStorage.getItem('wojo_own_pins') || '[]');
+    } catch (e) { return []; }
+  }
+  function saveOwnPinKey(key) {
+    var keys = getOwnPinKeys();
+    keys.push(key);
+    localStorage.setItem('wojo_own_pins', JSON.stringify(keys));
+  }
+  function removeOwnPinKey(key) {
+    var keys = getOwnPinKeys().filter(function (k) { return k !== key; });
+    localStorage.setItem('wojo_own_pins', JSON.stringify(keys));
+  }
+
+  function updateSuggestUI() {
+    var statusEl = document.getElementById('suggest-status');
+    var remainEl = document.getElementById('suggest-remaining');
+    var typeBtns = document.querySelectorAll('.suggest__type-btn');
+    var remaining = SUGGEST_MAX - getSuggestCount();
+
+    if (remainEl) {
+      remainEl.textContent = remaining > 0
+        ? remaining + ' pin' + (remaining !== 1 ? 's' : '') + ' remaining'
+        : '';
+    }
+    if (statusEl) {
+      statusEl.textContent = remaining <= 0
+        ? 'You\u2019ve placed all ' + SUGGEST_MAX + ' pins for this session.'
+        : '';
+    }
+    typeBtns.forEach(function (btn) {
+      btn.disabled = remaining <= 0;
+    });
   }
 
   // =====================================================================
@@ -497,7 +614,7 @@ const AppModule = (function () {
     updateNavInfo();
     highlightPin(displayEntry.id);
     MapModule.updateThumbVisibility(displayEntry.id);
-    hideTwoCents();
+    hideDock();
     MapModule.expandPinEntry(groupEntries, pinEl, displayEntry.id);
   }
 
@@ -666,10 +783,10 @@ const AppModule = (function () {
         MapModule.flyToEntry(sortedEntries[navIndex]);
         highlightPin(entryId);
         MapModule.updateThumbVisibility(entryId);
-        hideTwoCents();
+        hideDock();
         // Expand after fly animation completes
         setTimeout(function () {
-          hideTwoCents();
+          hideDock();
           MapModule.expandByEntryId(entryId);
         }, 1300);
       }
@@ -713,11 +830,13 @@ const AppModule = (function () {
     document.addEventListener('keydown', function (e) {
       // ESC closes lightbox or expanded entry
       if (e.key === 'Escape') {
-        if (els.lightbox.classList.contains('active')) {
+        if (placementMode) {
+          cancelPlacementMode();
+        } else if (els.lightbox.classList.contains('active')) {
           closeLightbox();
         } else {
           MapModule.closeExpandedPin();
-          showTwoCents();
+          showDock();
         }
       }
 
@@ -771,7 +890,7 @@ const AppModule = (function () {
           return sortedEntries.find(function (se) { return se.id === id; });
         }).filter(Boolean);
 
-        hideTwoCents();
+        hideDock();
         MapModule.expandPinEntry(groupEntries, pin, entry.id);
       }
     }, 1400);
