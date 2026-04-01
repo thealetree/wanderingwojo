@@ -130,6 +130,22 @@ const AppModule = (function () {
       if (content) content.classList.add('dock__content--active');
       dock.classList.add('dock--open');
 
+      // Desktop: left tabs flush left, right tabs flush right
+      if (window.innerWidth > 768 && tab && panel) {
+        var barRect = dock.querySelector('.dock__bar').getBoundingClientRect();
+        var tabCenter = tab.getBoundingClientRect().left + tab.offsetWidth / 2;
+        var barCenter = barRect.left + barRect.width / 2;
+        if (tabCenter > barCenter) {
+          // Right-side tab: flush right
+          panel.style.marginLeft = (barRect.width - panel.offsetWidth) + 'px';
+        } else {
+          // Left-side tab: flush left
+          panel.style.marginLeft = '0px';
+        }
+      } else if (panel) {
+        panel.style.marginLeft = '';
+      }
+
       // Update suggest remaining when opening suggest tab
       if (tabName === 'suggest') updateSuggestUI();
     }
