@@ -2048,7 +2048,8 @@ a:hover {
     box-shadow: inset 0 0 120px 40px rgba(0,0,0,0.35);
   }
   .floating-title__desc,
-  .floating-title__desc p {
+  .floating-title__desc p,
+  .contact-form__input {
     color: var(--link-color);
   }
   .mapboxgl-ctrl-group {

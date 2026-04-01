@@ -184,40 +184,64 @@ const AppModule = (function () {
       });
     }
 
-    // Validate before submit (message required)
+    // Submit via fetch so we can handle errors gracefully
     form.addEventListener('submit', function (e) {
+      e.preventDefault();
       var msgInput = document.getElementById('contact-msg');
-      if (!msgInput.value.trim()) {
-        e.preventDefault();
-        return;
-      }
-      // Let the form submit naturally (traditional POST)
+      if (!msgInput.value.trim()) return;
+
       var btn = form.querySelector('.contact-form__btn');
       btn.disabled = true;
       btn.textContent = 'Sending...';
+
+      var formData = new FormData(form);
+      fetch('https://formsubmit.co/ajax/' + CONTACT_EMAIL, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      }).then(function (res) {
+        if (!res.ok) throw new Error('Status ' + res.status);
+        return res.json();
+      }).then(function () {
+        btn.textContent = 'Sent!';
+        msgInput.value = '';
+        var fileInput = document.getElementById('contact-photo');
+        var fileNameEl = document.getElementById('contact-file-name');
+        if (fileInput) fileInput.value = '';
+        if (fileNameEl) fileNameEl.textContent = '';
+        setTimeout(function () {
+          btn.disabled = false;
+          btn.textContent = 'Send anonymously';
+        }, 3000);
+      }).catch(function () {
+        btn.disabled = false;
+        btn.textContent = 'Send anonymously';
+        showToast('Couldn\u2019t send right now \u2014 the mail service may be temporarily down. Try again later!', 6000);
+      });
     });
+  }
+
+  function showToast(message, duration) {
+    var ms = duration || 5000;
+    var toast = document.createElement('div');
+    toast.className = 'sent-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    requestAnimationFrame(function () {
+      toast.classList.add('sent-toast--visible');
+    });
+    setTimeout(function () {
+      toast.classList.remove('sent-toast--visible');
+      setTimeout(function () { toast.remove(); }, 400);
+    }, ms);
   }
 
   // Check for ?sent=true redirect and show success toast
   function checkSentRedirect() {
     var params = new URLSearchParams(window.location.search);
     if (params.get('sent') === 'true') {
-      // Clean URL
       window.history.replaceState({}, '', window.location.pathname);
-      // Show toast
-      var toast = document.createElement('div');
-      toast.className = 'sent-toast';
-      toast.textContent = 'Message sent! Thanks for reaching out.';
-      document.body.appendChild(toast);
-      // Animate in
-      requestAnimationFrame(function () {
-        toast.classList.add('sent-toast--visible');
-      });
-      // Remove after 5 seconds
-      setTimeout(function () {
-        toast.classList.remove('sent-toast--visible');
-        setTimeout(function () { toast.remove(); }, 400);
-      }, 5000);
+      showToast('Message sent! Thanks for reaching out.');
     }
   }
 
