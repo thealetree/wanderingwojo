@@ -481,5 +481,22 @@
     "mood_left": "Gooboieeee",
     "mood_right": "Yeahbuddiee",
     "mood_value": 0.75
+  },
+  {
+    "id": "2026-03-31-where-the-wind-blows",
+    "date": "2026-03-31",
+    "title": "Where the Wind Blows...",
+    "type": "field-notes",
+    "location_name": "Flagstaff, AZ",
+    "coordinates": [
+      35.1987522,
+      -111.651822
+    ],
+    "body": "Final night in Flagstaff. Feels like the cool wind is blowing us south to warmer temps, just in time for visits in Tucson, just as it has been this whole trip. I think we're both ready to get moving again. \n\nThere was a moment earlier, when it just felt kinda neutral, blank... No rush, nor any feeling of being held up... just... here. That's kinda nice. Seems to leave space for savoring, and maybe making measured choices, or just... sitting. \n\nI think we'll just do that. I'll sit in this window sill watching trains and cars pass by, and the big dude will sit and notice, sipping on and savoring everything showing up right now.",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_2905.jpg"
+    ],
+    "preview_photo": null
   }
 ]
