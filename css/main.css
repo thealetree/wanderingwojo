@@ -897,6 +897,7 @@ a:hover {
 
 /* Mobile player — in about panel */
 .kladg-player--mobile {
+  clear: both;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.4rem;
