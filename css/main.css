@@ -206,7 +206,7 @@ a:hover {
 }
 
 .dock__tab {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 1.05rem;
   font-weight: 600;
   color: var(--warm-gray);
@@ -239,7 +239,7 @@ a:hover {
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 0.95rem;
   color: var(--mid-gray);
   white-space: nowrap;
@@ -256,7 +256,7 @@ a:hover {
 }
 
 .dock__stats .journey-stats__item strong {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 700;
   color: var(--charcoal);
 }
@@ -2194,20 +2194,20 @@ a:hover {
     order: -1;
     width: 100%;
     justify-content: space-evenly;
-    font-size: 0.75rem;
-    gap: 0.3rem;
-    padding: 0.2rem 0;
+    font-size: 0.95rem;
+    gap: 0.35rem;
+    padding: 0.3rem 0;
     margin: 0;
     border-left: none;
     border-right: none;
     border-bottom: 1px solid var(--beige-dark);
   }
   .dock__stats .journey-stats__divider {
-    font-size: 0.5rem;
+    font-size: 0.6rem;
   }
   .dock__tab {
-    font-size: 0.8rem;
-    padding: 0.25rem 0.4rem;
+    font-size: 1rem;
+    padding: 0.3rem 0.4rem;
     min-height: 32px;
     display: flex;
     align-items: center;
