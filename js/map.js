@@ -1685,8 +1685,8 @@ const MapModule = (function () {
     'people': '#C06AB8', 'camping': '#8B6F47'
   };
   var SUGGEST_LABELS = {
-    'food': 'Food', 'hikes': 'Hikes', 'hot-springs': 'Hot Springs',
-    'people': 'People', 'camping': 'Camping'
+    'food': '🍽', 'hikes': '🥾', 'hot-springs': '♨️',
+    'people': '👋', 'camping': '⛺'
   };
 
   function setPlacementCallback(fn) {
@@ -1697,15 +1697,18 @@ const MapModule = (function () {
     if (!map || !pin || typeof pin.lng !== 'number' || typeof pin.lat !== 'number') return;
     var el = document.createElement('div');
     el.className = 'suggestion-pin' + (pin.isOwn ? ' suggestion-pin--own' : '');
+    el.style.setProperty('--pin-color', SUGGEST_COLORS[pin.type] || '#888');
+    var angle = (Math.random() - 0.5) * 16; // -8 to +8 degrees
+    el.style.setProperty('--pin-angle', angle.toFixed(1) + 'deg');
 
-    var html = '';
+    var html = '<div class="suggestion-pin__body">';
     if (pin.isOwn) {
       html += '<button class="suggestion-pin__delete" aria-label="Delete pin">\u00d7</button>';
     }
-    html += '<div class="suggestion-pin__label" style="--pin-color:' + (SUGGEST_COLORS[pin.type] || '#888') + ';background:' + (SUGGEST_COLORS[pin.type] || '#888') + '">' +
+    html += '<div class="suggestion-pin__label">' +
       (SUGGEST_LABELS[pin.type] || pin.type) +
     '</div>' +
-    '<div class="suggestion-pin__point"></div>';
+    '<div class="suggestion-pin__point"></div></div>';
     el.innerHTML = html;
 
     var marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })

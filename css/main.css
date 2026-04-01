@@ -464,8 +464,11 @@ a:hover {
 .suggestion-pin {
   z-index: 0;
   pointer-events: none;
-  transform-origin: bottom center;
   position: relative;
+}
+.suggestion-pin__body {
+  transform-origin: bottom center;
+  transform: rotate(var(--pin-angle, 0deg));
 }
 .suggestion-pin--own {
   pointer-events: auto;
@@ -495,23 +498,23 @@ a:hover {
   display: block;
 }
 .suggestion-pin__label {
-  font-family: var(--font-mono);
-  font-size: 0.5rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #fff;
-  background: var(--pin-color);
-  padding: 1px 5px;
-  border-radius: 2px;
-  white-space: nowrap;
+  font-size: 1.2rem;
+  line-height: 1;
+  background: var(--bg-card, #fff);
+  border: 2px solid var(--pin-color);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   box-shadow: var(--shadow-sm);
-  opacity: 0.85;
-  text-align: center;
+  filter: url(#roughen);
 }
 .suggestion-pin__point {
   width: 2px;
-  height: 10px;
-  background: linear-gradient(to bottom, #999, #bbb);
+  height: 24px;
+  background: linear-gradient(to bottom, var(--pin-color, #999), var(--beige-dark));
   margin: 0 auto;
   border-radius: 0 0 1px 1px;
 }
