@@ -914,7 +914,7 @@ const AppModule = (function () {
     // Number of entries
     var numEntries = sortedEntries.length;
 
-    // Approximate miles (haversine between consecutive entries)
+    // Approximate driving miles (haversine × 1.35 road circuity factor)
     var totalMiles = 0;
     for (var i = 1; i < sortedEntries.length; i++) {
       totalMiles += haversineDistance(
@@ -922,7 +922,7 @@ const AppModule = (function () {
         sortedEntries[i].coordinates[0], sortedEntries[i].coordinates[1]
       );
     }
-    totalMiles = Math.round(totalMiles);
+    totalMiles = Math.round(totalMiles * 1.35);
 
     // Unique states/regions
     var states = {};
