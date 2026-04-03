@@ -529,5 +529,31 @@
     "mood_left": "Meow",
     "mood_right": "Wow",
     "mood_value": 0.9
+  },
+  {
+    "id": "2026-04-02-fire-in-the-desert-sky",
+    "date": "2026-04-02",
+    "title": "Fire in The Desert Sky",
+    "type": "field-notes",
+    "location_name": "Tucson, AZ",
+    "coordinates": [
+      32.2228765,
+      -110.974847
+    ],
+    "body": "Got to roll in some bird shit today. Chilled in a cubby. Saw some lizards. This place is pretty damn chill I'd say. Big guy did his work, saw the inexorable march of automation creeping, seeping into every nook. Did  laundry (thank god...), bought some fruit and smoked oysters, and then caught up with a dear friend on a whim and felt really good about people. Funny how life tends to put amazing people in front of you when you least expect it.\n\nAnd maybe its not that they're making a killing or are firing on all cylinders in the conventional sense, but more like they happen to have amazing insight and are on a part of the journey that rhymes with your own, enough that both parties can learn/enjoy a thing or two from each other, even just a nice walk and a real chat. As Mr. Garcia (and Mr. Knowles) once stated so beautifully, \"Once in a while you get shown the light in the strangest of places if you look at it right.\"\n\nSpeaking of shining the light, we saw these huge skittering brown bugs showing up when it got dark... I started hunting them as the big guy kinda flipped out at the sight of them. I dunno, they just kinda walk around, eat and drink but the big guy seemed grossssssed out. I think even he was surprised by how much they made his hair stand on end.\n\nAnyway, time to try to get some sleep...",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_2977.jpg",
+      "media/photos/img_2976.jpg",
+      "media/photos/img_2974.jpg",
+      "media/photos/img_2973.jpg",
+      "media/photos/img_2972.jpg",
+      "media/photos/img_2969.jpg",
+      "media/photos/img_2985.jpg"
+    ],
+    "preview_photo": 6,
+    "mood_left": "HERE",
+    "mood_right": "GROSS!",
+    "mood_value": 0.8
   }
 ]
