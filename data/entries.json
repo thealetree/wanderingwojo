@@ -593,5 +593,41 @@
     "mood_left": "Lucky",
     "mood_right": "Lucky",
     "mood_value": 0.5
+  },
+  {
+    "id": "2026-04-05-xylojamz",
+    "date": "2026-04-05",
+    "title": "XyloJamz",
+    "type": "field-notes",
+    "location_name": "Tucson, AZ",
+    "coordinates": [
+      32.2228765,
+      -110.974847
+    ],
+    "body": "Well, they came back with stories. I did more lazing here (tending to the cut on my little paw from hunting around the yard the other night). But, the big dude and his friend went hiking among the saguaros, near where a Beatle used to live... (some McCartney guy...) Found a rainbow lizard, some cool rocks, his friend got stung in the face by a bee, found some tacos and some live xylophone jams, met a water pro and a cheese slanger at a biker bar, ate some of the best tacos ever, learned about a nonsense wedding speech given that was inspired by the big guy's own gibberish... Sound like it was a mellow, heartfelt, heartifilling, eclectic experience. They topped it off with some exquisite cheeses and wild foraged cacao chocolate. Can't make this shit up I guess. \n\nAnyway, one more day of chillin while the big dude reorders his truck, our home, and gets back on the road. It's been nice to stretch out and take it easy, but it seems life is pulling us onward. \"Into the great wide open... under the skies of blue\"",
+    "video_url": "https://youtube.com/shorts/ijhFqzy2tQg",
+    "photos": [
+      "media/photos/img_3035.jpg",
+      "media/photos/img_3036.jpg",
+      "media/photos/img_3041.jpg",
+      "media/photos/img_3042.jpg",
+      "media/photos/img_3050.jpg",
+      "media/photos/img_3051.jpg",
+      "media/photos/img_3054.jpg",
+      "media/photos/img_3057.jpg",
+      "media/photos/img_3058.jpg",
+      "media/photos/img_3063.jpg",
+      "media/photos/img_3069.jpg",
+      "media/photos/img_3076.jpg",
+      "media/photos/img_3077.jpg",
+      "media/photos/img_3078.jpg",
+      "media/photos/img_3080.jpg",
+      "media/photos/img_3086.jpg",
+      "media/photos/img_3087.jpg"
+    ],
+    "preview_photo": 13,
+    "mood_left": "Full",
+    "mood_right": "Toad",
+    "mood_value": 0.9
   }
 ]
