@@ -459,10 +459,14 @@ const AppModule = (function () {
     cancelPlacementMode();
     showToast(SUGGEST_LABELS[type] + ' pin placed!', 3000);
 
-    // Write to Firebase, then render with the key
-    fetch(FIREBASE_DB + '/suggestions.json', {
-      method: 'POST',
-      body: JSON.stringify(pinData)
+    // Reverse geocode, then write to Firebase with name
+    MapModule.reverseGeocodePOI(lngLat.lat, lngLat.lng)
+    .then(function (name) {
+      if (name) pinData.name = name;
+      return fetch(FIREBASE_DB + '/suggestions.json', {
+        method: 'POST',
+        body: JSON.stringify(pinData)
+      });
     })
     .then(function (r) { return r.json(); })
     .then(function (result) {
@@ -475,7 +479,6 @@ const AppModule = (function () {
     })
     .catch(function (err) {
       console.warn('Failed to save suggestion pin:', err);
-      // Still render optimistically without delete capability
       MapModule.addSuggestionPin(pinData);
     });
   }

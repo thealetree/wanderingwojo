@@ -1693,6 +1693,21 @@ const MapModule = (function () {
     placementCallback = fn;
   }
 
+  function reverseGeocodePOI(lat, lng) {
+    var url = 'https://api.mapbox.com/search/geocode/v6/reverse'
+      + '?longitude=' + lng + '&latitude=' + lat
+      + '&types=poi&limit=1&access_token=' + MAPBOX_TOKEN;
+    return fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.features && data.features.length > 0) {
+          return data.features[0].properties.name || null;
+        }
+        return null;
+      })
+      .catch(function () { return null; });
+  }
+
   function addSuggestionPin(pin) {
     if (!map || !pin || typeof pin.lng !== 'number' || typeof pin.lat !== 'number') return;
     var el = document.createElement('div');
@@ -1704,6 +1719,9 @@ const MapModule = (function () {
     var html = '<div class="suggestion-pin__body">';
     if (pin.isOwn) {
       html += '<button class="suggestion-pin__delete" aria-label="Delete pin">\u00d7</button>';
+    }
+    if (pin.name) {
+      html += '<div class="suggestion-pin__tooltip">' + escapeHtml(pin.name) + '</div>';
     }
     html += '<div class="suggestion-pin__label">' +
       (SUGGEST_LABELS[pin.type] || pin.type) +
@@ -1757,6 +1775,7 @@ const MapModule = (function () {
     addSuggestionPin: addSuggestionPin,
     addSuggestionPins: addSuggestionPins,
     removeSuggestionMarker: removeSuggestionMarker,
+    reverseGeocodePOI: reverseGeocodePOI,
     getMap: function () { return map; },
     escapeHtml: escapeHtml,
     formatDate: formatDate,
