@@ -1694,7 +1694,7 @@ const MapModule = (function () {
   }
 
   function reverseGeocodePOI(lat, lng) {
-    var url = 'https://api.mapbox.com/search/geocode/v6/reverse'
+    var url = 'https://api.mapbox.com/search/searchbox/v1/reverse'
       + '?longitude=' + lng + '&latitude=' + lat
       + '&types=poi&limit=1&access_token=' + MAPBOX_TOKEN;
     return fetch(url)
