@@ -510,7 +510,7 @@ a:hover {
   margin-bottom: 4px;
   font-family: var(--font-body);
   font-size: 0.8rem;
-  color: var(--text-primary);
+  color: var(--charcoal);
   background: var(--bg-card);
   border: 1.5px solid var(--beige-dark);
   border-radius: 4px;
