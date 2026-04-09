@@ -705,5 +705,36 @@
     "mood_left": "Worm",
     "mood_right": "Butterfly",
     "mood_value": 1
+  },
+  {
+    "id": "2026-04-08-no-shab",
+    "date": "2026-04-08",
+    "title": "No Shab",
+    "type": "field-notes",
+    "location_name": "Santa Fe, NM",
+    "coordinates": [
+      35.6876096,
+      -105.938456
+    ],
+    "body": "It was a day of working in the sun (lazing sooo contentedly in the truck), followed by a trip to the Zen Center so the big guy could experience it in person. \n\nA beautiful place, hosting extremely lovely and heartfelt people. \n\nNot sure there could be anything more Zen than the big guy feeling like nature and being on the road feels more \"in tune\" than being in the zendo. \n\nDeep gratitude and respect, and much more sitting meditation and more regular practice will resume now. But, out in the world, among the muck and the sun, vast canyons and ants hauling away some jerky he dropped, just feels more like \"it\". \n\nAnyway that was him. the highlight of MY day was seeing this MASSIVE rabbit (hare?) just outside the truck! The damn thing was bigger than me and its ears as big as my arms! It barely hopped and more like walked with enormously long legs. Too bad this glass was keeping me in, otherwise I woulda... I coulda... I'da ripped that thing apart and brought it back to share with the big guy... \"HOLD ME BACK\"! \n\nThe big dude mentioned to his mom on the phone that he's been making the trip all about him... like this hasn't really been my journal. Kinda cool he recognized that. His cousin sent us our FIRST donation. $25 smackaroonies... Big guy says he's gonna start making the trip stops more about me, and cat-friendly experiences. Oh and he's gonna spend that cold hard cash on either some dope ass treats or entry to a cat-catered experience. We'll see... \n\nIf y'all donate, include a note if you want him to spend it in any certain way. Fix me UP!\n\nAnyway, yeah... not too shabby a day at all. No shab, baby.",
+    "video_url": "https://youtu.be/fvrM0XCOzO8",
+    "photos": [
+      "media/photos/img_3152.jpg",
+      "media/photos/img_3154.jpg",
+      "media/photos/img_3155.jpg",
+      "media/photos/img_3158.jpg",
+      "media/photos/img_3160.jpg",
+      "media/photos/img_3161.jpg",
+      "media/photos/img_3166.jpg",
+      "media/photos/img_3168.jpg",
+      "media/photos/img_3169.jpg",
+      "media/photos/img_3171.jpg",
+      "media/photos/img_3175.jpg",
+      "media/photos/img_3178.jpg"
+    ],
+    "preview_photo": 11,
+    "mood_left": "No",
+    "mood_right": "Shab",
+    "mood_value": 0.05
   }
 ]
