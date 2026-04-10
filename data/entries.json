@@ -736,5 +736,27 @@
     "mood_left": "No",
     "mood_right": "Shab",
     "mood_value": 0.05
+  },
+  {
+    "id": "2026-04-09-jailbreak",
+    "date": "2026-04-09",
+    "title": "Jailbreak",
+    "type": "field-notes",
+    "location_name": "Santa Fe, NM",
+    "coordinates": [
+      35.6876096,
+      -105.938456
+    ],
+    "body": "I busted out. He didn't even realize until I was across the campsite. No leash, no hot truck air, just freedom. Grit on my paws, smells rushing by, hot sun beating down, ants and birds and turds and just... open. \n\nI kept just ahead of his reach until I got under a camp table and he seemed to genuinely just be joining me. He voice sounded friendly. But... holy shit did he pick me up and rush me back to the truck. Bopped the fuck out of my nose and told me \"You just can't do that dude... its not safe... you don't understand what's out there\"... Asshole. I'M A CAT. I'm curious, I hunt. I don't give a shit what's out there unless I can kill it. \n\nAnyway, back in the truck I just look out the back window as he drives off somewhere. Ends up using the funds cousin D sent to buy me a flea and tick collar. On the ride he said he was sorry... that I was right, but \"we need to do it the right way, the safe way, with a leash and bug prevention.\" Ok fine. \n\nSo, tomorrow, and from here on out, no more chillin in the truck for me, unless I want to. I'll be joining him outside for the work day. Maybe I can catch one of those little idiot hairless guys doing pushups (skink? lizard? Gecko?). Or one of those GIANT RABBITS?! Or these huge black beetles. UGH I'm so excited. Screw Christmas, this is bigger.\n\nThanks cousin D. He also got me some bullshit dried beef twist thing that I think is for dogs... figured I'd like it anyway. But you helped buy my freedom and I'll be forever grateful 🙏❤️",
+    "video_url": "https://youtu.be/kpk4yC7t42Y",
+    "photos": [
+      "media/photos/img_3183.jpg",
+      "media/photos/img_3192.jpg",
+      "media/photos/img_3194.jpg"
+    ],
+    "preview_photo": null,
+    "mood_left": "Miffed",
+    "mood_right": "Stoked",
+    "mood_value": 0.65
   }
 ]
