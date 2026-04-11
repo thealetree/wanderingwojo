@@ -758,5 +758,27 @@
     "mood_left": "Miffed",
     "mood_right": "Stoked",
     "mood_value": 0.65
+  },
+  {
+    "id": "2026-04-10-santa-fraidee",
+    "date": "2026-04-10",
+    "title": "Santa Fraidee",
+    "type": "field-notes",
+    "location_name": "Santa Fe, NM",
+    "coordinates": [
+      35.6876096,
+      -105.938456
+    ],
+    "body": "You know what... I didn't wanna go outside today, just to throw off the big guy, now that I have the tick collar that he insisted on...\n\nReally it was just a chillll Friday. Kinda nice that we got some rain (petrichor, ya know?). We went for dinner downtown after work, Trader Joes and just came back to the campsite. SO damn nice. \n\nBig dude's been dreaming up and AI crafting some wild blockchain that anonymously uses hardware imperfections and ambient signals to verify and vouch for video recordings and other digital creative acts. Now that AI can generate literally anything he thought it could be handy to have some kinda proof that something is legit in a transparent and open source way... He's batshit. I'm going to sleep.\n\nCatch ya tomorrow when we visit his step bro ✌️",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_3195.jpg",
+      "media/photos/img_3197.jpg",
+      "media/photos/img_3198.jpg"
+    ],
+    "preview_photo": null,
+    "mood_left": "Sleep",
+    "mood_right": "Yoinks",
+    "mood_value": 0.1
   }
 ]
