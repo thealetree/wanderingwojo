@@ -1,12 +1,12 @@
 {
-  "id": "poll-20260329",
-  "question": "Ok then, Where to buy a house/land?",
+  "id": "poll-20260410",
+  "question": "Should I try to learn to talk?",
   "options": [
-    "Alaska",
-    "PNW Coast",
-    "The Gorge",
-    "Central Oregon",
-    "Southwest Somewhere"
+    "Sure",
+    "Meh",
+    "What?",
+    "Why?",
+    "No"
   ],
   "active": true
 }
