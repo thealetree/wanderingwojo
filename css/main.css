@@ -2583,3 +2583,9 @@ a:hover {
     margin: 0 0 var(--space-sm) 0;
   }
 }
+
+@media (prefers-color-scheme: dark) {
+  .list-entry__title {
+    color: var(--accent);
+  }
+}

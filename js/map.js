@@ -275,9 +275,19 @@ const MapModule = (function () {
       var crX = catmullRom(p0[0], p1[0], p2[0], p3[0], t);
       var crY = catmullRom(p0[1], p1[1], p2[1], p3[1], t);
 
-      // Amplify the curve offset from straight line
-      var x = straightX + (crX - straightX) * curveFactor;
-      var y = straightY + (crY - straightY) * curveFactor;
+      // Amplify the curve offset from straight line, but cap deviation
+      // to prevent short segments between distant neighbors from spiking
+      var offsetX = (crX - straightX) * curveFactor;
+      var offsetY = (crY - straightY) * curveFactor;
+      var offsetDist = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+      var maxDeviation = dist * 0.2; // cap at 20% of segment length
+      if (offsetDist > maxDeviation && offsetDist > 0) {
+        var scale = maxDeviation / offsetDist;
+        offsetX *= scale;
+        offsetY *= scale;
+      }
+      var x = straightX + offsetX;
+      var y = straightY + offsetY;
 
       // Tangent for perpendicular meander direction (use amplified curve tangent)
       var tx = catmullRomDeriv(p0[0], p1[0], p2[0], p3[0], t) * curveFactor + dx * (1 - curveFactor);
