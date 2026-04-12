@@ -55,7 +55,9 @@ const MapModule = (function () {
 
   // Route coordinates — built dynamically from entries
   let routeCoords = [];
-  let waypointIndices = []; // routeCoords index for each entry waypoint
+  let routeSegments = [];        // per-entry-pair segments with coords + opacity
+  let segmentStartIndices = [];  // routeCoords index where each segment begins
+  let waypointIndices = [];      // routeCoords index for each entry waypoint
   let waypointToGroupIndex = {}; // maps entry waypoint index to locationGroups index
 
   /**
@@ -145,94 +147,236 @@ const MapModule = (function () {
       return new Date(a.date) - new Date(b.date);
     });
 
-    var waypoints = sorted.map(function (e) {
+    var allWaypoints = sorted.map(function (e) {
       return [e.coordinates[1], e.coordinates[0]];
     });
 
-    // Build meandering path between each pair of waypoints
-    // Track which routeCoords index each entry waypoint maps to
-    routeCoords = [];
-    waypointIndices = [0]; // first entry is at index 0
-    for (var i = 0; i < waypoints.length - 1; i++) {
-      var segment = meanderSegment(waypoints[i], waypoints[i + 1], i);
-      // Add all points except the last (to avoid duplicates at joins)
-      for (var j = 0; j < segment.length - 1; j++) {
-        routeCoords.push(segment[j]);
+    // Collapse consecutive same-location waypoints into unique route points.
+    // One Catmull-Rom control point per location cluster, not per entry.
+    var uniqueWaypoints = [];
+    var entryToRoutePoint = []; // maps each entry index to its uniqueWaypoints index
+    for (var i = 0; i < allWaypoints.length; i++) {
+      if (uniqueWaypoints.length === 0) {
+        uniqueWaypoints.push(allWaypoints[i]);
+      } else {
+        var prev = uniqueWaypoints[uniqueWaypoints.length - 1];
+        var ddx = allWaypoints[i][0] - prev[0];
+        var ddy = allWaypoints[i][1] - prev[1];
+        if (Math.sqrt(ddx * ddx + ddy * ddy) > 0.001) {
+          uniqueWaypoints.push(allWaypoints[i]);
+        }
       }
-      waypointIndices.push(routeCoords.length); // index where next entry lands
+      entryToRoutePoint.push(uniqueWaypoints.length - 1);
     }
-    // Add final waypoint
-    routeCoords.push(waypoints[waypoints.length - 1]);
 
+    // Detect overlapping segments between unique waypoints
+    var overlapCounts = [];
+    for (var i = 0; i < uniqueWaypoints.length - 1; i++) {
+      var count = 0;
+      for (var j = 0; j < i; j++) {
+        if (segmentsOverlap(uniqueWaypoints[i], uniqueWaypoints[i + 1], uniqueWaypoints[j], uniqueWaypoints[j + 1], 0.5)) {
+          count++;
+        }
+      }
+      overlapCounts.push(count);
+    }
+
+    // Build smooth segments between unique waypoints only
+    routeSegments = [];
+    routeCoords = [];
+    segmentStartIndices = [];
+
+    for (var i = 0; i < uniqueWaypoints.length - 1; i++) {
+      var p0 = uniqueWaypoints[Math.max(0, i - 1)];
+      var p1 = uniqueWaypoints[i];
+      var p2 = uniqueWaypoints[i + 1];
+      var p3 = uniqueWaypoints[Math.min(uniqueWaypoints.length - 1, i + 2)];
+
+      var segCoords = buildSmoothSegment(p0, p1, p2, p3, i, overlapCounts[i]);
+      routeSegments.push({ coords: segCoords, opacity: 1 });
+
+      segmentStartIndices.push(routeCoords.length);
+      for (var j = 0; j < segCoords.length; j++) {
+        routeCoords.push(segCoords[j]);
+      }
+    }
+
+    // Map each entry to its routeCoords position for pin reveal during animation
+    waypointIndices = [];
+    for (var i = 0; i < allWaypoints.length; i++) {
+      var rp = entryToRoutePoint[i];
+      if (rp < uniqueWaypoints.length - 1) {
+        waypointIndices.push(segmentStartIndices[rp]);
+      } else {
+        waypointIndices.push(routeCoords.length - 1);
+      }
+    }
+
+    computeSegmentOpacities();
     addRouteLayer();
   }
 
   /**
-   * Generate a meandering path between two [lng, lat] points.
-   * Wander amount is proportional to segment length so all segments
-   * look equally organic regardless of distance.
+   * Catmull-Rom spline interpolation for a single axis.
    */
-  function meanderSegment(from, to, seed) {
-    var dx = to[0] - from[0];
-    var dy = to[1] - from[1];
+  function catmullRom(v0, v1, v2, v3, t) {
+    var t2 = t * t, t3 = t2 * t;
+    return 0.5 * (
+      (2 * v1) +
+      (-v0 + v2) * t +
+      (2 * v0 - 5 * v1 + 4 * v2 - v3) * t2 +
+      (-v0 + 3 * v1 - 3 * v2 + v3) * t3
+    );
+  }
+
+  /**
+   * Catmull-Rom spline derivative for tangent direction.
+   */
+  function catmullRomDeriv(v0, v1, v2, v3, t) {
+    var t2 = t * t;
+    return 0.5 * (
+      (-v0 + v2) +
+      (4 * v0 - 10 * v1 + 8 * v2 - 2 * v3) * t +
+      (-3 * v0 + 9 * v1 - 9 * v2 + 3 * v3) * t2
+    );
+  }
+
+  /**
+   * Build a smooth curved segment between p1 and p2 using Catmull-Rom spline,
+   * with hand-drawn meander noise applied perpendicular to the local tangent.
+   * p0/p3 are the neighboring control points for curve continuity.
+   */
+  function buildSmoothSegment(p0, p1, p2, p3, seed, overlapCount) {
+    overlapCount = overlapCount || 0;
+    var dx = p2[0] - p1[0];
+    var dy = p2[1] - p1[1];
     var dist = Math.sqrt(dx * dx + dy * dy);
 
-    // Skip meandering for zero/near-zero distance (same location)
-    if (dist < 0.001) return [from, to];
+    if (dist < 0.001) return [p1, p2];
 
-    // Number of intermediate points — more for longer segments
     var steps = Math.max(12, Math.round(dist * 8));
+    var amp = dist * 0.03 * (1 + overlapCount * 0.8);
+    var bias = overlapCount * dist * 0.015;
+    var s = (seed + 1 + overlapCount * 31) * 7.3;
 
-    // Perpendicular unit vector
-    var px = -dy / dist;
-    var py = dx / dist;
-
-    // Wander amplitude scales with segment length (~3% of distance)
-    var amp = dist * 0.03;
-
-    // Seeded pseudo-random using sine — deterministic per segment
-    var s = (seed + 1) * 7.3;
+    // Curve amplification factor — Catmull-Rom produces subtle curves,
+    // multiply the deviation from a straight line to make bends visible on the map
+    var curveFactor = 1.8;
 
     var points = [];
     for (var i = 0; i <= steps; i++) {
       var t = i / steps;
-      // Layered sine waves at different frequencies for organic feel
-      var noise =
-        Math.sin(t * 6.2831 * 2.0 + s * 1.1) * 0.5 +
-        Math.sin(t * 6.2831 * 3.7 + s * 2.3) * 0.3 +
-        Math.sin(t * 6.2831 * 7.1 + s * 0.7) * 0.2;
 
-      // Taper at endpoints so the line meets waypoints cleanly
-      var taper = Math.sin(t * Math.PI);
-      var offset = noise * amp * taper;
+      // Straight-line interpolation
+      var straightX = p1[0] + dx * t;
+      var straightY = p1[1] + dy * t;
 
-      points.push([
-        from[0] + dx * t + px * offset,
-        from[1] + dy * t + py * offset
-      ]);
+      // Catmull-Rom base position (smooth curve through waypoints)
+      var crX = catmullRom(p0[0], p1[0], p2[0], p3[0], t);
+      var crY = catmullRom(p0[1], p1[1], p2[1], p3[1], t);
+
+      // Amplify the curve offset from straight line
+      var x = straightX + (crX - straightX) * curveFactor;
+      var y = straightY + (crY - straightY) * curveFactor;
+
+      // Tangent for perpendicular meander direction (use amplified curve tangent)
+      var tx = catmullRomDeriv(p0[0], p1[0], p2[0], p3[0], t) * curveFactor + dx * (1 - curveFactor);
+      var ty = catmullRomDeriv(p0[1], p1[1], p2[1], p3[1], t) * curveFactor + dy * (1 - curveFactor);
+      var tLen = Math.sqrt(tx * tx + ty * ty);
+
+      if (tLen > 0.0001) {
+        var px = -ty / tLen;
+        var py = tx / tLen;
+
+        var noise =
+          Math.sin(t * 6.2831 * 2.0 + s * 1.1) * 0.5 +
+          Math.sin(t * 6.2831 * 3.7 + s * 2.3) * 0.3 +
+          Math.sin(t * 6.2831 * 7.1 + s * 0.7) * 0.2;
+
+        var taper = Math.sin(t * Math.PI);
+        var offset = noise * amp * taper + bias * taper;
+
+        x += px * offset;
+        y += py * offset;
+      }
+
+      points.push([x, y]);
     }
     return points;
+  }
+
+  /**
+   * Compute per-segment opacity. Each segment now represents a real geographic
+   * transition between distinct location pins (same-location entries are collapsed).
+   * Fully desaturated by the midpoint between 2nd and 3rd most recent pins.
+   */
+  function computeSegmentOpacities() {
+    var n = routeSegments.length;
+    if (n === 0) return;
+    if (n < 3) {
+      routeSegments.forEach(function (seg) { seg.opacity = 1.0; });
+      return;
+    }
+
+    // Segment n-2 connects 3rd-to-last pin to 2nd-to-last pin.
+    // Threshold at its midpoint: position n-2 + 0.5 = n-1.5
+    // Ramp from there to end of last segment (position n-0.5) = 1.0 index units
+    var threshPos = n - 1.5;
+    var rampLength = 1.0; // reaches full opacity at last segment midpoint
+
+    var MIN_OPACITY = 0.35;
+    var MAX_OPACITY = 1.0;
+
+    for (var i = 0; i < n; i++) {
+      var segMid = i + 0.5;
+      if (segMid <= threshPos) {
+        routeSegments[i].opacity = MIN_OPACITY;
+      } else {
+        var progress = (segMid - threshPos) / rampLength;
+        routeSegments[i].opacity = MIN_OPACITY + (MAX_OPACITY - MIN_OPACITY) * Math.min(1, progress);
+      }
+    }
+  }
+
+  /**
+   * Check if two segments geographically overlap (endpoints within threshold).
+   */
+  function segmentsOverlap(a1, a2, b1, b2, threshold) {
+    function d(p, q) { var dx = p[0] - q[0], dy = p[1] - q[1]; return Math.sqrt(dx * dx + dy * dy); }
+    var same = d(a1, b1) + d(a2, b2);     // same direction
+    var rev  = d(a1, b2) + d(a2, b1);     // reverse direction
+    return Math.min(same, rev) < threshold;
+  }
+
+  /**
+   * Build a GeoJSON FeatureCollection from route segments.
+   * Each feature is a LineString with an opacity property.
+   */
+  function buildRouteFC(segments) {
+    return {
+      type: 'FeatureCollection',
+      features: segments.map(function (seg) {
+        return {
+          type: 'Feature',
+          properties: { opacity: seg.opacity },
+          geometry: { type: 'LineString', coordinates: seg.coords }
+        };
+      })
+    };
   }
 
   /**
    * Add the route line to the map (with draw-in animation)
    */
   function addRouteLayer() {
-    if (routeCoords.length < 2) return;
+    if (routeSegments.length === 0) return;
 
     var routeColor = isDark ? '#B87D6A' : '#C1440E';
 
-    // Start with minimal data — animation will reveal the full route
+    // Start with empty FeatureCollection — animation will reveal segments
     map.addSource('route', {
       type: 'geojson',
-      data: {
-        type: 'Feature',
-        properties: {},
-        geometry: {
-          type: 'LineString',
-          coordinates: [routeCoords[0], routeCoords[0]],
-        },
-      },
+      data: { type: 'FeatureCollection', features: [] },
     });
 
     // Glow layer (wider, semi-transparent — soft crayon halo)
@@ -247,12 +391,12 @@ const MapModule = (function () {
       paint: {
         'line-color': routeColor,
         'line-width': 6,
-        'line-opacity': 0.1,
+        'line-opacity': ['*', ['get', 'opacity'], 0.1],
         'line-blur': 8,
       },
     });
 
-    // Main route line — crayon-like dashes
+    // Main route line — dashed, per-segment opacity
     map.addLayer({
       id: 'route-line',
       type: 'line',
@@ -264,8 +408,8 @@ const MapModule = (function () {
       paint: {
         'line-color': routeColor,
         'line-width': 3,
-        'line-opacity': 0.6,
         'line-dasharray': [3, 2.5],
+        'line-opacity': ['get', 'opacity'],
       },
     });
 
@@ -294,8 +438,6 @@ const MapModule = (function () {
     var duration = 1250;
     var revealedPins = {};
 
-    // Map waypoint indices to location group indices for reveal
-    // During initial animation, we reveal by location group order
     function step(timestamp) {
       if (!startTime) startTime = timestamp;
       var elapsed = timestamp - startTime;
@@ -312,16 +454,41 @@ const MapModule = (function () {
         else hi = mid;
       }
       var endIndex = Math.max(1, lo);
-      var animCoords = routeCoords.slice(0, endIndex + 1);
+
+      // Build partial FeatureCollection from segments
+      var features = [];
+      for (var si = 0; si < routeSegments.length; si++) {
+        var segStart = segmentStartIndices[si];
+        var segLen = routeSegments[si].coords.length;
+        var segEnd = segStart + segLen - 1;
+
+        if (endIndex < segStart) break; // haven't reached this segment yet
+
+        if (endIndex >= segEnd) {
+          // Full segment drawn
+          features.push({
+            type: 'Feature',
+            properties: { opacity: routeSegments[si].opacity },
+            geometry: { type: 'LineString', coordinates: routeSegments[si].coords }
+          });
+        } else {
+          // Partial segment — slice coords up to current position
+          var localIdx = endIndex - segStart;
+          var partialCoords = routeSegments[si].coords.slice(0, localIdx + 1);
+          if (partialCoords.length >= 2) {
+            features.push({
+              type: 'Feature',
+              properties: { opacity: routeSegments[si].opacity },
+              geometry: { type: 'LineString', coordinates: partialCoords }
+            });
+          }
+        }
+      }
 
       if (map.getSource('route')) {
         map.getSource('route').setData({
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates: animCoords,
-          },
+          type: 'FeatureCollection',
+          features: features,
         });
       }
 
@@ -329,7 +496,6 @@ const MapModule = (function () {
       for (var wi = 0; wi < waypointIndices.length; wi++) {
         if (!revealedPins[wi] && endIndex >= waypointIndices[wi]) {
           revealedPins[wi] = true;
-          // Map this waypoint (entry index) to its location group
           var groupIdx = waypointToGroupIndex[wi];
           if (groupIdx !== undefined && !revealedPins['g' + groupIdx]) {
             revealedPins['g' + groupIdx] = true;
@@ -346,9 +512,10 @@ const MapModule = (function () {
       if (progress < 1) {
         requestAnimationFrame(step);
       } else {
-        // Animation complete — just remove reveal classes and enable clustering
-        // Don't call renderClusters() here — pins are already correct.
-        // The zoom handler will trigger clustering when the user zooms.
+        // Set final complete FeatureCollection to ensure all segments are shown
+        if (map.getSource('route')) {
+          map.getSource('route').setData(buildRouteFC(routeSegments));
+        }
         allLocationPins.forEach(function (pin) {
           pin.element.classList.remove('cork-pin--reveal');
         });
@@ -417,7 +584,8 @@ const MapModule = (function () {
   }
 
   /**
-   * Group entries by location_name into atomic units.
+   * Group entries by contiguous visit at the same location_name.
+   * A return visit (same location after visiting elsewhere) creates a new group.
    * Returns array sorted chronologically by earliest entry.
    */
   function buildLocationGroups(entries) {
@@ -425,32 +593,40 @@ const MapModule = (function () {
       return new Date(a.date) - new Date(b.date);
     });
 
-    var groups = {};
-    var order = [];
+    // Build groups by contiguous visit
+    var groups = [];
+    var currentGroup = null;
     sorted.forEach(function (entry) {
-      var key = entry.location_name;
-      if (!groups[key]) {
-        groups[key] = [];
-        order.push(key);
+      if (currentGroup && currentGroup.locationName === entry.location_name) {
+        currentGroup.entries.push(entry);
+      } else {
+        currentGroup = { locationName: entry.location_name, entries: [entry] };
+        groups.push(currentGroup);
       }
-      groups[key].push(entry);
     });
 
-    return order.map(function (name) {
-      var entries = groups[name];
-      // Centroid in [lng, lat] (Mapbox convention)
+    // Track visit index per location (0 = first visit, 1 = return, etc.)
+    var visitCounts = {};
+    groups.forEach(function (g) {
+      visitCounts[g.locationName] = (visitCounts[g.locationName] || 0);
+      g.visitIndex = visitCounts[g.locationName];
+      visitCounts[g.locationName]++;
+    });
+
+    return groups.map(function (g) {
       var avgLng = 0, avgLat = 0;
-      entries.forEach(function (e) {
+      g.entries.forEach(function (e) {
         avgLng += e.coordinates[1];
         avgLat += e.coordinates[0];
       });
-      avgLng /= entries.length;
-      avgLat /= entries.length;
+      avgLng /= g.entries.length;
+      avgLat /= g.entries.length;
 
       return {
-        locationName: name,
-        entries: entries,
-        centroid: [avgLng, avgLat]
+        locationName: g.locationName,
+        entries: g.entries,
+        centroid: [avgLng, avgLat],
+        visitIndex: g.visitIndex
       };
     });
   }
@@ -1782,5 +1958,7 @@ const MapModule = (function () {
     formatType: formatType,
     renderBody: renderBody,
     getMoodColor: getMoodColor,
+    buildEntryContentHtml: buildEntryContentHtml,
+    bindPhotoHandlers: bindPhotoHandlers,
   };
 })();

@@ -2383,3 +2383,203 @@ a:hover {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+/* ==========================================================================
+   LIST VIEW OVERLAY
+   ========================================================================== */
+
+.list-view {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: var(--bg-page);
+}
+
+.list-view.active {
+  display: flex;
+}
+
+.list-view__container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  padding-top: 60px;   /* clear dock bar */
+  padding-bottom: 60px; /* clear entry-nav */
+  overflow: hidden;
+}
+
+/* --- Sidebar (entry list) --- */
+.list-view__sidebar {
+  width: 380px;
+  min-width: 380px;
+  border-right: 2px solid var(--border-subtle);
+  overflow-y: auto;
+  padding: var(--space-sm) 0;
+}
+
+/* --- Detail pane --- */
+.list-view__detail {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg) var(--space-xl);
+}
+
+.list-view__detail-content {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* --- Entry cards in sidebar --- */
+.list-entry {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.list-entry:hover {
+  background: var(--beige);
+}
+
+.list-entry--active {
+  border-left-color: var(--terracotta);
+  background: var(--bg-card);
+}
+
+.list-entry__thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--rough-radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+  filter: url(#roughen);
+}
+
+.list-entry__thumb--placeholder {
+  background: var(--beige-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: var(--warm-gray);
+}
+
+.list-entry__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-entry__title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-entry__meta {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+/* --- List toggle button --- */
+.entry-nav__btn--list {
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+}
+
+.entry-nav__btn--active {
+  background: var(--charcoal);
+  color: var(--off-white);
+}
+
+.entry-nav__btn--active:hover {
+  background: var(--near-black);
+  color: var(--off-white);
+}
+
+/* --- Detail content reuses entry-expanded styles --- */
+.list-view__detail-content .entry-expanded__header,
+.list-view__detail-content .entry-expanded__body,
+.list-view__detail-content .entry-expanded__photos,
+.list-view__detail-content .entry-expanded__video,
+.list-view__detail-content .wojo-mood,
+.list-view__detail-content .entry-expanded__actions {
+  /* inherit expanded entry styling */
+}
+
+.list-view__detail-content .entry-expanded__photo img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--rough-radius-sm);
+  cursor: pointer;
+}
+
+.list-view__detail-content .entry-expanded__photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.list-view__detail-content .entry-expanded__photo--inline {
+  float: right;
+  max-width: 45%;
+  margin: 0 0 var(--space-sm) var(--space-md);
+}
+
+.list-view__detail-content .entry-expanded__photo--inline img {
+  width: 100%;
+}
+
+/* --- Mobile expand/collapse --- */
+.list-entry__detail {
+  display: none;
+  padding: var(--space-sm) var(--space-md) var(--space-md);
+}
+
+.list-entry--expanded .list-entry__detail {
+  display: block;
+}
+
+/* Mobile expanded: hide sidebar preview row, show full content */
+.list-entry--expanded > .list-entry__thumb,
+.list-entry--expanded > .list-entry__info {
+  display: none;
+}
+
+/* --- Mobile: single column --- */
+@media (max-width: 768px) {
+  .list-view__container {
+    flex-direction: column;
+    padding-top: 80px;
+    padding-bottom: 56px;
+  }
+
+  .list-view__sidebar {
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+    border-right: none;
+  }
+
+  .list-view__detail {
+    display: none;
+  }
+
+  .list-entry__detail .entry-expanded__photo--inline {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 var(--space-sm) 0;
+  }
+}

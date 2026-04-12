@@ -18,6 +18,7 @@ const AppModule = (function () {
   let globalPhotoList = [];     // [{src, entryIndex, entryId, title}]
   let globalPhotoIndex = 0;
   let lightboxOriginEntryId = null;
+  let listViewActive = false;
 
   // --- DOM refs ---
   const els = {};
@@ -45,6 +46,7 @@ const AppModule = (function () {
     initLightbox();
     initKeyboardNav();
     initJourneyStats();
+    initListView();
     initKladgPlayer();
     loadSuggestionPins();
   }
@@ -67,6 +69,11 @@ const AppModule = (function () {
     els.navInfo = document.getElementById('nav-info');
     els.entryNav = document.getElementById('entry-nav');
     els.journeyStats = document.getElementById('journey-stats');
+    els.listView = document.getElementById('list-view');
+    els.listSidebar = document.getElementById('list-sidebar');
+    els.listDetail = document.getElementById('list-detail');
+    els.listDetailContent = document.getElementById('list-detail-content');
+    els.listToggle = document.getElementById('nav-list-toggle');
   }
 
   /**
@@ -681,6 +688,13 @@ const AppModule = (function () {
     navIndex = newIndex;
     var entry = sortedEntries[navIndex];
 
+    // List view mode — update selection instead of flying map
+    if (listViewActive) {
+      selectListEntry(navIndex);
+      updateNavInfo();
+      return;
+    }
+
     // Check if the target entry is in the currently expanded pin
     var expandedIds = MapModule.getExpandedPinEntryIds();
     if (expandedIds.length > 0 && expandedIds.indexOf(entry.id) !== -1) {
@@ -794,20 +808,25 @@ const AppModule = (function () {
     if (globalPhotoList.length > 0) {
       var currentItem = globalPhotoList[globalPhotoIndex];
       if (currentItem.entryId !== lightboxOriginEntryId) {
-        // User navigated to a different entry — fly there and expand
         navIndex = currentItem.entryIndex;
         var entryId = currentItem.entryId;
         updateNavInfo();
-        MapModule.closeExpandedPin();
-        MapModule.flyToEntry(sortedEntries[navIndex]);
-        highlightPin(entryId);
-        MapModule.updateThumbVisibility(entryId);
-        hideDock();
-        // Expand after fly animation completes
-        setTimeout(function () {
+
+        if (listViewActive) {
+          // In list view — just update selection
+          selectListEntry(navIndex);
+        } else {
+          // On map — fly there and expand
+          MapModule.closeExpandedPin();
+          MapModule.flyToEntry(sortedEntries[navIndex]);
+          highlightPin(entryId);
+          MapModule.updateThumbVisibility(entryId);
           hideDock();
-          MapModule.expandByEntryId(entryId);
-        }, 1300);
+          setTimeout(function () {
+            hideDock();
+            MapModule.expandByEntryId(entryId);
+          }, 1300);
+        }
       }
     }
   }
@@ -847,12 +866,14 @@ const AppModule = (function () {
 
   function initKeyboardNav() {
     document.addEventListener('keydown', function (e) {
-      // ESC closes lightbox or expanded entry
+      // ESC closes lightbox, list view, or expanded entry
       if (e.key === 'Escape') {
         if (placementMode) {
           cancelPlacementMode();
         } else if (els.lightbox.classList.contains('active')) {
           closeLightbox();
+        } else if (listViewActive) {
+          toggleListView();
         } else {
           MapModule.closeExpandedPin();
           showDock();
@@ -913,6 +934,139 @@ const AppModule = (function () {
         MapModule.expandPinEntry(groupEntries, pin, entry.id);
       }
     }, 1400);
+  }
+
+  // =====================================================================
+  // LIST VIEW
+  // =====================================================================
+
+  function initListView() {
+    if (!els.listToggle || !els.listView) return;
+    els.listToggle.addEventListener('click', function () {
+      toggleListView();
+    });
+  }
+
+  function toggleListView() {
+    listViewActive = !listViewActive;
+    if (listViewActive) {
+      buildListSidebar();
+      els.listView.classList.add('active');
+      els.listView.setAttribute('aria-hidden', 'false');
+      els.listToggle.classList.add('entry-nav__btn--active');
+      selectListEntry(navIndex);
+    } else {
+      els.listView.classList.remove('active');
+      els.listView.setAttribute('aria-hidden', 'true');
+      els.listToggle.classList.remove('entry-nav__btn--active');
+      // Fly map to current entry on close
+      var entry = sortedEntries[navIndex];
+      if (entry) {
+        MapModule.flyToEntry(entry);
+        highlightPin(entry.id);
+        MapModule.updatePinPreview(entry.id);
+        MapModule.updateThumbVisibility(entry.id);
+      }
+    }
+  }
+
+  function buildListSidebar() {
+    if (!els.listSidebar) return;
+    var html = '';
+    // Display newest first in sidebar
+    for (var i = sortedEntries.length - 1; i >= 0; i--) {
+      var entry = sortedEntries[i];
+      var photo = getEntryThumb(entry);
+      var thumbHtml = photo
+        ? '<img class="list-entry__thumb" src="' + MapModule.escapeHtml(photo) + '" alt="" loading="lazy">'
+        : '<div class="list-entry__thumb list-entry__thumb--placeholder">' + getTypeEmoji(entry.type) + '</div>';
+
+      html +=
+        '<div class="list-entry" data-list-index="' + i + '">' +
+          thumbHtml +
+          '<div class="list-entry__info">' +
+            '<div class="list-entry__title">' + MapModule.escapeHtml(entry.title) + '</div>' +
+            '<div class="list-entry__meta">' + MapModule.formatDate(entry.date) + ' &middot; ' + MapModule.escapeHtml(entry.location_name) + '</div>' +
+          '</div>' +
+          '<div class="list-entry__detail"></div>' +
+        '</div>';
+    }
+    els.listSidebar.innerHTML = html;
+
+    // Bind click handlers
+    els.listSidebar.querySelectorAll('.list-entry').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var idx = parseInt(el.getAttribute('data-list-index'), 10);
+        navIndex = idx;
+        updateNavInfo();
+        selectListEntry(idx);
+      });
+    });
+  }
+
+  function selectListEntry(index) {
+    if (!els.listSidebar) return;
+    var entry = sortedEntries[index];
+    if (!entry) return;
+
+    // Update active highlight in sidebar
+    els.listSidebar.querySelectorAll('.list-entry').forEach(function (el) {
+      var elIdx = parseInt(el.getAttribute('data-list-index'), 10);
+      el.classList.toggle('list-entry--active', elIdx === index);
+    });
+
+    // Scroll active entry into view in sidebar
+    var activeEl = els.listSidebar.querySelector('.list-entry--active');
+    if (activeEl) {
+      activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+
+    var isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+      // Mobile: expand/collapse inline
+      els.listSidebar.querySelectorAll('.list-entry').forEach(function (el) {
+        var elIdx = parseInt(el.getAttribute('data-list-index'), 10);
+        var detailEl = el.querySelector('.list-entry__detail');
+        if (elIdx === index) {
+          el.classList.toggle('list-entry--expanded');
+          if (el.classList.contains('list-entry--expanded') && detailEl) {
+            detailEl.innerHTML = MapModule.buildEntryContentHtml(entry);
+            MapModule.bindPhotoHandlers(detailEl, entry);
+          }
+        } else {
+          el.classList.remove('list-entry--expanded');
+        }
+      });
+    } else {
+      // Desktop: collapse any mobile-expanded entries
+      els.listSidebar.querySelectorAll('.list-entry--expanded').forEach(function (el) {
+        el.classList.remove('list-entry--expanded');
+      });
+      // Render in detail pane
+      if (els.listDetailContent) {
+        els.listDetailContent.innerHTML = MapModule.buildEntryContentHtml(entry);
+        MapModule.bindPhotoHandlers(els.listDetailContent, entry);
+        els.listDetail.scrollTop = 0;
+      }
+    }
+  }
+
+  function getEntryThumb(entry) {
+    if (!entry.photos || entry.photos.length === 0) return null;
+    var idx = (typeof entry.preview_photo === 'number' && entry.preview_photo < entry.photos.length)
+      ? entry.preview_photo : 0;
+    return entry.photos[idx];
+  }
+
+  function getTypeEmoji(type) {
+    var map = {
+      'field-notes': '\uD83D\uDC3E',
+      'dispatch': '\uD83D\uDCDD',
+      'video-log': '\uD83C\uDFA5',
+      'wojo-report': '\uD83D\uDE3A'
+    };
+    return map[type] || '\uD83D\uDCCC';
   }
 
   // =====================================================================

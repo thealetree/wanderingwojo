@@ -150,6 +150,7 @@
         <button class="entry-nav__btn" id="nav-prev" aria-label="Previous entry">&lsaquo;</button>
         <span class="entry-nav__info" id="nav-info"></span>
         <button class="entry-nav__btn" id="nav-next" aria-label="Next entry">&rsaquo;</button>
+        <button class="entry-nav__btn entry-nav__btn--list" id="nav-list-toggle" aria-label="Toggle list view">&#9776;</button>
       </div>
     </div>
     <div class="footer-links footer-links--right">
@@ -162,6 +163,18 @@
           <button class="kladg-player__btn kladg-player__btn--play" id="kladg-play" aria-label="Play">&#9654;</button>
           <button class="kladg-player__btn" id="kladg-next" aria-label="Next track">&#9197;</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       LIST VIEW OVERLAY
+       ================================================================ -->
+  <div class="list-view" id="list-view" aria-hidden="true">
+    <div class="list-view__container">
+      <div class="list-view__sidebar" id="list-sidebar"></div>
+      <div class="list-view__detail" id="list-detail">
+        <div class="list-view__detail-content" id="list-detail-content"></div>
       </div>
     </div>
   </div>
