@@ -780,5 +780,51 @@
     "mood_left": "Sleep",
     "mood_right": "Yoinks",
     "mood_value": 0.1
+  },
+  {
+    "id": "2026-04-11-brother-jesse",
+    "date": "2026-04-11",
+    "title": "Brother Jesse",
+    "type": "field-notes",
+    "location_name": "Santa Fe, NM",
+    "coordinates": [
+      35.6876096,
+      -105.938456
+    ],
+    "body": "THIS is why we landed in Santa Fe. One amazing day of hanging with The big dude's Brother Jesse. What an amazing guy, and it's wild how much their personalities rhyme in so many ways. That kinda self-deprecation to the extreme when in fact they're more than decent. \n\nFor example, he took us on a really special little hike to see some ancient petroglyphs, walked along some fancy art gallery streets, went for street tacos and fancy tequila, all while I watched them connect more and more as time and awkwardness melted away from both of them, and laughs and stories settled in. \n\nAt the end of the visit, just after some heartfelt hugs goodbye, I heard Brother Jesse offer the big guy anything in return for the hospitality. \"No way you don't owe me shit :)\" Said the Big Guy, \n\n\"Can I offer you something sharp?\"\n\n\"You mean, like a knife? Hell yeah!\"\n\nJesse picked out a throwing knife to give to the big guy and they bonded as Jesse taught him how to throw and get it to stick. \n\nThis was the whole reason for coming to Santa Fe. Release of strict Zen conceptions, remembering childhood faith and reconnecting with family. \n\nLet's hope we see more of Jesse much sooner than later. \n\nThen, SIX HOURS back to Tucson. Big guy thought, \"that was too nice..\" And Michela said \"Just come back\" and with that, we drove while I jumped around and watched the semi trucks and street lights pass for hours. Then... deep SLEEEeeeeeeep",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_3203.jpg",
+      "media/photos/img_3204.jpg",
+      "media/photos/img_3205.jpg",
+      "media/photos/img_3206.jpg",
+      "media/photos/img_3207.jpg",
+      "media/photos/img_3208.jpg",
+      "media/photos/img_3209.jpg",
+      "media/photos/img_3210.jpg",
+      "media/photos/img_3211.jpg",
+      "media/photos/img_3214.jpg",
+      "media/photos/img_3216.jpg",
+      "media/photos/img_3217.jpg",
+      "media/photos/img_3218.jpg",
+      "media/photos/img_3219.jpg",
+      "media/photos/img_3220.jpg",
+      "media/photos/img_3221.jpg",
+      "media/photos/img_3223.jpg",
+      "media/photos/img_3224.jpg",
+      "media/photos/img_3227.jpg",
+      "media/photos/img_3238.jpg",
+      "media/photos/img_3249.jpg",
+      "media/photos/img_3251.jpg",
+      "media/photos/img_3252.jpg",
+      "media/photos/img_3256.jpg",
+      "media/photos/img_3257.jpg",
+      "media/photos/img_3258.jpg",
+      "media/photos/img_3259.jpg"
+    ],
+    "preview_photo": 3,
+    "mood_left": "Oink",
+    "mood_right": "Meow",
+    "mood_value": 1
   }
 ]
