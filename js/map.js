@@ -28,6 +28,21 @@ const MapModule = (function () {
   let expandedTabIndex = 0;
   let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   let entryNumberMap = {};  // entry id -> 1-based number
+
+  // Build compact range string from array of entries, e.g. "21-25, 32"
+  function buildRangeString(groupEntries) {
+    var nums = groupEntries.map(function (e) { return entryNumberMap[e.id] || 0; }).sort(function (a, b) { return a - b; });
+    var ranges = [];
+    var i = 0;
+    while (i < nums.length) {
+      var start = nums[i];
+      while (i + 1 < nums.length && nums[i + 1] === nums[i] + 1) i++;
+      var end = nums[i];
+      ranges.push(start === end ? '' + start : start + '-' + end);
+      i++;
+    }
+    return ranges.join(', ');
+  }
   let totalEntries = 0;
 
   // Clustering state
@@ -772,9 +787,7 @@ const MapModule = (function () {
 
     var numberDisplay;
     if (isGrouped && displayEntry.id === groupEntries[groupEntries.length - 1].id) {
-      var firstNum = entryNumberMap[groupEntries[0].id] || '';
-      var lastNum = entryNumberMap[groupEntries[groupEntries.length - 1].id] || '';
-      numberDisplay = firstNum + '-' + lastNum;
+      numberDisplay = buildRangeString(groupEntries);
     } else {
       numberDisplay = '' + (entryNumberMap[displayEntry.id] || '');
     }
@@ -1151,9 +1164,7 @@ const MapModule = (function () {
       var isLatestInGroup = pinData.entries.length > 1 &&
         entry.id === pinData.entries[pinData.entries.length - 1].id;
       if (isLatestInGroup) {
-        var firstNum = entryNumberMap[pinData.entries[0].id] || '';
-        var lastNum = entryNumberMap[pinData.entries[pinData.entries.length - 1].id] || '';
-        numberEl.textContent = firstNum + '-' + lastNum;
+        numberEl.textContent = buildRangeString(pinData.entries);
       } else {
         numberEl.textContent = '' + (entryNumberMap[entry.id] || '');
       }
