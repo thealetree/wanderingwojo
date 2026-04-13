@@ -826,5 +826,29 @@
     "mood_left": "Oink",
     "mood_right": "Meow",
     "mood_value": 1
+  },
+  {
+    "id": "2026-04-13-real-resty",
+    "date": "2026-04-13",
+    "title": "Real Resty",
+    "type": "field-notes",
+    "location_name": "Tucson, AZ",
+    "coordinates": [
+      32.2228765,
+      -110.974847
+    ],
+    "body": "I find myself back in the room in Tucson but this time it has brand new carpet!! UGH so easy to zip around and run back and forth, ears back in this big open space. Yeah, it's nice. I even got to explore the rest of the house. Seems like they're keeping me and this dog apart. I can hear Chita, and she sounds sweet, but I also hear from the big guy and Michela that she likes to destroy small animals at times. Don't think I wanna cross that path!\n\nSo, I'll settle into this big room for a bit and enjoy the space, peace, and hangs with the big guy and M. The work week is starting for them so I think it's gonna be preeeeety damn low key. \n\nSo nice to be back here, not rushing, not confined, snugs and hugs and smells and yeah. Yep :) Yep",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_3260.jpg",
+      "media/photos/img_3263.jpg",
+      "media/photos/img_3265.jpg",
+      "media/photos/img_3267.jpg",
+      "media/photos/screenshot-2026-04-13-at-73642am.png"
+    ],
+    "preview_photo": 4,
+    "mood_left": "Real Resty",
+    "mood_right": "New Carpet",
+    "mood_value": 0.05
   }
 ]
