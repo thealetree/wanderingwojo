@@ -850,5 +850,29 @@
     "mood_left": "Real Resty",
     "mood_right": "New Carpet",
     "mood_value": 0.05
+  },
+  {
+    "id": "2026-04-15-granny",
+    "date": "2026-04-15",
+    "title": "Granny",
+    "type": "field-notes",
+    "location_name": "Tucson, AZ",
+    "coordinates": [
+      32.2228765,
+      -110.974847
+    ],
+    "body": "Been a couple days of stretching, splooting, keeping an eye on these damn doves, saw my first lizard and DAMN near gottem with these claws...\n\nIt's not quite so hot out. Just right I think. The big dude and Michela have been enjoying mellow times, movies, laughs and chats about the state of the world, and where to go from here. Not sure they've figured anything out, but it's at least nice to see people connect and know they aren't the only ones who see things as kinda crazy right now. \n\nAnyway it's mid week. They're still working, so I'll be chillin. Love hot warm the sun is through the window down here. \n\nP.S.\nToday was Nakaii's birthday (the big dude's step dad). The Big guy's mom and sis are gonna celebrate with the first fire of the season up at sis's place. We'll be there in spirit. In other news, Granny better damn well kick this flu ASAP because I'm gonna be coming back at some point and we're gonna need her in her best shape for laughs, minnow treats, sci-fi shows, Bloody Marys, coloring books and ALLLLLLL the pets. Nakaii, maybe you could give Granny a healing hug from all of us?",
+    "video_url": "https://youtu.be/fyONhFD8P8k",
+    "photos": [
+      "media/photos/img_3273.jpg",
+      "media/photos/img_3274.jpg",
+      "media/photos/img_3276.jpg",
+      "media/photos/img_3277.jpg",
+      "media/photos/img_3279.jpg"
+    ],
+    "preview_photo": null,
+    "mood_left": "Granny",
+    "mood_right": "Glammy",
+    "mood_value": 0.9
   }
 ]
