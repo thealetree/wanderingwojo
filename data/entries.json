@@ -874,5 +874,25 @@
     "mood_left": "Granny",
     "mood_right": "Glammy",
     "mood_value": 0.9
+  },
+  {
+    "id": "2026-04-16-what-will-be",
+    "date": "2026-04-16",
+    "title": "What Will Be",
+    "type": "field-notes",
+    "location_name": "Tucson, AZ",
+    "coordinates": [
+      32.2228765,
+      -110.974847
+    ],
+    "body": "Seems like we can't step through the world without leaving paw prints. Funny that we ever might think or wish we could go without a trace, or at least only an enjoyable one... \"Don't mean to disturb. Don't want to inconvenience. Don't wanna cause distress, pain, bummer vibes.\"\n\nBut all we get to do is walk, and when at our best, step wisely, lovingly, with good intentions and diligent, child-like observations. And as we do, we leave prints. Try as we might to step lightly, or as otherwise described above, it's not fully up to us how that print is made, what lies beneath, how the impression holds, or doesn't... or what comes after.\n\nIf that's the case, seems like we might as well be bold and not bashful with our strides, since the marks will be made either way. So, make them honestly, openly, and with care. And let what will be, be.",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_3283.jpg"
+    ],
+    "preview_photo": null,
+    "mood_left": "Step",
+    "mood_right": "Stride",
+    "mood_value": 0.75
   }
 ]
