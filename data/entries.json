@@ -960,7 +960,7 @@
       "media/photos/img_3358.jpg",
       "media/photos/img_3353.jpg"
     ],
-    "preview_photo": null,
+    "preview_photo": 1,
     "mood_left": "Braindead",
     "mood_right": "Heartspent",
     "mood_value": 0.05
