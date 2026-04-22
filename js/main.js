@@ -950,6 +950,9 @@ const AppModule = (function () {
   function toggleListView() {
     listViewActive = !listViewActive;
     if (listViewActive) {
+      // Close any expanded pin before entering list view
+      MapModule.closeExpandedPin();
+      showDock();
       buildListSidebar();
       els.listView.classList.add('active');
       els.listView.setAttribute('aria-hidden', 'false');
@@ -959,6 +962,7 @@ const AppModule = (function () {
       els.listView.classList.remove('active');
       els.listView.setAttribute('aria-hidden', 'true');
       els.listToggle.classList.remove('entry-nav__btn--active');
+      showDock();
       // Fly map to current entry on close
       var entry = sortedEntries[navIndex];
       if (entry) {
