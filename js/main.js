@@ -959,6 +959,7 @@ const AppModule = (function () {
       els.listView.classList.remove('active');
       els.listView.setAttribute('aria-hidden', 'true');
       els.listToggle.classList.remove('entry-nav__btn--active');
+      showDock();
       // Fly map to current entry on close
       var entry = sortedEntries[navIndex];
       if (entry) {
