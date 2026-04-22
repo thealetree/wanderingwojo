@@ -1,12 +1,12 @@
 {
-  "id": "poll-20260410",
-  "question": "Should I try to learn to talk?",
+  "id": "poll-20260421",
+  "question": "Where next?",
   "options": [
-    "Sure",
-    "Meh",
-    "What?",
-    "Why?",
-    "No"
+    "Sideways",
+    "Upward",
+    "Inward",
+    "Outward",
+    "Spin Around"
   ],
   "active": true
 }
