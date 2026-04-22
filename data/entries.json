@@ -934,5 +934,35 @@
     "mood_left": "Love",
     "mood_right": "Happiness",
     "mood_value": 0.55
+  },
+  {
+    "id": "2026-04-21-baffled-by",
+    "date": "2026-04-21",
+    "title": "Baffled By",
+    "type": "field-notes",
+    "location_name": "Stevenson, WA",
+    "coordinates": [
+      45.6941611,
+      -121.88355
+    ],
+    "body": "Crazy how contrast seems to reveal the relief of meaning, not out there, but between me and that, here and there, all and small. Suddenly surrounded by family after weeks on the road, months with no home, a cat and a dude, lucky enough to experience punctuation. Bouts by ourselves peppered with deeply meaningful visits, cherished laughter, stories shared and made, sadness and smiles, meals and miles. \n\nLove and curiosity, anxiety and urgency draws us ever onward, inward. Others pull us outward, upward, forward.\n\nI know this sounds cryptic, wannabe poetic (I'm a fucking cat, gimme a break), maybe a bit dramatic, blah blah. More like braindead and heartspent. Ready for a rest and so very grateful for the love we're surrounded by. Baffled by. \n\nI seem to have picked not just a decent human in the Big Guy, but holy shit did I win the lottery with the people he's introduced me to, who keep him around.\n\nLike... How amazing was it to see Granny getting back to health?! Give her hugs, get some minnows!? To run around in that house, hide in my fort?! How awesome to see Justine?! Wrestle with her, eat some hair... She even drove us all the way up to the other grandparents and parents while the big guy worked in what's normally MY seat! They laughed and sang, burped and farted... I dunno kinda intense but it's fun to see their energy. There's so much LOVE and goodness that the big guy fell into (and me in turn). Being away from it really offers contrast, even if it also stings to leave the goodness we found when we were away. \n\nSeems that's life? Something about having cake but not getting to eat it? Or... tradeoffs, compromise, tragedy, comedy, do your best, flail and fail and do better... we better.\n\nBut really, seeing all four grandparents in a single day, at 40 years old... the big dude has it made.",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_3370.jpg",
+      "media/photos/img_3369.jpg",
+      "media/photos/img_3368.jpg",
+      "media/photos/img_3366.jpg",
+      "media/photos/img_3365.jpg",
+      "media/photos/img_3364.jpg",
+      "media/photos/img_3362.jpg",
+      "media/photos/img_3360.jpg",
+      "media/photos/img_3359.jpg",
+      "media/photos/img_3358.jpg",
+      "media/photos/img_3353.jpg"
+    ],
+    "preview_photo": null,
+    "mood_left": "Braindead",
+    "mood_right": "Heartspent",
+    "mood_value": 0.05
   }
 ]
