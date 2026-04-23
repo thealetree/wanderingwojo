@@ -465,7 +465,6 @@ const MapModule = (function () {
 
     // Flow particle layer — small warm-gold dots flowing in direction of travel.
     // Dasharray is animated via startFlowAnimation() after the draw-in completes.
-    var flowColor = isDark ? 'rgba(220,170,80,0.7)' : 'rgba(200,149,58,0.65)';
     map.addLayer({
       id: 'route-flow',
       type: 'line',
@@ -475,10 +474,10 @@ const MapModule = (function () {
         'line-cap': 'round',
       },
       paint: {
-        'line-color': flowColor,
-        'line-width': 2,
+        'line-color': '#ffffff',
+        'line-width': 3,
         'line-dasharray': [1, 4],
-        'line-opacity': ['*', ['get', 'opacity'], 1.0],
+        'line-opacity': 0.9,
       },
     });
 
