@@ -2734,11 +2734,9 @@ a:hover {
 
 /* Highlight ring on target elements */
 .tutorial-highlight {
-  position: relative;
   z-index: 5001 !important;
   outline: 3px solid var(--accent-light) !important;
   outline-offset: 4px;
-  border-radius: 6px;
   animation: tutorial-pulse 2s ease-in-out infinite;
 }
 
