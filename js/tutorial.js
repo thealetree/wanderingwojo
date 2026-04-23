@@ -50,6 +50,12 @@ const TutorialModule = (function () {
       position: 'top'
     },
     {
+      title: "My Time Machine",
+      body: "See that clock? That\u2019s my time machine! Click it to scrub through our journey one stop at a time.",
+      target: '#nav-timeline-toggle',
+      position: 'top'
+    },
+    {
       title: "Keyboard Shortcuts",
       body: "\u2190 \u2192 arrow keys navigate between entries. ESC closes any open story or photo. You\u2019re basically a power user now.",
       target: null,

@@ -2667,6 +2667,8 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--bg-page);
+  color: var(--mid-gray);
 }
 
 .entry-nav__btn--timeline svg {

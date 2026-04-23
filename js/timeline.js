@@ -163,7 +163,7 @@ const TimelineModule = (function () {
     isActive = true;
     activeIndex = currentNavIndex;
     if (barEl) {
-      barEl.style.display = '';
+      barEl.style.display = 'block';
       barEl.removeAttribute('aria-hidden');
       requestAnimationFrame(function () {
         barEl.classList.add('timeline-bar--active');
