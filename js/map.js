@@ -463,9 +463,11 @@ const MapModule = (function () {
       },
     });
 
-    // Flow particle layer — small warm-gold dots flowing in direction of travel.
+    // Flow particle layer — gold dots flowing in direction of travel, rendered
+    // above route-line (added last = topmost layer). Width > route-line so dots
+    // visually dominate; full opacity so they're not washed out by blend.
     // Dasharray is animated via startFlowAnimation() after the draw-in completes.
-    var flowColor = isDark ? 'rgba(220,170,80,0.7)' : 'rgba(200,149,58,0.65)';
+    var flowColor = isDark ? '#FFD050' : '#D4900A';
     map.addLayer({
       id: 'route-flow',
       type: 'line',
@@ -476,9 +478,9 @@ const MapModule = (function () {
       },
       paint: {
         'line-color': flowColor,
-        'line-width': 2,
+        'line-width': 4,
         'line-dasharray': [1, 4],
-        'line-opacity': ['*', ['get', 'opacity'], 1.0],
+        'line-opacity': ['get', 'opacity'],
       },
     });
 
