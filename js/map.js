@@ -476,9 +476,9 @@ const MapModule = (function () {
       },
       paint: {
         'line-color': flowColor,
-        'line-width': 2,
+        'line-width': 4,
         'line-dasharray': [1, 4],
-        'line-opacity': ['*', ['get', 'opacity'], 1.0],
+        'line-opacity': ['max', ['get', 'opacity'], 0.6],
       },
     });
 
