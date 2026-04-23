@@ -49,6 +49,7 @@ const AppModule = (function () {
     initListView();
     initKladgPlayer();
     loadSuggestionPins();
+    TutorialModule.init();
   }
 
   /**
