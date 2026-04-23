@@ -478,7 +478,7 @@ const MapModule = (function () {
         'line-color': flowColor,
         'line-width': 2,
         'line-dasharray': [1, 4],
-        'line-opacity': ['*', ['get', 'opacity'], 0.6],
+        'line-opacity': ['*', ['get', 'opacity'], 1.0],
       },
     });
 
