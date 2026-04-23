@@ -70,10 +70,12 @@ const MapModule = (function () {
 
   // Route coordinates — built dynamically from entries
   let routeCoords = [];
-  let routeSegments = [];        // per-entry-pair segments with coords + opacity
+  let routeSegments = [];        // per-entry-pair segments with coords + opacity + color
   let segmentStartIndices = [];  // routeCoords index where each segment begins
   let waypointIndices = [];      // routeCoords index for each entry waypoint
   let waypointToGroupIndex = {}; // maps entry waypoint index to locationGroups index
+  let flowAnimFrame = null;
+  let flowDashSeq = null;
 
   /**
    * Initialize the map. Returns false if no valid token.
@@ -227,6 +229,13 @@ const MapModule = (function () {
       }
     }
 
+    // Assign temporal gradient color to each segment (oldest = sage, newest = terracotta)
+    var totalSegs = routeSegments.length;
+    for (var i = 0; i < totalSegs; i++) {
+      var t = totalSegs > 1 ? i / (totalSegs - 1) : 0;
+      routeSegments[i].color = interpolateRouteColor(t);
+    }
+
     computeSegmentOpacities();
     addRouteLayer();
   }
@@ -364,6 +373,24 @@ const MapModule = (function () {
   }
 
   /**
+   * Interpolate route color along the temporal gradient:
+   * sage (#7C9A7E) → warm gold (#C8953A) → terracotta (#C1440E)
+   * t=0 is the oldest segment, t=1 is the newest.
+   */
+  function interpolateRouteColor(t) {
+    var sage  = [124, 154, 126];
+    var gold  = [200, 149, 58];
+    var terra = [193, 68, 14];
+    var from, to, tt;
+    if (t <= 0.5) { from = sage;  to = gold;  tt = t * 2; }
+    else          { from = gold;  to = terra; tt = (t - 0.5) * 2; }
+    var r = Math.round(from[0] + (to[0] - from[0]) * tt);
+    var g = Math.round(from[1] + (to[1] - from[1]) * tt);
+    var b = Math.round(from[2] + (to[2] - from[2]) * tt);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  /**
    * Check if two segments geographically overlap (endpoints within threshold).
    */
   function segmentsOverlap(a1, a2, b1, b2, threshold) {
@@ -383,7 +410,7 @@ const MapModule = (function () {
       features: segments.map(function (seg) {
         return {
           type: 'Feature',
-          properties: { opacity: seg.opacity },
+          properties: { opacity: seg.opacity, color: seg.color || '#C1440E' },
           geometry: { type: 'LineString', coordinates: seg.coords }
         };
       })
@@ -395,8 +422,6 @@ const MapModule = (function () {
    */
   function addRouteLayer() {
     if (routeSegments.length === 0) return;
-
-    var routeColor = isDark ? '#B87D6A' : '#C1440E';
 
     // Start with empty FeatureCollection — animation will reveal segments
     map.addSource('route', {
@@ -414,14 +439,14 @@ const MapModule = (function () {
         'line-cap': 'round',
       },
       paint: {
-        'line-color': routeColor,
+        'line-color': ['get', 'color'],
         'line-width': 6,
         'line-opacity': ['*', ['get', 'opacity'], 0.1],
         'line-blur': 8,
       },
     });
 
-    // Main route line — dashed, per-segment opacity
+    // Main route line — dashed, per-segment color gradient + opacity
     map.addLayer({
       id: 'route-line',
       type: 'line',
@@ -431,15 +456,84 @@ const MapModule = (function () {
         'line-cap': 'round',
       },
       paint: {
-        'line-color': routeColor,
+        'line-color': ['get', 'color'],
         'line-width': 3,
         'line-dasharray': [3, 2.5],
         'line-opacity': ['get', 'opacity'],
       },
     });
 
+    // Flow particle layer — small warm-gold dots flowing in direction of travel.
+    // Dasharray is animated via startFlowAnimation() after the draw-in completes.
+    var flowColor = isDark ? 'rgba(220,170,80,0.7)' : 'rgba(200,149,58,0.65)';
+    map.addLayer({
+      id: 'route-flow',
+      type: 'line',
+      source: 'route',
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round',
+      },
+      paint: {
+        'line-color': flowColor,
+        'line-width': 2.5,
+        'line-dasharray': [1, 4],
+        'line-opacity': ['*', ['get', 'opacity'], 0.75],
+      },
+    });
+
     // Animation is triggered externally via startRouteAnimation()
     // after fitBounds completes
+  }
+
+  /**
+   * Build dash-array sequence for flow animation.
+   * Each entry is a shifted version of [dash=1, gap=4] (period=5),
+   * cycling through gives the appearance of dots flowing forward along the route.
+   */
+  function buildFlowDashSequence() {
+    var D = 1, G = 4, T = 5, N = 10;
+    var seq = [];
+    for (var i = 0; i < N; i++) {
+      var s = i / N * T;
+      if (s < 0.001) {
+        seq.push([D, G]);
+      } else if (s <= G) {
+        seq.push([0, +s.toFixed(3), D, +(G - s).toFixed(3)]);
+      } else {
+        var w = +(s - G).toFixed(3);
+        seq.push([w, G, +(D - w).toFixed(3)]);
+      }
+    }
+    return seq;
+  }
+
+  /**
+   * Start the continuous flow-particle animation on the route-flow layer.
+   * Called once after the draw-in animation completes.
+   */
+  function startFlowAnimation() {
+    if (!map || !map.getLayer('route-flow')) return;
+    if (flowAnimFrame) return;
+
+    if (!flowDashSeq) flowDashSeq = buildFlowDashSequence();
+
+    var stepIndex = 0;
+    var lastStepTime = 0;
+    var STEP_MS = 60;
+
+    function tick(ts) {
+      if (ts - lastStepTime >= STEP_MS) {
+        lastStepTime = ts;
+        stepIndex = (stepIndex + 1) % flowDashSeq.length;
+        if (map.getLayer('route-flow')) {
+          map.setPaintProperty('route-flow', 'line-dasharray', flowDashSeq[stepIndex]);
+        }
+      }
+      flowAnimFrame = requestAnimationFrame(tick);
+    }
+
+    flowAnimFrame = requestAnimationFrame(tick);
   }
 
   /**
@@ -493,7 +587,7 @@ const MapModule = (function () {
           // Full segment drawn
           features.push({
             type: 'Feature',
-            properties: { opacity: routeSegments[si].opacity },
+            properties: { opacity: routeSegments[si].opacity, color: routeSegments[si].color || '#C1440E' },
             geometry: { type: 'LineString', coordinates: routeSegments[si].coords }
           });
         } else {
@@ -503,7 +597,7 @@ const MapModule = (function () {
           if (partialCoords.length >= 2) {
             features.push({
               type: 'Feature',
-              properties: { opacity: routeSegments[si].opacity },
+              properties: { opacity: routeSegments[si].opacity, color: routeSegments[si].color || '#C1440E' },
               geometry: { type: 'LineString', coordinates: partialCoords }
             });
           }
@@ -545,6 +639,7 @@ const MapModule = (function () {
           pin.element.classList.remove('cork-pin--reveal');
         });
         initialAnimationComplete = true;
+        startFlowAnimation();
       }
     }
 
