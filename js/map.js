@@ -76,6 +76,7 @@ const MapModule = (function () {
   let waypointToGroupIndex = {}; // maps entry waypoint index to locationGroups index
   let flowAnimFrame = null;
   let flowDashSeq = null;
+  let entryToRoutePoint = [];    // maps sorted entry index → unique waypoint index (module-level for timeline)
 
   /**
    * Initialize the map. Returns false if no valid token.
@@ -171,7 +172,7 @@ const MapModule = (function () {
     // Collapse consecutive same-location waypoints into unique route points.
     // One Catmull-Rom control point per location cluster, not per entry.
     var uniqueWaypoints = [];
-    var entryToRoutePoint = []; // maps each entry index to its uniqueWaypoints index
+    entryToRoutePoint = []; // module-level; maps each entry index to its uniqueWaypoints index
     for (var i = 0; i < allWaypoints.length; i++) {
       if (uniqueWaypoints.length === 0) {
         uniqueWaypoints.push(allWaypoints[i]);
@@ -2045,6 +2046,55 @@ const MapModule = (function () {
     pins.forEach(addSuggestionPin);
   }
 
+  // =======================================================================
+  // TIMELINE: show/hide entries by index
+  // =======================================================================
+
+  /**
+   * Show only entries 0..maxSortedIndex on the map (for timeline scrubbing).
+   * Hides cork pins and route segments for entries beyond maxSortedIndex.
+   */
+  function showEntryRange(maxSortedIndex) {
+    // Update cork pin visibility based on current cluster state
+    currentClusters.forEach(function (cluster) {
+      var pin = allLocationPins[cluster.primaryIndex];
+      if (!pin) return;
+      var hasEntryInRange = cluster.entries.some(function (e) {
+        var idx = (entryNumberMap[e.id] || 0) - 1; // 0-based sorted index
+        return idx <= maxSortedIndex;
+      });
+      pin.element.style.display = hasEntryInRange ? '' : 'none';
+    });
+
+    // Update route source to only show segments up to this entry's waypoint
+    if (!map || !map.getSource('route')) return;
+    if (entryToRoutePoint.length === 0) return;
+
+    var wpIdx = entryToRoutePoint[Math.min(maxSortedIndex, entryToRoutePoint.length - 1)];
+    if (!wpIdx) {
+      map.getSource('route').setData({ type: 'FeatureCollection', features: [] });
+    } else {
+      map.getSource('route').setData(buildRouteFC(routeSegments.slice(0, wpIdx)));
+    }
+  }
+
+  /**
+   * Restore all entries to their cluster-determined visibility (after timeline off).
+   */
+  function showAllEntries() {
+    allLocationPins.forEach(function (pin, gi) {
+      // Secondary pins (merged into another cluster's primary) stay hidden
+      var isSecondary = currentClusters.some(function (c) {
+        return c.primaryIndex !== gi && c.groupIndices.indexOf(gi) !== -1;
+      });
+      pin.element.style.display = isSecondary ? 'none' : '';
+    });
+
+    if (map && map.getSource('route')) {
+      map.getSource('route').setData(buildRouteFC(routeSegments));
+    }
+  }
+
   // --- Public API ---
   return {
     init: init,
@@ -2063,6 +2113,8 @@ const MapModule = (function () {
     showCorkPins: showCorkPins,
     flyToEntry: flyToEntry,
     getCurrentLocation: getCurrentLocation,
+    showEntryRange: showEntryRange,
+    showAllEntries: showAllEntries,
     setPlacementCallback: setPlacementCallback,
     addSuggestionPin: addSuggestionPin,
     addSuggestionPins: addSuggestionPins,

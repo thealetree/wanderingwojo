@@ -19,6 +19,7 @@ const AppModule = (function () {
   let globalPhotoIndex = 0;
   let lightboxOriginEntryId = null;
   let listViewActive = false;
+  let timelineActive = false;
 
   // --- DOM refs ---
   const els = {};
@@ -47,6 +48,7 @@ const AppModule = (function () {
     initKeyboardNav();
     initJourneyStats();
     initListView();
+    initTimeline();
     initKladgPlayer();
     loadSuggestionPins();
     TutorialModule.init();
@@ -75,6 +77,7 @@ const AppModule = (function () {
     els.listDetail = document.getElementById('list-detail');
     els.listDetailContent = document.getElementById('list-detail-content');
     els.listToggle = document.getElementById('nav-list-toggle');
+    els.timelineToggle = document.getElementById('nav-timeline-toggle');
   }
 
   /**
@@ -696,6 +699,16 @@ const AppModule = (function () {
       return;
     }
 
+    // Timeline mode — sync playhead and update map visibility, no flying
+    if (timelineActive) {
+      updateNavInfo();
+      TimelineModule.syncToIndex(navIndex);
+      MapModule.showEntryRange(navIndex);
+      highlightPin(entry.id);
+      MapModule.updatePinPreview(entry.id);
+      return;
+    }
+
     // Check if the target entry is in the currently expanded pin
     var expandedIds = MapModule.getExpandedPinEntryIds();
     if (expandedIds.length > 0 && expandedIds.indexOf(entry.id) !== -1) {
@@ -875,6 +888,10 @@ const AppModule = (function () {
           closeLightbox();
         } else if (listViewActive) {
           toggleListView();
+        } else if (timelineActive) {
+          timelineActive = false;
+          TimelineModule.deactivate();
+          MapModule.showAllEntries();
         } else {
           MapModule.closeExpandedPin();
           showDock();
@@ -949,8 +966,17 @@ const AppModule = (function () {
   }
 
   function toggleListView() {
+    // Deactivate timeline before entering list view
+    if (!listViewActive && timelineActive) {
+      timelineActive = false;
+      TimelineModule.deactivate();
+      MapModule.showAllEntries();
+    }
+
     listViewActive = !listViewActive;
     if (listViewActive) {
+      // Disable the clock button while list view is open
+      if (els.timelineToggle) els.timelineToggle.disabled = true;
       document.getElementById('dock').style.display = '';
       MapModule.closeExpandedPin();
       buildListSidebar();
@@ -962,6 +988,8 @@ const AppModule = (function () {
       els.listView.classList.remove('active');
       els.listView.setAttribute('aria-hidden', 'true');
       els.listToggle.classList.remove('entry-nav__btn--active');
+      // Re-enable clock button when list view closes
+      if (els.timelineToggle) els.timelineToggle.disabled = false;
       showDock();
       // Fly map to current entry on close
       var entry = sortedEntries[navIndex];
@@ -1071,6 +1099,36 @@ const AppModule = (function () {
       'wojo-report': '\uD83D\uDE3A'
     };
     return map[type] || '\uD83D\uDCCC';
+  }
+
+  // =====================================================================
+  // TIMELINE SCRUBBER
+  // =====================================================================
+
+  function initTimeline() {
+    if (!els.timelineToggle || !window.TimelineModule) return;
+
+    TimelineModule.init(sortedEntries, els.timelineToggle, function onScrub(newIndex) {
+      navIndex = newIndex;
+      updateNavInfo();
+      highlightPin(sortedEntries[navIndex].id);
+      MapModule.updatePinPreview(sortedEntries[navIndex].id);
+      MapModule.showEntryRange(navIndex);
+    });
+
+    els.timelineToggle.addEventListener('click', function () {
+      if (listViewActive) return; // disabled during list view
+      if (timelineActive) {
+        timelineActive = false;
+        TimelineModule.deactivate();
+        MapModule.showAllEntries();
+      } else {
+        MapModule.closeExpandedPin();
+        timelineActive = true;
+        TimelineModule.activate(navIndex);
+        MapModule.showEntryRange(navIndex);
+      }
+    });
   }
 
   // =====================================================================

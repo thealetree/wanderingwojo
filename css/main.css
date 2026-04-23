@@ -2542,6 +2542,154 @@ a:hover {
   width: 100%;
 }
 
+/* ==========================================================================
+   Timeline Scrubber
+   ========================================================================== */
+
+#timeline-bar {
+  position: fixed;
+  bottom: calc(2rem + 66px);
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  z-index: 1001;
+  width: calc(100vw - 8rem);
+  max-width: 1200px;
+  background: var(--bg-card);
+  border: 2px solid var(--beige-dark);
+  border-radius: var(--rough-radius-sm);
+  padding: 10px 28px;
+  box-shadow: var(--shadow-md);
+  filter: url(#roughen);
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out-expo), transform 0.3s var(--ease-out-expo);
+}
+
+#timeline-bar.timeline-bar--active {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.timeline__track {
+  position: relative;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  cursor: crosshair;
+  user-select: none;
+}
+
+/* Base track line */
+.timeline__track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--beige-dark);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+/* Warm fill from left to playhead */
+.timeline__fill {
+  position: absolute;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(to right, var(--sage), var(--terracotta));
+  border-radius: 1px;
+  pointer-events: none;
+  transition: width 0.08s ease;
+}
+
+/* Entry pin dots */
+.timeline__pin {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: var(--beige-dark);
+  border: 1.5px solid var(--warm-gray);
+  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Entries at the same location as the previous — stacked slightly above center */
+.timeline__pin--cluster {
+  width: 7px;
+  height: 7px;
+  margin-top: -5px;
+}
+
+.timeline__pin--active {
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  opacity: 1;
+}
+
+.timeline__pin--inactive {
+  background: var(--beige-dark);
+  border-color: var(--warm-gray);
+  opacity: 0.45;
+}
+
+/* Vertical playhead bar with diamond head */
+.timeline__playhead {
+  position: absolute;
+  width: 3px;
+  height: 22px;
+  background: var(--charcoal);
+  border-radius: 1.5px;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  transition: left 0.08s ease;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.timeline__playhead::before {
+  content: '';
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: var(--charcoal);
+  border-radius: 2px;
+  transform: rotate(45deg);
+  top: -5px;
+  left: 50%;
+  margin-left: -4.5px;
+}
+
+/* --- Clock toggle button --- */
+.entry-nav__btn--timeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.entry-nav__btn--timeline svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Disabled state (when list view is active) */
+.entry-nav__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  #timeline-bar {
+    bottom: calc(1.25rem + 57px);
+    width: calc(100vw - 1.5rem);
+    padding: 8px 16px;
+  }
+}
+
 /* --- Mobile expand/collapse --- */
 .list-entry__detail {
   display: none;
