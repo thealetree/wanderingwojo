@@ -476,8 +476,8 @@ const MapModule = (function () {
       },
       paint: {
         'line-color': flowColor,
-        'line-width': 2,
-        'line-dasharray': [1, 4],
+        'line-width': 3,
+        'line-dasharray': [3, 2],
         'line-opacity': ['*', ['get', 'opacity'], 1.0],
       },
     });
@@ -488,11 +488,11 @@ const MapModule = (function () {
 
   /**
    * Build dash-array sequence for flow animation.
-   * Each entry is a shifted version of [dash=1, gap=4] (period=5),
-   * cycling through gives the appearance of dots flowing forward along the route.
+   * Each entry is a shifted version of [dash=3, gap=2] (period=5),
+   * cycling through gives the appearance of dashes flowing forward along the route.
    */
   function buildFlowDashSequence() {
-    var D = 1, G = 4, T = 5, N = 10;
+    var D = 3, G = 2, T = 5, N = 10;
     var seq = [];
     for (var i = 0; i < N; i++) {
       var s = i / N * T;
