@@ -964,5 +964,34 @@
     "mood_left": "Braindead",
     "mood_right": "Heartspent",
     "mood_value": 0.05
+  },
+  {
+    "id": "2026-04-24-pounce-pet",
+    "date": "2026-04-24",
+    "title": "POUNCE.PET",
+    "type": "field-notes",
+    "location_name": "Stevenson, WA",
+    "coordinates": [
+      45.6941611,
+      -121.88355
+    ],
+    "body": "Been a few days since my last entry. Too busy pouncing around the huge house, chomping plants, hanging with the big guy's loud loving musical family and friends. Crazy how he has all the old ones still (they're all so damn NICE!).\n\nAuntie Bean's friends are all so damn cool and nice to me too! Que le friq?! \n\nAnyway, speaking of pouncing... the big guy helped me put together an app to help pets connect with each other, chat, set up play dates, and even help with adoptions! Get your human to check it out at pounce.pet in their web browser. Or, if you know the big guy, reach out to him for a special invite code. It's pretty damn cute to see all these dapper pet profiles. \n\nAnyway, one more day of work for the big guy while I prowl around this house and enjoy the room to stretch these LEGGGGGS!",
+    "video_url": null,
+    "photos": [
+      "media/photos/img_3394.jpg",
+      "media/photos/img_3387.jpg",
+      "media/photos/img_3385.png",
+      "media/photos/img_3384.png",
+      "media/photos/img_3383.jpg",
+      "media/photos/img_3380.jpg",
+      "media/photos/img_3377.jpg",
+      "media/photos/img_3374.jpg",
+      "media/photos/screenshot-2026-04-24-at-80339am.png",
+      "media/photos/screenshot-2026-04-24-at-80320am.png"
+    ],
+    "preview_photo": 8,
+    "mood_left": "Prowlin",
+    "mood_right": "Pouncin",
+    "mood_value": 0.5
   }
 ]
