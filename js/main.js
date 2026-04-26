@@ -212,6 +212,12 @@ const AppModule = (function () {
 
     // Init suggest tab
     initSuggestTab(dock);
+
+    // Open dock tab from URL hash (e.g. journal.html#poll from landing page)
+    var hash = window.location.hash.replace('#', '');
+    if (hash && dock.querySelector('[data-dock="' + hash + '"]')) {
+      openTab(hash);
+    }
   }
 
   function initContactForm(form) {

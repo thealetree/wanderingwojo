@@ -463,8 +463,9 @@ img { display: block; max-width: 100%; }
 .polaroid__photo {
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: repeating-linear-gradient(45deg, var(--paper-deep) 0 8px, var(--paper-2) 8px 16px);
+  background: var(--paper-deep);
   border: 1px solid var(--ink-mute);
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -472,6 +473,12 @@ img { display: block; max-width: 100%; }
   font-size: 10px;
   letter-spacing: .2em;
   color: var(--ink-mute);
+}
+.polaroid__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .polaroid__caption {
   position: absolute;
@@ -549,12 +556,20 @@ img { display: block; max-width: 100%; }
   margin-top: 14px;
 }
 
-/* dark-mode override: ruled paper still needs to look right */
+/* dark-mode overrides */
+/* Letter paper stays warm/white with dark ink regardless of theme */
 :root.auto-dark .letter {
-  background-color: #2A2825;
-  background-image: repeating-linear-gradient(transparent 0 33px, rgba(31, 138, 138, 0.32) 33px 34px);
+  background-color: #FBF6E6;
+  background-image: repeating-linear-gradient(transparent 0 33px, rgba(31, 138, 138, 0.22) 33px 34px);
 }
+:root.auto-dark .letter__body { color: #1A1814; }
+:root.auto-dark .letter__signoff { color: var(--vermillion-2); }
+
+/* Polaroid stays warm/white with dark ink */
 :root.auto-dark .polaroid__inner { background: #E5DCC2; color: var(--ink); }
+
+/* Wojo cat line drawing (dark strokes on transparent) needs inverting on dark bg */
+:root.auto-dark .fg-masthead__cat img { filter: invert(1); }
 
 /* ============================================================
    5. DOCK
