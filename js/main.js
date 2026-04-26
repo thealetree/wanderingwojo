@@ -599,7 +599,24 @@ const AppModule = (function () {
 
     if (mapInitialized) {
       const map = MapModule.getMap();
-      map.on('load', function () {
+      // Run once when the map style is ready. Some environments don't emit 'load'
+      // (e.g. when tiles are slow), so prefer style readiness as the signal.
+      var didInit = false;
+      function runWhenReady() {
+        if (didInit) return;
+        if (!map.isStyleLoaded || !map.isStyleLoaded()) return;
+        didInit = true;
+        onMapReady(map);
+      }
+      map.on('load', runWhenReady);
+      map.on('styledata', runWhenReady);
+      map.on('idle', runWhenReady);
+      // Belt-and-suspenders: if no event has triggered init within 1.5s, force it.
+      setTimeout(runWhenReady, 1500);
+    }
+  }
+
+  function onMapReady(map) {
         MapModule.addCorkPins(entries, handlePinClick, handlePinHover);
         MapModule.addRouteFromEntries(entries);
         updateNavInfo();
@@ -633,8 +650,6 @@ const AppModule = (function () {
         } else {
           checkUrlHash();
         }
-      });
-    }
   }
 
   function handlePinClick(groupEntries, pinEl, marker) {

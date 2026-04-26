@@ -17,8 +17,26 @@
   <!-- RSS Feed -->
   <link rel="alternate" type="application/rss+xml" title="Wandering Wojo" href="feed.xml">
 
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Caveat:wght@400;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
   <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/main.css">
+
+  <!-- Auto dark-mode hook (matches landing) -->
+  <script>
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('auto-dark');
+    }
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+        document.documentElement.classList.toggle('auto-dark', e.matches);
+      });
+    }
+  </script>
 
   <!-- SVG Filters for hand-drawn effect -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
