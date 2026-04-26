@@ -108,21 +108,6 @@ img { display: block; max-width: 100%; }
   height: 200px;
   width: auto;
 }
-.fg-masthead__cat-label {
-  position: absolute;
-  bottom: -8px;
-  right: -12px;
-  transform: rotate(-12deg);
-  background: var(--mustard);
-  color: var(--ink);
-  border: 2px solid var(--ink);
-  padding: 4px 10px;
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .2em;
-  box-shadow: 2px 2px 0 var(--ink);
-}
 
 .fg-masthead__title {
   text-align: left;
@@ -132,11 +117,16 @@ img { display: block; max-width: 100%; }
 }
 .fg-masthead__headline {
   font-family: var(--display);
-  font-size: clamp(64px, 9vw, 132px);
+  font-size: clamp(44px, 9vw, 132px);
   line-height: .82;
   letter-spacing: -.03em;
   color: var(--ink);
 }
+.fg-masthead__headline > span {
+  display: block;
+  white-space: nowrap;
+}
+.fg-masthead__headline br { display: none; }
 .fg-masthead__headline--alt { color: var(--vermillion-2); }
 
 .fg-masthead__est {
@@ -442,37 +432,6 @@ img { display: block; max-width: 100%; }
   z-index: 3;
 }
 
-/* stickers around the active notebook */
-.fg-sticker {
-  position: absolute;
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 10px;
-  letter-spacing: .25em;
-  padding: 6px 10px;
-  z-index: 4;
-}
-.fg-sticker--utah {
-  bottom: -18px;
-  left: -30px;
-  transform: rotate(-10deg);
-  border: 2px solid var(--teal-2);
-  color: var(--teal-2);
-  background: var(--paper);
-  box-shadow: 2px 2px 0 var(--teal-2);
-}
-.fg-sticker--active {
-  top: 80px;
-  right: -22px;
-  transform: rotate(12deg);
-  background: var(--mustard);
-  color: var(--ink);
-  border: 2px solid var(--ink);
-  letter-spacing: .2em;
-  padding: 4px 10px;
-  box-shadow: 2px 2px 0 var(--ink);
-}
-
 /* ============================================================
    4. ABOUT
    ============================================================ */
@@ -580,7 +539,8 @@ img { display: block; max-width: 100%; }
   line-height: 34px;
   color: var(--ink);
 }
-.letter__body p { margin: 0; }
+.letter__body p { margin: 0 0 34px; }
+.letter__body p:last-child { margin-bottom: 0; }
 .letter__signoff {
   font-family: var(--display);
   font-size: 24px;
@@ -684,7 +644,14 @@ img { display: block; max-width: 100%; }
 
 /* ============================================================
    RESPONSIVE
+   Mobile field-guide design — Direction A on a phone.
+   Single-column flow, full-bleed bands with 2px ink edges,
+   safe-area padding for notched phones.
    ============================================================ */
+
+/* tablet / small desktop (960px and below) — stack the masthead
+   and notebook grid but keep enough horizontal padding to feel
+   like a guidebook spread, not a phone. */
 @media (max-width: 960px) {
   .fg-masthead { padding: 36px 28px 28px; }
   .fg-masthead__stamp { right: 28px; top: 16px; padding: 8px 12px; font-size: 9px; }
@@ -710,6 +677,7 @@ img { display: block; max-width: 100%; }
     grid-template-columns: 1fr;
     gap: 56px 0;
     padding: 12px 0 24px;
+    justify-items: center;
   }
 
   .fg-about { padding: 40px 24px 36px; }
@@ -749,10 +717,211 @@ img { display: block; max-width: 100%; }
   }
 }
 
-@media (max-width: 520px) {
-  .notebook { width: 280px; height: 380px; }
-  .notebook__title { font-size: 22px; }
-  .notebook__subtitle { font-size: 18px; }
-  .fg-section-head__title { font-size: 26px; }
-  .fg-section-head__hand { font-size: 18px; }
+/* phone (≤640px) — full mobile field-guide layout */
+@media (max-width: 640px) {
+  html { -webkit-text-size-adjust: 100%; }
+  .fg-root {
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+
+  .fg-topbar {
+    padding: 10px 16px;
+    font-size: 9px;
+    letter-spacing: .22em;
+    gap: 6px 12px;
+    line-height: 1;
+  }
+
+  .fg-masthead {
+    padding: 28px 20px 24px;
+    text-align: left;
+  }
+  .fg-masthead__stamp {
+    top: 16px;
+    right: 14px;
+    padding: 6px 10px;
+    font-size: 9px;
+    border-width: 2px;
+  }
+  .fg-masthead__grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+    align-items: start;
+    text-align: left;
+  }
+  .fg-masthead__cat {
+    justify-self: start;
+    margin: 4px 0 12px;
+  }
+  .fg-masthead__cat img { height: 140px; }
+  .fg-masthead__title { text-align: left; }
+  .fg-masthead__eyebrow { margin-bottom: 8px; }
+  .fg-masthead__headline {
+    /* WANDERING (9 chars) must fit on one line; ~6.6x font-size wide at -.035em */
+    font-size: clamp(36px, 13vw, 64px);
+    line-height: .85;
+    letter-spacing: -.035em;
+  }
+  .fg-masthead__est {
+    align-items: flex-start;
+    text-align: left;
+    margin-top: 14px;
+  }
+  .fg-masthead__est-hand { font-size: 32px; transform: rotate(-3deg); }
+  .fg-masthead__tagline {
+    margin-top: 22px;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .fg-masthead__tagline hr { width: 100%; }
+  .fg-masthead__tagline-text {
+    font-size: 17px;
+    line-height: 1.35;
+    text-align: left;
+  }
+
+  /* sections */
+  .fg-chapters,
+  .fg-about {
+    padding: 32px 20px 36px;
+  }
+  .fg-section-head {
+    margin-bottom: 4px;
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid var(--ink);
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .fg-section-head__title { font-size: 28px; letter-spacing: -.01em; }
+  .fg-section-head__rule { display: none; }
+  .fg-section-head__hand {
+    font-size: 22px;
+    transform: rotate(-1deg);
+    margin-top: 8px;
+  }
+
+  /* notebooks — column stack, fluid width, --tilt set inline by JS */
+  .fg-chapters__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    align-items: center;
+    padding: 16px 0 8px;
+  }
+  .fg-chapters__slot {
+    width: min(100%, 300px);
+  }
+  .notebook {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 320 / 420;
+    padding: 0;
+  }
+  .notebook__cover {
+    padding: 16px 14px;
+  }
+  .notebook__top-row { font-size: 9px; }
+  .notebook__title { font-size: 17px; line-height: 1; text-wrap: balance; }
+  .notebook__subtitle { font-size: 19px; margin: 2px 0 6px; }
+  .notebook__dates { font-size: 9px; margin-bottom: 8px; }
+  .notebook__stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 3px;
+    column-gap: 8px;
+    font-size: 9px;
+  }
+  .notebook__stats span { display: block; }
+  .notebook__abstract { width: 130px; height: 130px; font-size: 48px; }
+  .notebook__center img { max-height: 150px; }
+  .notebook__upcoming-untitled { font-size: 36px; }
+
+  /* about */
+  .fg-about__grid {
+    gap: 24px;
+  }
+  .polaroid { transform: rotate(-3deg); }
+  .polaroid__inner { width: min(86vw, 240px); padding: 12px 12px 44px; }
+  .polaroid__caption { font-size: 22px; bottom: 12px; }
+  .polaroid__stamp {
+    top: 28px;
+    right: 8px;
+    padding: 7px 11px;
+    font-size: 9px;
+  }
+  .letter {
+    padding: 20px 20px 24px 40px;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 27px,
+      rgba(31, 138, 138, 0.28) 27px,
+      rgba(31, 138, 138, 0.28) 28px
+    );
+    background-position: 0 42px;
+  }
+  .letter::before { left: 28px; }
+  .letter::after  { left: 32px; }
+  .letter__body {
+    font-size: 21px;
+    line-height: 28px;
+  }
+  .letter__body p { margin: 0 0 28px; }
+  .letter__signoff { font-size: 22px; margin-top: 6px; }
+
+  /* dock — stacked vertical with dashed link list, 2-col btn grid */
+  .fg-dock {
+    padding: 24px 20px max(28px, env(safe-area-inset-bottom));
+  }
+  .fg-dock__grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    text-align: left;
+    justify-items: stretch;
+  }
+  .fg-dock__center {
+    order: -1;
+    border-left: 0;
+    border-right: 0;
+    border-top: 1px solid var(--paper);
+    border-bottom: 1px solid var(--paper);
+    padding: 8px 0 6px;
+    font-size: 18px;
+  }
+  .fg-dock__center-caption { font-size: 8px; }
+  .fg-dock__left {
+    flex-direction: column;
+    gap: 0;
+    justify-content: stretch;
+    align-items: stretch;
+  }
+  .dock-link {
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(244, 236, 216, 0.25);
+  }
+  .dock-link:last-child { border-bottom: 0; }
+  .dock-link__name { font-size: 18px; }
+  .fg-dock__right {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    justify-content: stretch;
+  }
+  .dock-btn {
+    min-height: 40px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+}
+
+/* extra-small (≤380px) — tighten padding so WANDERING still fits */
+@media (max-width: 380px) {
+  .fg-masthead { padding: 24px 16px 20px; }
+  .fg-chapters,
+  .fg-about { padding: 28px 16px 32px; }
+  .fg-masthead__headline { font-size: clamp(34px, 12.5vw, 44px); }
+  .fg-section-head__title { font-size: 24px; }
 }

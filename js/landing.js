@@ -26,17 +26,27 @@
       var stats = computeStats(chapterEntries[chapter.id] || []);
       slot.appendChild(renderNotebook(chapter, stats));
 
-      // Stickers around the live, active first chapter
-      if (chapter.status === 'live' && stats.primaryState) {
-        slot.appendChild(makeSticker('utah', stats.primaryState.toUpperCase() + ' ✓'));
-        slot.appendChild(makeSticker('active', '★ ACTIVE'));
-      }
-
       grid.appendChild(slot);
     });
+
+    paintTopbarStats(entries);
   }).catch(function (err) {
     console.error('[landing] failed to load chapters', err);
   });
+
+  function paintTopbarStats(entries) {
+    var totals = computeStats(entries);
+    var slots = {
+      days: document.querySelector('[data-stat="days"]'),
+      entriesMiles: document.querySelector('[data-stat="entries-miles"]'),
+      states: document.querySelector('[data-stat="states"]'),
+    };
+    if (!totals.stats.length) return;
+    // totals.stats = ['N DAYS','M ENTRIES','~X MI','Y STATES']
+    if (slots.days) slots.days.textContent = totals.stats[0];
+    if (slots.entriesMiles) slots.entriesMiles.textContent = totals.stats[1] + ' · ' + totals.stats[2];
+    if (slots.states) slots.states.textContent = totals.stats[3];
+  }
 
   /* ---------- helpers ---------- */
 
@@ -57,31 +67,23 @@
 
   function computeStats(entries) {
     if (!entries.length) {
-      return { dates: 'TBA', stats: [], primaryState: null };
+      return { dates: 'TBA', stats: [] };
     }
 
     var sorted = entries.slice().sort(function (a, b) {
       return new Date(a.date) - new Date(b.date);
     });
-    var first = sorted[0];
-    var last = sorted[sorted.length - 1];
-
-    var firstDate = new Date(first.date);
-    var lastDate = new Date(last.date);
-    var now = new Date();
-    var endDate = lastDate > now ? lastDate : now;
+    var firstDate = new Date(sorted[0].date);
+    var lastDate = new Date(sorted[sorted.length - 1].date);
+    var endDate = lastDate > new Date() ? lastDate : new Date();
     var days = Math.max(1, Math.round((endDate - firstDate) / 86400000));
 
     var miles = approxMiles(sorted);
-
     var states = uniqueStates(sorted);
-    var primaryState = states[states.length - 1] || null;
-
     var dates = formatMonth(firstDate) + ' ' + firstDate.getFullYear() + ' — PRESENT';
 
     return {
       dates: dates,
-      primaryState: primaryState,
       stats: [
         days + ' DAYS',
         entries.length + ' ENTRIES',
@@ -251,10 +253,6 @@
       return svg;
     }
     return document.createDocumentFragment();
-  }
-
-  function makeSticker(kind, text) {
-    return el('div', 'fg-sticker fg-sticker--' + kind, text);
   }
 
   function el(tag, className, text) {
