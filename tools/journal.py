@@ -30,6 +30,77 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 ENTRIES_FILE = os.path.join(PROJECT_ROOT, 'data', 'entries.json')
 POLL_FILE = os.path.join(PROJECT_ROOT, 'data', 'poll.json')
+CHAPTERS_FILE = os.path.join(PROJECT_ROOT, 'data', 'chapters.json')
+
+# Fallback chapter used when chapters.json is missing — keeps tool working with
+# the original single-chapter setup.
+DEFAULT_CHAPTER = {
+    'id': 'oregon-southwest',
+    'number': '01',
+    'title': 'OREGON → SOUTHWEST',
+    'subtitle': 'the wandering begins',
+    'type': 'moving',
+    'status': 'live',
+    'entries_file': 'data/entries.json',
+}
+
+
+def _load_chapters():
+    """Read chapters.json. Returns a list of chapter dicts. Falls back to a
+    single default chapter if the file is missing or malformed so the tool
+    keeps working with legacy setups."""
+    try:
+        with open(CHAPTERS_FILE, 'r', encoding='utf-8') as f:
+            chapters = json.load(f)
+        if isinstance(chapters, list) and chapters:
+            return chapters
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+    return [DEFAULT_CHAPTER]
+
+
+def _save_chapters(chapters):
+    """Write chapters.json."""
+    with open(CHAPTERS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(chapters, f, indent=2, ensure_ascii=False)
+        f.write('\n')
+
+
+def _get_chapter(chapter_id):
+    """Look up a chapter by id. Returns the chapter dict or None."""
+    if not chapter_id:
+        return None
+    for ch in _load_chapters():
+        if ch.get('id') == chapter_id:
+            return ch
+    return None
+
+
+def _entries_path_for_chapter(chapter_id):
+    """Resolve the absolute entries.json path for a given chapter id.
+    Falls back to the legacy ENTRIES_FILE if the chapter is unknown."""
+    chapter = _get_chapter(chapter_id)
+    if chapter and chapter.get('entries_file'):
+        return os.path.join(PROJECT_ROOT, chapter['entries_file'])
+    return ENTRIES_FILE
+
+
+def _read_entries(path):
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+def _last_entry_date_for_chapter(chapter):
+    """Return the most recent entry date string in a chapter, or '' if none."""
+    path = os.path.join(PROJECT_ROOT, chapter.get('entries_file', '')) \
+        if chapter.get('entries_file') else ENTRIES_FILE
+    entries = _read_entries(path)
+    if not entries:
+        return ''
+    return max((e.get('date', '') for e in entries), default='')
 
 # ---------------------------------------------------------------------------
 # Embedded HTML page
@@ -491,6 +562,92 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
     .editing-banner.active { display: flex; }
 
+    /* ---- Chapter picker ---- */
+    .chapter-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--beige-dark);
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chapter-bar__label {
+      font-family: var(--font-mono);
+      font-size: 0.625rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mid-gray);
+    }
+
+    .chapter-bar__select {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .chapter-bar__meta {
+      font-family: var(--font-mono);
+      font-size: 0.625rem;
+      color: var(--warm-gray);
+      letter-spacing: 0.04em;
+    }
+
+    .chapter-bar__edit {
+      font-family: var(--font-mono);
+      font-size: 0.625rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.75rem;
+      background: transparent;
+      border: 1px solid var(--beige-dark);
+      border-radius: 6px;
+      color: var(--mid-gray);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chapter-bar__edit:hover {
+      border-color: var(--warm-gray);
+      color: var(--charcoal);
+    }
+
+    .chapter-edit {
+      display: none;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      background: var(--beige);
+      border: 1px solid var(--beige-dark);
+      border-radius: 10px;
+    }
+
+    .chapter-edit.active { display: block; }
+
+    .chapter-edit__title {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+      margin-bottom: 0.75rem;
+    }
+
+    .chapter-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.5rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: var(--beige);
+      color: var(--dark-gray);
+      margin-right: 0.375rem;
+      vertical-align: middle;
+    }
+
     .editing-banner__cancel {
       font-family: var(--font-mono);
       font-size: 0.625rem;
@@ -582,6 +739,36 @@ HTML_PAGE = r"""<!DOCTYPE html>
     <div class="header">
       <div class="header__title">Journal Tool</div>
       <div class="header__subtitle">Wandering Wojo — Journal Manager</div>
+    </div>
+
+    <!-- Chapter Picker -->
+    <div class="chapter-bar">
+      <span class="chapter-bar__label">Chapter</span>
+      <select class="form-select chapter-bar__select" id="chapter-select" aria-label="Active chapter">
+        <option value="">Loading chapters...</option>
+      </select>
+      <span class="chapter-bar__meta" id="chapter-meta"></span>
+      <button class="chapter-bar__edit" id="chapter-edit-btn" type="button">Edit</button>
+    </div>
+
+    <!-- Chapter Metadata Editor -->
+    <div class="chapter-edit" id="chapter-edit-panel">
+      <div class="chapter-edit__title">Edit Chapter Metadata</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="chapter-title-input">Title</label>
+          <input class="form-input" id="chapter-title-input" type="text" placeholder="OREGON → SOUTHWEST">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="chapter-subtitle-input">Subtitle</label>
+          <input class="form-input" id="chapter-subtitle-input" type="text" placeholder="the wandering begins">
+        </div>
+      </div>
+      <div class="btn-group" style="margin-top:0.5rem;">
+        <button class="btn btn-primary" id="chapter-save-btn" type="button">Save Chapter</button>
+        <button class="btn btn-secondary" id="chapter-cancel-btn" type="button">Cancel</button>
+      </div>
+      <div class="status" id="chapter-status"></div>
     </div>
 
     <!-- Entry List -->
@@ -800,6 +987,17 @@ HTML_PAGE = r"""<!DOCTYPE html>
     var lastGeocodedLocation = '';
     var geocodeStatusEl = document.getElementById('geocode-status');
 
+    // Chapter state — populated by loadChapters()
+    var chaptersList = [];
+    var currentChapterId = null;
+
+    function getChapterById(id) {
+      for (var i = 0; i < chaptersList.length; i++) {
+        if (chaptersList[i].id === id) return chaptersList[i];
+      }
+      return null;
+    }
+
     // ---- Geocode via local proxy ----
     async function geocodeLocation(locationName) {
       if (!locationName || !locationName.trim()) return null;
@@ -983,10 +1181,12 @@ HTML_PAGE = r"""<!DOCTYPE html>
       entryListToggle.classList.toggle('open');
     });
 
-    // Load entries from server
+    // Load entries from server (for the currently selected chapter)
     async function loadEntryList() {
       try {
-        var resp = await fetch('/api/entries');
+        var url = '/api/entries';
+        if (currentChapterId) url += '?chapter=' + encodeURIComponent(currentChapterId);
+        var resp = await fetch(url);
         var entries = await resp.json();
 
         // Sort chronologically (newest first for the list)
@@ -1011,9 +1211,17 @@ HTML_PAGE = r"""<!DOCTYPE html>
           if (editingId === entry.id) item.classList.add('active');
           item.setAttribute('data-id', entry.id);
 
+          // Resolve chapter label: prefer the entry's stored chapter id, then
+          // fall back to the chapter we loaded the list for.
+          var entryChapterId = entry.chapter || currentChapterId;
+          var entryChapter = getChapterById(entryChapterId);
+          var chapterTag = entryChapter
+            ? '<span class="chapter-tag" title="' + escapeHtml(entryChapter.title || '') + '">CH ' + escapeHtml(entryChapter.number || '?') + '</span>'
+            : '';
+
           item.innerHTML =
             '<div class="entry-list-item__info">' +
-              '<div class="entry-list-item__title">' + escapeHtml(entry.title) + '</div>' +
+              '<div class="entry-list-item__title">' + chapterTag + escapeHtml(entry.title) + '</div>' +
               '<div class="entry-list-item__meta">' +
                 formatType(entry.type) + ' \u00b7 ' +
                 escapeHtml(entry.location_name || '') + ' \u00b7 ' +
@@ -1121,7 +1329,10 @@ HTML_PAGE = r"""<!DOCTYPE html>
         var resp = await fetch('/api/delete-entry', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: entry.id })
+          body: JSON.stringify({
+            id: entry.id,
+            chapter: entry.chapter || currentChapterId,
+          })
         });
 
         var result = await resp.json();
@@ -1321,7 +1532,8 @@ HTML_PAGE = r"""<!DOCTYPE html>
         preview_photo: previewPhotoIndex,
         mood_left: fields.moodLeft.value.trim() || null,
         mood_right: fields.moodRight.value.trim() || null,
-        mood_value: parseFloat(fields.moodValue.value)
+        mood_value: parseFloat(fields.moodValue.value),
+        chapter: currentChapterId || null
       };
 
       if (!entry.mood_left || !entry.mood_right) {
@@ -1662,10 +1874,152 @@ HTML_PAGE = r"""<!DOCTYPE html>
     }
 
     // ==================================================================
+    // CHAPTER PICKER + METADATA EDITOR
+    // ==================================================================
+    var chapterSelect = document.getElementById('chapter-select');
+    var chapterMeta = document.getElementById('chapter-meta');
+    var chapterEditBtn = document.getElementById('chapter-edit-btn');
+    var chapterEditPanel = document.getElementById('chapter-edit-panel');
+    var chapterTitleInput = document.getElementById('chapter-title-input');
+    var chapterSubtitleInput = document.getElementById('chapter-subtitle-input');
+    var chapterSaveBtn = document.getElementById('chapter-save-btn');
+    var chapterCancelBtn = document.getElementById('chapter-cancel-btn');
+    var chapterStatus = document.getElementById('chapter-status');
+
+    function pickDefaultChapterId(chapters) {
+      // Most recently active = chapter with the latest entry date.
+      // Ties (or all empty) → highest chapter number.
+      var best = null;
+      chapters.forEach(function(ch) {
+        if (!best) { best = ch; return; }
+        var a = ch.last_entry_date || '';
+        var b = best.last_entry_date || '';
+        if (a > b) best = ch;
+        else if (a === b && (ch.number || '') > (best.number || '')) best = ch;
+      });
+      return best ? best.id : null;
+    }
+
+    function renderChapterSelect() {
+      chapterSelect.innerHTML = '';
+      chaptersList.forEach(function(ch) {
+        var opt = document.createElement('option');
+        opt.value = ch.id;
+        var label = (ch.number ? ch.number + ' · ' : '') + (ch.title || ch.id);
+        opt.textContent = label;
+        if (ch.id === currentChapterId) opt.selected = true;
+        chapterSelect.appendChild(opt);
+      });
+      var current = getChapterById(currentChapterId);
+      if (current && current.subtitle) {
+        chapterMeta.textContent = current.subtitle;
+      } else {
+        chapterMeta.textContent = '';
+      }
+    }
+
+    async function loadChapters() {
+      try {
+        var resp = await fetch('/api/chapters');
+        chaptersList = await resp.json();
+        if (!Array.isArray(chaptersList) || chaptersList.length === 0) {
+          chaptersList = [];
+          chapterSelect.innerHTML = '<option value="">(no chapters)</option>';
+          return;
+        }
+        currentChapterId = pickDefaultChapterId(chaptersList);
+        renderChapterSelect();
+      } catch (err) {
+        console.error('Failed to load chapters:', err);
+        chapterSelect.innerHTML = '<option value="">(failed to load)</option>';
+      }
+    }
+
+    chapterSelect.addEventListener('change', function() {
+      currentChapterId = chapterSelect.value || null;
+      var current = getChapterById(currentChapterId);
+      chapterMeta.textContent = current && current.subtitle ? current.subtitle : '';
+      // Switching chapters drops any in-progress edit since the entry being
+      // edited belongs to a different file.
+      switchToNewMode();
+      clearForm();
+      // Close the chapter editor if it was open for the previous chapter.
+      chapterEditPanel.classList.remove('active');
+      loadEntryList();
+    });
+
+    function openChapterEditor() {
+      var current = getChapterById(currentChapterId);
+      if (!current) return;
+      chapterTitleInput.value = current.title || '';
+      chapterSubtitleInput.value = current.subtitle || '';
+      chapterStatus.innerHTML = '';
+      chapterEditPanel.classList.add('active');
+      chapterTitleInput.focus();
+    }
+
+    chapterEditBtn.addEventListener('click', function() {
+      if (chapterEditPanel.classList.contains('active')) {
+        chapterEditPanel.classList.remove('active');
+      } else {
+        openChapterEditor();
+      }
+    });
+
+    chapterCancelBtn.addEventListener('click', function() {
+      chapterEditPanel.classList.remove('active');
+    });
+
+    chapterSaveBtn.addEventListener('click', async function() {
+      var current = getChapterById(currentChapterId);
+      if (!current) return;
+      var title = chapterTitleInput.value.trim();
+      var subtitle = chapterSubtitleInput.value.trim();
+      if (!title) {
+        chapterStatus.innerHTML = '<div class="status-step fail">Title is required.</div>';
+        return;
+      }
+
+      chapterSaveBtn.disabled = true;
+      chapterStatus.innerHTML = '<div class="status-step">Saving chapter...</div>';
+
+      try {
+        var resp = await fetch('/api/save-chapter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: currentChapterId, title: title, subtitle: subtitle })
+        });
+        var result = await resp.json();
+        var html = '';
+        if (result.saved) {
+          html += '<div class="status-step done">Chapter metadata saved</div>';
+          // Update local copy so the selector reflects the new title.
+          current.title = title;
+          current.subtitle = subtitle;
+          renderChapterSelect();
+          loadEntryList();  // refresh tags in entry list
+        } else {
+          html += '<div class="status-step fail">Failed: ' + escapeHtml(result.save_error || 'Unknown') + '</div>';
+        }
+        if (result.committed) html += '<div class="status-step done">Committed to git</div>';
+        else if (result.commit_error) html += '<div class="status-step fail">Git: ' + escapeHtml(result.commit_error) + '</div>';
+        if (result.pushed) html += '<div class="status-step done">Pushed to remote</div>';
+        else if (result.push_error) html += '<div class="status-step fail">Push: ' + escapeHtml(result.push_error) + '</div>';
+        chapterStatus.innerHTML = html;
+      } catch (err) {
+        chapterStatus.innerHTML = '<div class="status-step fail">Network error: ' + escapeHtml(err.message) + '</div>';
+      }
+      chapterSaveBtn.disabled = false;
+    });
+
+    // ==================================================================
     // INIT
     // ==================================================================
     updateMoodPreview();
-    loadEntryList();
+    (async function() {
+      await loadChapters();
+      loadEntryList();
+    })();
   </script>
 </body>
 </html>
@@ -1683,18 +2037,21 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
         sys.stderr.write(f"  {args[0]}\n")
 
     def do_GET(self):
-        if self.path == '/' or self.path == '/index.html':
+        path_only = self.path.split('?')[0]
+        if path_only == '/' or path_only == '/index.html':
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
             self.end_headers()
             self.wfile.write(HTML_PAGE.encode('utf-8'))
-        elif self.path == '/api/entries':
+        elif path_only == '/api/entries':
             self.handle_list_entries()
-        elif self.path == '/api/poll':
+        elif path_only == '/api/chapters':
+            self.handle_list_chapters()
+        elif path_only == '/api/poll':
             self.handle_get_poll()
-        elif self.path == '/api/suggestions':
+        elif path_only == '/api/suggestions':
             self.handle_get_suggestions()
-        elif self.path.startswith('/api/geocode'):
+        elif path_only == '/api/geocode':
             self.handle_geocode()
         elif self.path.startswith('/media/photos/'):
             self.serve_photo()
@@ -1710,6 +2067,8 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.handle_update_entry()
         elif self.path == '/api/delete-entry':
             self.handle_delete_entry()
+        elif self.path == '/api/save-chapter':
+            self.handle_save_chapter()
         elif self.path == '/api/save-poll':
             self.handle_save_poll()
         elif self.path == '/api/delete-suggestions':
@@ -1717,14 +2076,80 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
         else:
             self.send_error(404)
 
+    def _query_chapter_id(self):
+        """Read ?chapter=<id> from the request URL."""
+        parsed = urlparse(self.path)
+        params = parse_qs(parsed.query)
+        return (params.get('chapter', [''])[0] or '').strip() or None
+
     def handle_list_entries(self):
-        """Return all entries as JSON."""
+        """Return all entries for the requested chapter as JSON.
+        ?chapter=<id> selects which chapter's entries file to read.
+        Defaults to the legacy entries.json when no chapter is given."""
+        chapter_id = self._query_chapter_id()
+        path = _entries_path_for_chapter(chapter_id) if chapter_id else ENTRIES_FILE
+        self.send_json(200, _read_entries(path))
+
+    def handle_list_chapters(self):
+        """Return chapter metadata, augmented with the most recent entry date
+        per chapter so the client can default to the most recently active
+        chapter."""
+        chapters = _load_chapters()
+        enriched = []
+        for ch in chapters:
+            ch_copy = dict(ch)
+            ch_copy['last_entry_date'] = _last_entry_date_for_chapter(ch)
+            enriched.append(ch_copy)
+        self.send_json(200, enriched)
+
+    def handle_save_chapter(self):
+        """Update editable chapter metadata (title, subtitle) by id."""
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length)
+
+        result = {'saved': False, 'committed': False, 'pushed': False}
+
         try:
-            with open(ENTRIES_FILE, 'r', encoding='utf-8') as f:
-                entries = json.load(f)
-            self.send_json(200, entries)
-        except (FileNotFoundError, json.JSONDecodeError):
-            self.send_json(200, [])
+            payload = json.loads(body)
+        except json.JSONDecodeError as e:
+            result['save_error'] = f'Invalid JSON: {e}'
+            self.send_json(400, result)
+            return
+
+        chapter_id = payload.get('id')
+        if not chapter_id:
+            result['save_error'] = 'Missing chapter id'
+            self.send_json(400, result)
+            return
+
+        chapters = _load_chapters()
+        target = next((c for c in chapters if c.get('id') == chapter_id), None)
+        if target is None:
+            result['save_error'] = f'Chapter not found: {chapter_id}'
+            self.send_json(404, result)
+            return
+
+        # Only allow editing the user-facing copy fields. id/path/file mappings
+        # stay locked to keep entries pointed at the right file.
+        for field in ('title', 'subtitle'):
+            if field in payload:
+                target[field] = (payload.get(field) or '').strip()
+
+        try:
+            _save_chapters(chapters)
+            result['saved'] = True
+            print(f"  ✓ Updated chapter: {target.get('title', chapter_id)}")
+        except OSError as e:
+            result['save_error'] = str(e)
+            self.send_json(500, result)
+            return
+
+        self._git_commit_and_push(
+            result,
+            f"Update chapter: {target.get('title', chapter_id)}",
+            extra_paths=['data/chapters.json'],
+        )
+        self.send_json(200, result)
 
     def handle_geocode(self):
         """Proxy geocoding request to Nominatim (avoids browser CORS issues)."""
@@ -1860,7 +2285,8 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(500, {'error': str(e)})
 
     def handle_save_entry(self):
-        """Save a new entry to entries.json and push to git."""
+        """Save a new entry to the chapter's entries file and push to git.
+        The entry's `chapter` field selects the target file."""
         content_length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(content_length)
 
@@ -1877,36 +2303,45 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(400, result)
             return
 
-        # Read existing entries
+        chapter_id = entry.get('chapter')
+        entries_path = _entries_path_for_chapter(chapter_id)
+
         try:
-            with open(ENTRIES_FILE, 'r', encoding='utf-8') as f:
+            with open(entries_path, 'r', encoding='utf-8') as f:
                 entries = json.load(f)
         except FileNotFoundError:
             entries = []
         except json.JSONDecodeError:
-            result['save_error'] = 'entries.json is malformed'
+            result['save_error'] = f'{os.path.basename(entries_path)} is malformed'
             self.send_json(500, result)
             return
 
-        # Append and write
         entries.append(entry)
         try:
-            with open(ENTRIES_FILE, 'w', encoding='utf-8') as f:
+            with open(entries_path, 'w', encoding='utf-8') as f:
                 json.dump(entries, f, indent=2, ensure_ascii=False)
                 f.write('\n')
             result['saved'] = True
-            print(f"  ✓ Saved entry: {entry.get('title', 'Untitled')}")
+            print(f"  ✓ Saved entry: {entry.get('title', 'Untitled')} → {os.path.basename(entries_path)}")
         except OSError as e:
             result['save_error'] = str(e)
             self.send_json(500, result)
             return
 
-        self._regenerate_feed()
-        self._git_commit_and_push(result, f"Add entry: {entry.get('title', 'New entry')}")
+        # Only regen the public RSS feed when writing to the canonical
+        # entries.json — chapter-specific files don't have a feed yet.
+        if entries_path == ENTRIES_FILE:
+            self._regenerate_feed()
+        rel_entries = os.path.relpath(entries_path, PROJECT_ROOT)
+        self._git_commit_and_push(
+            result,
+            f"Add entry: {entry.get('title', 'New entry')}",
+            extra_paths=[rel_entries],
+        )
         self.send_json(200, result)
 
     def handle_update_entry(self):
-        """Update an existing entry in entries.json by ID."""
+        """Update an existing entry in the chapter's entries file by ID."""
         content_length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(content_length)
 
@@ -1925,15 +2360,17 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(400, result)
             return
 
+        chapter_id = updated_entry.get('chapter')
+        entries_path = _entries_path_for_chapter(chapter_id)
+
         try:
-            with open(ENTRIES_FILE, 'r', encoding='utf-8') as f:
+            with open(entries_path, 'r', encoding='utf-8') as f:
                 entries = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
-            result['save_error'] = 'Could not read entries.json'
+            result['save_error'] = f'Could not read {os.path.basename(entries_path)}'
             self.send_json(500, result)
             return
 
-        # Find and replace the entry
         found = False
         for i, entry in enumerate(entries):
             if entry.get('id') == entry_id:
@@ -1947,22 +2384,28 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             return
 
         try:
-            with open(ENTRIES_FILE, 'w', encoding='utf-8') as f:
+            with open(entries_path, 'w', encoding='utf-8') as f:
                 json.dump(entries, f, indent=2, ensure_ascii=False)
                 f.write('\n')
             result['saved'] = True
-            print(f"  \u2713 Updated entry: {updated_entry.get('title', 'Untitled')}")
+            print(f"  \u2713 Updated entry: {updated_entry.get('title', 'Untitled')} \u2192 {os.path.basename(entries_path)}")
         except OSError as e:
             result['save_error'] = str(e)
             self.send_json(500, result)
             return
 
-        self._regenerate_feed()
-        self._git_commit_and_push(result, f"Update entry: {updated_entry.get('title', 'Untitled')}")
+        if entries_path == ENTRIES_FILE:
+            self._regenerate_feed()
+        rel_entries = os.path.relpath(entries_path, PROJECT_ROOT)
+        self._git_commit_and_push(
+            result,
+            f"Update entry: {updated_entry.get('title', 'Untitled')}",
+            extra_paths=[rel_entries],
+        )
         self.send_json(200, result)
 
     def handle_delete_entry(self):
-        """Delete an entry from entries.json by ID."""
+        """Delete an entry from the chapter's entries file by ID."""
         content_length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(content_length)
 
@@ -1981,11 +2424,14 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(400, result)
             return
 
+        chapter_id = data.get('chapter')
+        entries_path = _entries_path_for_chapter(chapter_id)
+
         try:
-            with open(ENTRIES_FILE, 'r', encoding='utf-8') as f:
+            with open(entries_path, 'r', encoding='utf-8') as f:
                 entries = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
-            result['save_error'] = 'Could not read entries.json'
+            result['save_error'] = f'Could not read {os.path.basename(entries_path)}'
             self.send_json(500, result)
             return
 
@@ -2003,18 +2449,24 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             return
 
         try:
-            with open(ENTRIES_FILE, 'w', encoding='utf-8') as f:
+            with open(entries_path, 'w', encoding='utf-8') as f:
                 json.dump(new_entries, f, indent=2, ensure_ascii=False)
                 f.write('\n')
             result['saved'] = True
-            print(f"  \u2713 Deleted entry: {title}")
+            print(f"  \u2713 Deleted entry: {title} from {os.path.basename(entries_path)}")
         except OSError as e:
             result['save_error'] = str(e)
             self.send_json(500, result)
             return
 
-        self._regenerate_feed()
-        self._git_commit_and_push(result, f"Delete entry: {title}")
+        if entries_path == ENTRIES_FILE:
+            self._regenerate_feed()
+        rel_entries = os.path.relpath(entries_path, PROJECT_ROOT)
+        self._git_commit_and_push(
+            result,
+            f"Delete entry: {title}",
+            extra_paths=[rel_entries],
+        )
         self.send_json(200, result)
 
     def handle_get_poll(self):
@@ -2193,30 +2645,32 @@ class JournalHandler(http.server.BaseHTTPRequestHandler):
             f.write(feed_xml)
         print('  \u2713 Regenerated feed.xml')
 
-    def _git_commit_and_push(self, result, message):
-        """Shared git commit + push logic — robust version."""
+    def _git_commit_and_push(self, result, message, extra_paths=None):
+        """Shared git commit + push logic — robust version.
+        `extra_paths` is an optional list of repo-relative paths to also stage
+        (e.g. a chapter-specific entries file or chapters.json)."""
         try:
-            # Stage entries.json, poll.json, photos, and feed.xml
-            subprocess.run(
-                ['git', 'add', 'data/entries.json'],
-                cwd=PROJECT_ROOT,
-                capture_output=True, text=True, check=True
-            )
-            subprocess.run(
-                ['git', 'add', 'data/poll.json'],
-                cwd=PROJECT_ROOT,
-                capture_output=True, text=True
-            )
-            subprocess.run(
-                ['git', 'add', 'media/photos/'],
-                cwd=PROJECT_ROOT,
-                capture_output=True, text=True
-            )
-            subprocess.run(
-                ['git', 'add', 'feed.xml'],
-                cwd=PROJECT_ROOT,
-                capture_output=True, text=True
-            )
+            # Stage the standard set every operation might touch, plus any
+            # caller-specified extras. `git add` on a missing path errors
+            # noisily but doesn't abort the run; we just ignore those.
+            paths_to_stage = [
+                'data/entries.json',
+                'data/poll.json',
+                'data/chapters.json',
+                'media/photos/',
+                'feed.xml',
+            ]
+            if extra_paths:
+                for p in extra_paths:
+                    if p not in paths_to_stage:
+                        paths_to_stage.append(p)
+
+            for p in paths_to_stage:
+                subprocess.run(
+                    ['git', 'add', p],
+                    cwd=PROJECT_ROOT,
+                    capture_output=True, text=True
+                )
 
             # Check if there's actually anything staged to commit
             diff_check = subprocess.run(

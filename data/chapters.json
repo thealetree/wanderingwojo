@@ -9,19 +9,21 @@
     "status": "live",
     "tilt": -3,
     "cover": "route",
-    "path": "journal.html"
+    "path": "journal.html",
+    "entries_file": "data/entries.json"
   },
   {
-    "id": "chapter-02",
+    "id": "settling-in",
     "number": "02",
-    "title": "UNTITLED",
-    "subtitle": "",
-    "type": "roadtrip",
+    "title": "SETTLING IN",
+    "subtitle": "finding a place",
+    "type": "stationary",
     "color": "teal",
-    "status": "upcoming",
-    "tilt": 2,
+    "status": "live",
+    "tilt": 1.5,
     "cover": "cat",
-    "path": null
+    "path": "/journal-ch2.html",
+    "entries_file": "data/entries-settling-in.json"
   },
   {
     "id": "chapter-03",
@@ -33,6 +35,7 @@
     "status": "upcoming",
     "tilt": -1.5,
     "cover": null,
-    "path": null
+    "path": null,
+    "entries_file": "data/entries-chapter-03.json"
   }
 ]
