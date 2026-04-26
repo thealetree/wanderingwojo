@@ -1,0 +1,38 @@
+[
+  {
+    "id": "oregon-southwest",
+    "number": "01",
+    "title": "OREGON → SOUTHWEST",
+    "subtitle": "the long way home",
+    "type": "roadtrip",
+    "color": "vermillion",
+    "status": "live",
+    "tilt": -3,
+    "cover": "route",
+    "path": "/"
+  },
+  {
+    "id": "chapter-02",
+    "number": "02",
+    "title": "UNTITLED",
+    "subtitle": "",
+    "type": "roadtrip",
+    "color": "teal",
+    "status": "upcoming",
+    "tilt": 2,
+    "cover": "cat",
+    "path": null
+  },
+  {
+    "id": "chapter-03",
+    "number": "03",
+    "title": "",
+    "subtitle": "",
+    "type": "roadtrip",
+    "color": "ink",
+    "status": "upcoming",
+    "tilt": -1.5,
+    "cover": null,
+    "path": null
+  }
+]

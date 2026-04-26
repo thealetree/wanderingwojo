@@ -1,0 +1,104 @@
+/* Wandering Wojo — refreshed token system
+   Risograph palette: cream paper + warm red + teal + mustard + ink
+*/
+:root {
+  /* paper / ink */
+  --paper:        #F4ECD8;  /* cream page */
+  --paper-2:      #EADFC4;  /* shaded paper */
+  --paper-deep:   #E0D2B0;  /* card edge / pocket */
+  --ink:          #1A1814;  /* near-black, warm */
+  --ink-soft:     #3A332A;  /* body text */
+  --ink-mute:     #6B5F4F;  /* labels */
+
+  /* riso accents */
+  --vermillion:   #E5421A;  /* warm red */
+  --vermillion-2: #C73214;  /* deeper */
+  --teal:         #1F8A8A;  /* riso teal */
+  --teal-2:       #156E6E;
+  --mustard:      #E8B23A;  /* sun yellow */
+  --mustard-2:    #C99020;
+  --moss:         #6B8E4E;  /* secondary green */
+
+  /* shadow / border */
+  --rule:         #1A1814;
+  --rule-soft:    rgba(26,24,20,0.18);
+  --shadow-1:     0 1px 0 rgba(26,24,20,0.08), 0 2px 6px rgba(26,24,20,0.06);
+  --shadow-2:     0 2px 0 rgba(26,24,20,0.12), 0 8px 22px rgba(26,24,20,0.10);
+  --shadow-3:     0 3px 0 rgba(26,24,20,0.18), 0 18px 40px rgba(26,24,20,0.14);
+
+  /* type */
+  --display: 'Archivo Black', 'Helvetica Neue', Arial, sans-serif;
+  --hand:    'Caveat', 'Marker Felt', cursive;
+  --mono:    'JetBrains Mono', ui-monospace, monospace;
+  --serif:   'Fraunces', Georgia, serif;
+
+  /* shapes */
+  --rough:    255px 15px 225px 15px / 15px 225px 15px 255px;
+  --rough-sm: 185px 8px 165px 8px / 8px 165px 8px 185px;
+
+  --space-xs: .25rem;
+  --space-sm: .5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl:4rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root.auto-dark {
+    --paper:       #1B1A17;
+    --paper-2:     #232220;
+    --paper-deep:  #2C2A26;
+    --ink:         #F2E9D2;
+    --ink-soft:    #D9CDB0;
+    --ink-mute:    #998C73;
+    --rule:        #F2E9D2;
+    --rule-soft:   rgba(242,233,210,0.18);
+    --shadow-1:     0 1px 0 rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.5);
+    --shadow-2:     0 2px 0 rgba(0,0,0,0.5), 0 8px 22px rgba(0,0,0,0.6);
+    --shadow-3:     0 3px 0 rgba(0,0,0,0.7), 0 18px 40px rgba(0,0,0,0.7);
+  }
+}
+
+/* paper texture — applied on top of var(--paper) */
+.paper-bg {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(rgba(26,24,20,0.04) 1px, transparent 1px),
+    radial-gradient(rgba(26,24,20,0.025) 1px, transparent 1px);
+  background-size: 3px 3px, 7px 7px;
+  background-position: 0 0, 1px 2px;
+}
+
+.paper-bg-2 {
+  background-color: var(--paper-2);
+  background-image:
+    radial-gradient(rgba(26,24,20,0.05) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+/* riso "off-register" double print effect for headlines */
+.riso-print {
+  position: relative;
+  display: inline-block;
+}
+.riso-print::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  color: var(--vermillion);
+  transform: translate(2px, -2px);
+  mix-blend-mode: multiply;
+  z-index: -1;
+  opacity: .9;
+}
+.riso-print::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  color: var(--teal);
+  transform: translate(-2px, 2px);
+  mix-blend-mode: multiply;
+  z-index: -1;
+  opacity: .85;
+}
