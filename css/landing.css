@@ -940,3 +940,305 @@ img { display: block; max-width: 100%; }
   .fg-masthead__headline { font-size: clamp(34px, 12.5vw, 44px); }
   .fg-section-head__title { font-size: 24px; }
 }
+
+/* ============================================================
+   6. MODAL (poll / message / donate / rss)
+   Field-guide popups: paper card, ink border, vermillion stamp.
+   ============================================================ */
+.fg-modal[hidden] { display: none; }
+.fg-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.fg-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 24, 20, 0.62);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  cursor: pointer;
+  animation: fg-modal-fade .18s ease-out;
+}
+.fg-modal__card {
+  position: relative;
+  background-color: #FBF6E6;
+  background-image:
+    radial-gradient(rgba(26,24,20,0.04) 1px, transparent 1px),
+    radial-gradient(rgba(26,24,20,0.025) 1px, transparent 1px);
+  background-size: 3px 3px, 7px 7px;
+  background-position: 0 0, 1px 2px;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: var(--shadow-3);
+  width: min(560px, 100%);
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+  padding: 36px 36px 32px;
+  transform: rotate(-.6deg);
+  animation: fg-modal-pop .24s cubic-bezier(.2, 1.2, .4, 1);
+}
+.fg-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--ink);
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 10px;
+  font-family: var(--display);
+  transition: color .15s, transform .15s;
+}
+.fg-modal__close:hover { color: var(--vermillion-2); transform: rotate(90deg); }
+.fg-modal__stamp {
+  display: inline-block;
+  border: 2.5px solid var(--vermillion-2);
+  color: var(--vermillion-2);
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: .3em;
+  background: rgba(244, 236, 216, 0.7);
+  transform: rotate(-3deg);
+  margin-bottom: 14px;
+}
+.fg-modal__title {
+  font-family: var(--display);
+  font-size: clamp(28px, 4.4vw, 40px);
+  line-height: 1;
+  margin: 0 0 18px;
+  color: var(--ink);
+}
+.fg-modal__body { font-family: var(--serif); }
+.fg-modal__intro {
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  margin: 0 0 20px;
+}
+.fg-modal__foot {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .15em;
+  color: var(--ink-mute);
+  margin: 16px 0 0;
+}
+.fg-modal__foot a {
+  color: var(--teal-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* --- Poll panel --- */
+.fg-poll__options { display: flex; flex-direction: column; gap: 10px; }
+.fg-poll__option {
+  position: relative;
+  text-align: left;
+  background: #FBF6E6;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  font-family: var(--hand);
+  font-size: 22px;
+  line-height: 1.1;
+  padding: 12px 18px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform .12s ease, background .15s ease;
+}
+.fg-poll__option:hover:not(.fg-poll__option--voted) {
+  transform: translateX(3px);
+  background: var(--paper-deep);
+}
+.fg-poll__option--voted { cursor: default; }
+.fg-poll__option-bar {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  background: rgba(229, 66, 26, 0.18);
+  z-index: 0;
+  transition: width .4s ease;
+}
+.fg-poll__option--selected .fg-poll__option-bar { background: rgba(229, 66, 26, 0.34); }
+.fg-poll__option--selected { border-color: var(--vermillion-2); }
+.fg-poll__option-label,
+.fg-poll__option-count {
+  position: relative;
+  z-index: 1;
+}
+.fg-poll__option-count {
+  float: right;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .12em;
+  color: var(--ink-mute);
+  margin-left: 12px;
+}
+
+/* --- Form panel (message) --- */
+.fg-form { display: flex; flex-direction: column; gap: 12px; }
+.fg-form__input {
+  width: 100%;
+  background: #FBF6E6;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  padding: 12px 14px;
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.4;
+  resize: vertical;
+}
+.fg-form__input:focus {
+  outline: none;
+  border-color: var(--vermillion-2);
+  box-shadow: 0 0 0 3px rgba(229, 66, 26, 0.18);
+}
+.fg-form__file-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .2em;
+  color: var(--ink-mute);
+  cursor: pointer;
+  padding: 6px 0;
+  align-self: flex-start;
+}
+.fg-form__file-label:hover { color: var(--vermillion-2); }
+.fg-form__file-icon { font-size: 16px; }
+.fg-form__file-input { display: none; }
+.fg-form__file-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.fg-form__btn {
+  align-self: flex-start;
+  background: var(--vermillion);
+  border: 2px solid var(--vermillion-2);
+  color: #FBF6E6;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .25em;
+  padding: 12px 22px;
+  cursor: pointer;
+  transition: background .15s, transform .12s;
+}
+.fg-form__btn:hover:not(:disabled) { background: var(--vermillion-2); transform: translateY(-1px); }
+.fg-form__btn:disabled { opacity: .65; cursor: default; }
+
+/* --- Donate panel --- */
+.fg-donate__frame {
+  border: 1.5px solid var(--ink);
+  background: #FBF6E6;
+  padding: 4px;
+  overflow: hidden;
+}
+.fg-donate__frame iframe { display: block; width: 100%; }
+
+/* --- RSS panel --- */
+.fg-rss__url {
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid var(--ink);
+  background: #FBF6E6;
+  margin-bottom: 14px;
+}
+.fg-rss__url-text {
+  flex: 1;
+  padding: 12px 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink);
+  word-break: break-all;
+  user-select: all;
+}
+.fg-rss__copy {
+  background: var(--ink);
+  color: #FBF6E6;
+  border: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .2em;
+  padding: 0 18px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.fg-rss__copy:hover { background: var(--vermillion-2); }
+.fg-rss__copy--ok { background: var(--moss); }
+.fg-rss__open {
+  display: inline-block;
+  font-family: var(--hand);
+  font-size: 22px;
+  color: var(--vermillion-2);
+  text-decoration: none;
+  margin-top: 6px;
+}
+.fg-rss__open:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+/* Modal stays on warm paper in dark mode (matches polaroid/letter behavior) */
+:root.auto-dark .fg-modal__card {
+  background-color: #FBF6E6;
+  color: var(--ink);
+}
+:root.auto-dark .fg-poll__option,
+:root.auto-dark .fg-form__input,
+:root.auto-dark .fg-donate__frame,
+:root.auto-dark .fg-rss__url { background: #FBF6E6; color: var(--ink); border-color: var(--ink); }
+:root.auto-dark .fg-rss__url-text { color: var(--ink); }
+:root.auto-dark .fg-modal__stamp { background: rgba(244, 236, 216, 0.7); }
+:root.auto-dark .fg-modal__intro { color: var(--ink); }
+:root.auto-dark .fg-modal__title { color: var(--ink); }
+:root.auto-dark .fg-modal__close { color: var(--ink); }
+:root.auto-dark .fg-modal__foot { color: var(--ink-soft); }
+
+@keyframes fg-modal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fg-modal-pop {
+  from { opacity: 0; transform: rotate(-.6deg) translateY(14px) scale(.96); }
+  to   { opacity: 1; transform: rotate(-.6deg) translateY(0) scale(1); }
+}
+
+@media (max-width: 640px) {
+  .fg-modal { padding: 12px; }
+  .fg-modal__card {
+    padding: 28px 22px 24px;
+    transform: rotate(0);
+    max-height: calc(100vh - 24px);
+  }
+  .fg-modal__title { font-size: 26px; }
+  .fg-modal__intro { font-size: 16px; }
+}
+
+/* ===== Toast (used by message form) ===== */
+.fg-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink);
+  color: #FBF6E6;
+  padding: 14px 22px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .15em;
+  border: 2px solid var(--vermillion);
+  box-shadow: var(--shadow-2);
+  z-index: 1100;
+  opacity: 0;
+  transition: opacity .25s ease, transform .25s ease;
+  max-width: 90vw;
+  text-align: center;
+}
+.fg-toast--visible { opacity: 1; transform: translateX(-50%) translateY(0); }

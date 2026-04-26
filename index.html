@@ -113,7 +113,7 @@
           <div class="polaroid__photo">
             <img src="media/photos/img_2336.jpg" alt="Van and Wojo">
           </div>
-          <div class="polaroid__caption">somewhere in Utah</div>
+          <div class="polaroid__caption">Mt. Sasta, March 2026</div>
           <div class="polaroid__tape"></div>
         </div>
         <div class="polaroid__stamp">★ COPILOTS ★</div>
@@ -152,14 +152,74 @@
       </div>
 
       <div class="fg-dock__right">
-        <a class="dock-btn" href="journal.html#poll">POLL</a>
-        <a class="dock-btn" href="journal.html#message">MESSAGE</a>
-        <a class="dock-btn dock-btn--accent" href="journal.html#donate">DONATE</a>
-        <a class="dock-btn" href="feed.xml">RSS</a>
+        <button class="dock-btn" type="button" data-modal="poll">POLL</button>
+        <button class="dock-btn" type="button" data-modal="message">MESSAGE</button>
+        <button class="dock-btn dock-btn--accent" type="button" data-modal="donate">DONATE</button>
+        <button class="dock-btn" type="button" data-modal="rss">RSS</button>
       </div>
     </div>
   </footer>
 
+</div>
+
+<!-- ============== MODALS ============== -->
+<div class="fg-modal" id="fg-modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="fg-modal-title">
+  <div class="fg-modal__backdrop" data-modal-close></div>
+  <div class="fg-modal__card paper-bg">
+    <button class="fg-modal__close" type="button" data-modal-close aria-label="Close">&times;</button>
+    <div class="fg-modal__stamp" id="fg-modal-stamp">★ ★</div>
+    <h2 class="fg-modal__title" id="fg-modal-title">—</h2>
+    <div class="fg-modal__body">
+
+      <!-- POLL -->
+      <section class="fg-modal__panel" data-panel="poll" hidden>
+        <p class="fg-modal__intro" id="poll-intro">One question, your call. Pick one.</p>
+        <div class="fg-poll__options" id="poll-options"></div>
+        <p class="fg-modal__foot" id="poll-total"></p>
+      </section>
+
+      <!-- MESSAGE -->
+      <section class="fg-modal__panel" data-panel="message" hidden>
+        <p class="fg-modal__intro">Send us a postcard. 100% anonymous unless you sign it.</p>
+        <form class="fg-form" id="contact-form-landing" method="POST" enctype="multipart/form-data">
+          <textarea class="fg-form__input" id="contact-msg-landing" name="message" rows="5" placeholder="Say something nice (or weird)&hellip;"></textarea>
+          <label class="fg-form__file-label" for="contact-photo-landing">
+            <span class="fg-form__file-icon">&#9737;</span>
+            <span class="fg-form__file-text">Attach a photo (optional)</span>
+            <input type="file" id="contact-photo-landing" name="attachment" accept="image/*" class="fg-form__file-input">
+          </label>
+          <span class="fg-form__file-name" id="contact-file-name-landing"></span>
+          <input type="hidden" name="_subject" value="New message from Wandering Wojo">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_template" value="table">
+          <button class="fg-form__btn" type="submit">Send anonymously</button>
+        </form>
+      </section>
+
+      <!-- DONATE -->
+      <section class="fg-modal__panel" data-panel="donate" hidden>
+        <p class="fg-modal__intro">Every dollar buys gas, cat treats, or a campsite. Thanks for keeping the wheels turning.</p>
+        <div class="fg-donate__frame">
+          <iframe id="kofi-frame-landing" loading="lazy" style="border:none;width:100%;background:transparent;" height="640" title="Support Wandering Wojo on Ko-fi"></iframe>
+        </div>
+      </section>
+
+      <!-- RSS -->
+      <section class="fg-modal__panel" data-panel="rss" hidden>
+        <p class="fg-modal__intro">New entries land in your reader the moment they post. Drop this feed URL into Feedly, NetNewsWire, or the reader of your choice.</p>
+        <div class="fg-rss__url" id="rss-url-row">
+          <code class="fg-rss__url-text" id="rss-url-text">https://wanderingwojo.com/feed.xml</code>
+          <button class="fg-rss__copy" type="button" id="rss-copy-btn">Copy</button>
+        </div>
+        <a class="fg-rss__open" href="feed.xml" target="_blank" rel="noopener">Open feed in browser &rarr;</a>
+        <p class="fg-modal__foot">Need a reader? Try
+          <a href="https://feedly.com" target="_blank" rel="noopener">Feedly</a> or
+          <a href="https://netnewswire.com" target="_blank" rel="noopener">NetNewsWire</a>.
+        </p>
+      </section>
+
+    </div>
+  </div>
 </div>
 
 <script src="js/landing.js"></script>

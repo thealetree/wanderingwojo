@@ -262,3 +262,237 @@
     return n;
   }
 })();
+
+/* ============================================================
+   Landing-page modals: poll, message, donate, rss
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var CONTACT_EMAIL = atob('dGhlYWxldHJlZUBnbWFpbC5jb20=');
+  var FIREBASE_DB = 'https://wanderingwojo-default-rtdb.firebaseio.com';
+  var KOFI_URL = 'https://ko-fi.com/wanderingwojo/?hidefeed=true&widget=true&embed=true&preview=true';
+
+  var modal = document.getElementById('fg-modal');
+  if (!modal) return;
+  var titleEl = document.getElementById('fg-modal-title');
+  var stampEl = document.getElementById('fg-modal-stamp');
+  var panels = modal.querySelectorAll('[data-panel]');
+
+  var META = {
+    poll:    { title: 'TODAY’S QUESTION', stamp: '★ DISPATCH POLL ★' },
+    message: { title: 'DROP A NOTE',      stamp: '★ POSTCARD ★' },
+    donate:  { title: 'FUEL THE TRIP',    stamp: '★ TIP JAR ★' },
+    rss:     { title: 'SUBSCRIBE',        stamp: '★ RSS FEED ★' },
+  };
+
+  var pollLoaded = false;
+  var kofiLoaded = false;
+
+  function openModal(name) {
+    var meta = META[name];
+    if (!meta) return;
+    titleEl.textContent = meta.title;
+    stampEl.textContent = meta.stamp;
+    panels.forEach(function (p) {
+      if (p.dataset.panel === name) p.removeAttribute('hidden');
+      else p.setAttribute('hidden', '');
+    });
+    modal.removeAttribute('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    document.documentElement.style.overflow = 'hidden';
+
+    if (name === 'poll' && !pollLoaded) { loadPoll(); pollLoaded = true; }
+    if (name === 'donate' && !kofiLoaded) {
+      var iframe = document.getElementById('kofi-frame-landing');
+      if (iframe) iframe.src = KOFI_URL;
+      kofiLoaded = true;
+    }
+  }
+
+  function closeModal() {
+    modal.setAttribute('hidden', '');
+    modal.setAttribute('aria-hidden', 'true');
+    document.documentElement.style.overflow = '';
+  }
+
+  // Open triggers
+  document.querySelectorAll('[data-modal]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      openModal(btn.getAttribute('data-modal'));
+    });
+  });
+  // Close triggers
+  modal.querySelectorAll('[data-modal-close]').forEach(function (btn) {
+    btn.addEventListener('click', closeModal);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !modal.hasAttribute('hidden')) closeModal();
+  });
+
+  /* ---------- Poll ---------- */
+  function loadPoll() {
+    fetch('data/poll.json?t=' + Date.now())
+      .then(function (r) { return r.json(); })
+      .then(function (poll) {
+        if (!poll || !poll.active) {
+          document.getElementById('poll-intro').textContent = 'No active poll right now — check back soon.';
+          return;
+        }
+        renderPoll(poll);
+      })
+      .catch(function () {
+        document.getElementById('poll-intro').textContent = 'Couldn’t load the poll. Try again in a sec.';
+      });
+  }
+
+  function renderPoll(poll) {
+    var intro = document.getElementById('poll-intro');
+    var optionsEl = document.getElementById('poll-options');
+    var totalEl = document.getElementById('poll-total');
+    intro.textContent = poll.question;
+    optionsEl.innerHTML = '';
+
+    var votedPollId = localStorage.getItem('wojo_poll_voted_id');
+    var votedOption = localStorage.getItem('wojo_poll_voted_option');
+    var hasVoted = (votedPollId === poll.id);
+
+    fetch(FIREBASE_DB + '/polls/' + poll.id + '.json')
+      .then(function (r) { return r.json(); })
+      .then(function (data) { paintOptions(poll, data || {}, hasVoted, votedOption, optionsEl, totalEl); })
+      .catch(function () { paintOptions(poll, {}, hasVoted, votedOption, optionsEl, totalEl); });
+  }
+
+  function paintOptions(poll, votes, hasVoted, votedOption, optionsEl, totalEl) {
+    var total = 0;
+    poll.options.forEach(function (_, i) { total += (votes['opt' + i] || 0); });
+    optionsEl.innerHTML = '';
+    poll.options.forEach(function (opt, i) {
+      var key = 'opt' + i;
+      var count = votes[key] || 0;
+      var pct = total > 0 ? Math.round((count / total) * 100) : 0;
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'fg-poll__option';
+      if (hasVoted) btn.classList.add('fg-poll__option--voted');
+      if (hasVoted && votedOption === key) btn.classList.add('fg-poll__option--selected');
+
+      var bar = hasVoted ? '<div class="fg-poll__option-bar" style="width:' + pct + '%"></div>' : '';
+      var pctText = hasVoted ? '<span class="fg-poll__option-count">' + pct + '%</span>' : '';
+      btn.innerHTML = bar + pctText + '<span class="fg-poll__option-label">' + escapeHtml(opt) + '</span>';
+
+      if (!hasVoted) {
+        btn.addEventListener('click', function () { castVote(poll, key); });
+      }
+      optionsEl.appendChild(btn);
+    });
+    if (totalEl) totalEl.textContent = hasVoted ? total + ' vote' + (total === 1 ? '' : 's') : '';
+  }
+
+  function castVote(poll, optKey) {
+    localStorage.setItem('wojo_poll_voted_id', poll.id);
+    localStorage.setItem('wojo_poll_voted_option', optKey);
+    fetch(FIREBASE_DB + '/polls/' + poll.id + '/' + optKey + '.json')
+      .then(function (r) { return r.json(); })
+      .then(function (current) {
+        return fetch(FIREBASE_DB + '/polls/' + poll.id + '/' + optKey + '.json', {
+          method: 'PUT',
+          body: JSON.stringify((current || 0) + 1),
+        });
+      })
+      .then(function () { renderPoll(poll); })
+      .catch(function () { renderPoll(poll); });
+  }
+
+  /* ---------- Contact form ---------- */
+  var form = document.getElementById('contact-form-landing');
+  if (form) {
+    form.action = 'https://formsubmit.co/' + CONTACT_EMAIL;
+    var fileInput = document.getElementById('contact-photo-landing');
+    var fileNameEl = document.getElementById('contact-file-name-landing');
+    if (fileInput && fileNameEl) {
+      fileInput.addEventListener('change', function () {
+        fileNameEl.textContent = fileInput.files.length ? fileInput.files[0].name : '';
+      });
+    }
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var msg = document.getElementById('contact-msg-landing');
+      if (!msg.value.trim()) return;
+      var btn = form.querySelector('.fg-form__btn');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      fetch('https://formsubmit.co/ajax/' + CONTACT_EMAIL, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json' },
+      }).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      }).then(function () {
+        btn.textContent = 'Sent!';
+        msg.value = '';
+        if (fileInput) fileInput.value = '';
+        if (fileNameEl) fileNameEl.textContent = '';
+        toast('Postcard delivered. Thanks for writing in!');
+        setTimeout(function () { btn.disabled = false; btn.textContent = 'Send anonymously'; }, 2500);
+      }).catch(function () {
+        btn.disabled = false;
+        btn.textContent = 'Send anonymously';
+        toast('Couldn’t send right now — the mail service may be down. Try again later!');
+      });
+    });
+  }
+
+  /* ---------- RSS copy ---------- */
+  var copyBtn = document.getElementById('rss-copy-btn');
+  var urlText = document.getElementById('rss-url-text');
+  if (copyBtn && urlText) {
+    copyBtn.addEventListener('click', function () {
+      var url = urlText.textContent;
+      var done = function () {
+        copyBtn.textContent = 'Copied';
+        copyBtn.classList.add('fg-rss__copy--ok');
+        setTimeout(function () {
+          copyBtn.textContent = 'Copy';
+          copyBtn.classList.remove('fg-rss__copy--ok');
+        }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(done).catch(fallbackCopy);
+      } else {
+        fallbackCopy();
+      }
+      function fallbackCopy() {
+        var ta = document.createElement('textarea');
+        ta.value = url;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) { /* noop */ }
+        document.body.removeChild(ta);
+      }
+    });
+  }
+
+  /* ---------- Helpers ---------- */
+  function toast(message) {
+    var t = document.createElement('div');
+    t.className = 'fg-toast';
+    t.textContent = message;
+    document.body.appendChild(t);
+    requestAnimationFrame(function () { t.classList.add('fg-toast--visible'); });
+    setTimeout(function () {
+      t.classList.remove('fg-toast--visible');
+      setTimeout(function () { t.remove(); }, 300);
+    }, 4500);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+})();
