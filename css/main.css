@@ -1043,7 +1043,7 @@ a:hover {
 
 .entry-nav__chapter-num {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -1052,7 +1052,7 @@ a:hover {
 
 .entry-nav__chapter-title {
   font-family: var(--font-hand);
-  font-size: 1.15rem;
+  font-size: 0.575rem;
   font-weight: 700;
   color: var(--text-primary);
   white-space: nowrap;
@@ -1065,7 +1065,7 @@ a:hover {
     width: calc(100vw - 8rem);
     max-width: 1200px;
     justify-content: space-between;
-    padding: 12px 2rem 10px;
+    padding: 12px 2rem 10px 0.75rem;
   }
 
   .footer-links {
@@ -1074,7 +1074,8 @@ a:hover {
   }
 
   .footer-links--left {
-    justify-content: space-evenly;
+    flex: 0 0 auto;
+    justify-content: flex-start;
   }
 
   .footer-links--right {
@@ -1084,11 +1085,11 @@ a:hover {
   .entry-nav__chapter {
     order: 0;
     flex-shrink: 0;
-    padding: 0 1.25rem;
+    padding: 0 1.25rem 0 0.5rem;
   }
 
   .entry-nav__chapter-title {
-    font-size: 1.25rem;
+    font-size: 0.625rem;
   }
 
   .entry-nav__center {
