@@ -1023,6 +1023,37 @@ a:hover {
   gap: 2px;
 }
 
+/* Chapter label (sits between All Notebooks link and nav controls) */
+.entry-nav__chapter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  line-height: 1.05;
+  text-align: center;
+  user-select: none;
+  padding: 0 0.5rem;
+  order: -1;
+}
+
+.entry-nav__chapter-num {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-yellow);
+}
+
+.entry-nav__chapter-title {
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
 @media (min-width: 769px) {
   .entry-nav {
     flex-direction: row;
@@ -1044,6 +1075,16 @@ a:hover {
 
   .footer-links--right {
     justify-content: space-evenly;
+  }
+
+  .entry-nav__chapter {
+    order: 0;
+    flex-shrink: 0;
+    padding: 0 1.25rem;
+  }
+
+  .entry-nav__chapter-title {
+    font-size: 1.25rem;
   }
 
   .entry-nav__center {

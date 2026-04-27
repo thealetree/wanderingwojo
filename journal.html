@@ -164,6 +164,10 @@
     <div class="footer-links footer-links--left">
       <a class="footer-links__link footer-links__link--home" href="/" title="Back to Field Guide"><span class="footer-links__title">&larr; All Notebooks</span><span class="footer-links__desc">Field Guide</span></a>
     </div>
+    <div class="entry-nav__chapter" id="entry-nav-chapter" aria-hidden="true">
+      <span class="entry-nav__chapter-num"></span>
+      <span class="entry-nav__chapter-title"></span>
+    </div>
     <div class="entry-nav__center">
       <div class="entry-nav__controls">
         <button class="entry-nav__btn entry-nav__btn--timeline" id="nav-timeline-toggle" aria-label="Toggle timeline scrubber">
@@ -235,6 +239,16 @@
   <!-- ================================================================
        SCRIPTS
        ================================================================ -->
+  <script>
+    window.CHAPTER_NUMBER = '01';
+    window.CHAPTER_TITLE = 'WASHINGTON → SOUTHWEST';
+    (function () {
+      var chapter = document.getElementById('entry-nav-chapter');
+      if (!chapter) return;
+      chapter.querySelector('.entry-nav__chapter-num').textContent = 'Chapter ' + window.CHAPTER_NUMBER;
+      chapter.querySelector('.entry-nav__chapter-title').textContent = window.CHAPTER_TITLE;
+    })();
+  </script>
   <script src="js/tutorial.js"></script>
   <script src="js/map.js"></script>
   <script src="js/timeline.js"></script>
