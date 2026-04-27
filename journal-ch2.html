@@ -164,12 +164,14 @@
        ENTRY NAVIGATION + JOURNEY STATS (unified bar)
        ================================================================ -->
   <div class="entry-nav" id="entry-nav">
-    <div class="footer-links footer-links--left">
-      <a class="footer-links__link footer-links__link--home" href="/" title="Back to Field Guide"><span class="footer-links__title">&larr; All Notebooks</span><span class="footer-links__desc">Field Guide</span></a>
-    </div>
-    <div class="entry-nav__chapter" id="entry-nav-chapter" aria-hidden="true">
-      <span class="entry-nav__chapter-num"></span>
-      <span class="entry-nav__chapter-title"></span>
+    <div class="entry-nav__left">
+      <div class="footer-links footer-links--left">
+        <a class="footer-links__link footer-links__link--home" href="/" title="Back to Field Guide"><span class="footer-links__title">&larr; All Notebooks</span><span class="footer-links__desc">Field Guide</span></a>
+      </div>
+      <div class="entry-nav__chapter" id="entry-nav-chapter" aria-hidden="true">
+        <span class="entry-nav__chapter-num"></span>
+        <span class="entry-nav__chapter-title"></span>
+      </div>
     </div>
     <div class="entry-nav__center">
       <div class="entry-nav__controls">
@@ -245,7 +247,7 @@
   <script>
     window.ENTRIES_PATH = 'data/entries-settling-in.json';
     window.CHAPTER_NUMBER = '02';
-    window.CHAPTER_TITLE = 'SETTLING IN';
+    window.CHAPTER_TITLE = 'PNW';
     (function () {
       var chapter = document.getElementById('entry-nav-chapter');
       if (!chapter) return;

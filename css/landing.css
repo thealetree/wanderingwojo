@@ -829,6 +829,10 @@ img { display: block; max-width: 100%; }
   .fg-chapters__slot {
     width: min(100%, 300px);
   }
+  /* Hide the upcoming/placeholder notebook on mobile — only live chapters */
+  .fg-chapters__slot:has(.notebook--upcoming) {
+    display: none;
+  }
   .notebook {
     width: 100%;
     height: auto;
