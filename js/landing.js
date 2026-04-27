@@ -52,6 +52,7 @@
         var slot = document.createElement('div');
         slot.className = 'fg-chapters__slot';
         var stats = computeStats(chapterEntries[chapter.id] || []);
+        if (chapter.dates) stats.dates = chapter.dates;
         slot.appendChild(renderNotebook(chapter, stats, chapter.id === activeChapterId));
         grid.appendChild(slot);
       });

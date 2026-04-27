@@ -10,7 +10,8 @@
     "tilt": -3,
     "cover": "route",
     "path": "journal.html",
-    "entries_file": "data/entries.json"
+    "entries_file": "data/entries.json",
+    "dates": "3/7/26 – 4/24/26"
   },
   {
     "id": "settling-in",
@@ -23,7 +24,8 @@
     "tilt": 1.5,
     "cover": "cat",
     "path": "/journal-ch2.html",
-    "entries_file": "data/entries-settling-in.json"
+    "entries_file": "data/entries-settling-in.json",
+    "dates": "4/26/26 – PRESENT"
   },
   {
     "id": "chapter-03",
