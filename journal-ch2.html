@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wandering Wojo</title>
+  <meta name="description" content="A travel journal. Southwest to Alaska.">
+  <meta name="theme-color" content="#FAF6EF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1E1D1B" media="(prefers-color-scheme: dark)">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Wandering Wojo">
+  <meta property="og:description" content="A travel journal. Southwest to Alaska.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://wanderingwojo.com">
+
+  <!-- RSS Feed -->
+  <link rel="alternate" type="application/rss+xml" title="Wandering Wojo" href="feed.xml">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Caveat:wght@400;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/main.css">
+
+  <!-- Auto dark-mode hook (matches landing) -->
+  <script>
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('auto-dark');
+    }
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+        document.documentElement.classList.toggle('auto-dark', e.matches);
+      });
+    }
+  </script>
+
+  <!-- SVG Filters for hand-drawn effect -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <filter id="roughen">
+        <feTurbulence type="turbulence" baseFrequency="0.015" numOctaves="3" result="noise" seed="2"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+</head>
+<body>
+
+  <!-- ================================================================
+       UNIFIED DOCK (About, Poll, Message, Suggest, Donate, Swag)
+       ================================================================ -->
+  <div class="dock" id="dock">
+    <div class="dock__bar">
+      <a class="dock__back-link" href="/" aria-label="Back to landing">&larr; All Notebooks</a>
+      <button class="dock__tab dock__tab--tutorial" id="tutorial-btn" title="How to use this site">?</button>
+      <button class="dock__tab" data-dock="about">About</button>
+      <button class="dock__tab" data-dock="poll">Poll</button>
+      <button class="dock__tab" data-dock="message">Message</button>
+      <div class="dock__stats" id="journey-stats"></div>
+      <button class="dock__tab" data-dock="suggest">Suggest</button>
+      <button class="dock__tab" data-dock="donate">Donate</button>
+      <a class="dock__tab dock__tab--link" href="https://wanderingwojo.redbubble.com" target="_blank" rel="noopener">Swag</a>
+    </div>
+    <div class="dock__panel" id="dock-panel">
+
+      <!-- About tab -->
+      <div class="dock__content" data-dock-content="about">
+        <div class="dock__hero">
+          <img src="media/photos/img_2336.jpg" alt="Van and Wojo" class="dock__hero-img">
+        </div>
+        <p class="dock__blurb">Wojo and his co-pilot Van traded four walls for the road. This map is their
+        journal: every stop, every story, every nap in the sun.</p>
+        <p class="dock__blurb dock__blurb--muted">Use the tabs above to vote in our poll, send us a message, suggest places to visit, or help fuel the adventure.</p>
+        <div class="rss-subscribe">
+          <a class="rss-subscribe__link" href="feed.xml" target="_blank" rel="noopener">
+            <span class="rss-subscribe__icon">&#9641;</span> Subscribe via RSS
+          </a>
+          <span class="rss-subscribe__hint">Get notified when new entries are posted. Copy the link and paste it into an RSS reader like
+            <a href="https://feedly.com" target="_blank" rel="noopener">Feedly</a> or
+            <a href="https://netnewswire.com" target="_blank" rel="noopener">NetNewsWire</a>.</span>
+        </div>
+        <div class="kladg-player kladg-player--mobile" id="kladg-player-mobile">
+          <a class="kladg-player__header" href="https://kladg.com" target="_blank" rel="noopener"><span class="kladg-player__header-text">KLADG RADIO</span></a>
+          <div class="kladg-player__row">
+            <img class="kladg-player__art" src="" alt="Album art">
+            <a class="kladg-player__title" href="https://kladg.com" target="_blank" rel="noopener">Loading...</a>
+            <div class="kladg-player__controls">
+              <button class="kladg-player__btn" data-kladg="prev" aria-label="Previous track">&#9198;</button>
+              <button class="kladg-player__btn kladg-player__btn--play" data-kladg="play" aria-label="Play">&#9654;</button>
+              <button class="kladg-player__btn" data-kladg="next" aria-label="Next track">&#9197;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Poll tab -->
+      <div class="dock__content" data-dock-content="poll">
+        <p class="dock__poll-question" id="poll-question"></p>
+        <div class="dock__poll-options" id="poll-options"></div>
+        <p class="dock__poll-total" id="poll-total"></p>
+      </div>
+
+      <!-- Message tab -->
+      <div class="dock__content" data-dock-content="message">
+        <form class="contact-form" id="contact-form" method="POST" enctype="multipart/form-data">
+          <label class="contact-form__label" for="contact-msg">Send us a message!</label>
+          <textarea class="contact-form__input" id="contact-msg" name="message" rows="3" placeholder="Say something nice (or weird)..."></textarea>
+          <label class="contact-form__file-label" for="contact-photo">
+            <span class="contact-form__file-icon">📷</span> Attach a photo
+            <input type="file" id="contact-photo" name="attachment" accept="image/*" class="contact-form__file-input">
+          </label>
+          <span class="contact-form__file-name" id="contact-file-name"></span>
+          <span class="contact-form__hint">100% anonymous, unless you include your contact info. Images up to 10 MB.</span>
+          <input type="hidden" name="_subject" value="New message from Wandering Wojo">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_next" id="contact-next" value="">
+          <button class="contact-form__btn" type="submit">Send</button>
+        </form>
+      </div>
+
+      <!-- Suggest tab -->
+      <div class="dock__content" data-dock-content="suggest">
+        <p class="suggest__intro">Drop a pin to suggest a spot!</p>
+        <div class="suggest__types" id="suggest-types">
+          <button class="suggest__type-btn" data-pin-type="food" style="--pin-color:#E8913A">🍽 Food</button>
+          <button class="suggest__type-btn" data-pin-type="hikes" style="--pin-color:#5B8C3E">🥾 Hikes</button>
+          <button class="suggest__type-btn" data-pin-type="hot-springs" style="--pin-color:#4A9BD9">♨ Hot Springs</button>
+          <button class="suggest__type-btn" data-pin-type="people" style="--pin-color:#C06AB8">👋 People</button>
+          <button class="suggest__type-btn" data-pin-type="camping" style="--pin-color:#8B6F47">⛺ Camping</button>
+        </div>
+        <p class="suggest__status" id="suggest-status"></p>
+        <p class="suggest__remaining" id="suggest-remaining"></p>
+      </div>
+
+      <!-- Donate tab -->
+      <div class="dock__content" data-dock-content="donate">
+        <p class="dock__donate-intro">Help fuel the adventure! Every bit goes to gas, cat treats, or wherever the road takes us.</p>
+        <div class="dock__kofi-wrap">
+          <iframe id="kofiframe" src="https://ko-fi.com/wanderingwojo/?hidefeed=true&widget=true&embed=true&preview=true" style="border:none;width:100%;background:transparent;" height="712" title="Support Wandering Wojo on Ko-fi"></iframe>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================================================
+       TIMELINE SCRUBBER (appears above entry nav when active)
+       ================================================================ -->
+  <div id="timeline-bar" aria-hidden="true" style="display:none"></div>
+
+  <!-- ================================================================
+       ENTRY NAVIGATION + JOURNEY STATS (unified bar)
+       ================================================================ -->
+  <div class="entry-nav" id="entry-nav">
+    <div class="footer-links footer-links--left">
+      <a class="footer-links__link footer-links__link--home" href="/" title="Back to Field Guide"><span class="footer-links__title">&larr; All Notebooks</span><span class="footer-links__desc">Field Guide</span></a>
+    </div>
+    <div class="entry-nav__center">
+      <div class="entry-nav__controls">
+        <button class="entry-nav__btn entry-nav__btn--timeline" id="nav-timeline-toggle" aria-label="Toggle timeline scrubber">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="8" cy="8" r="6"/>
+            <path d="M8 5v3.5l2.5 1.5"/>
+          </svg>
+        </button>
+        <button class="entry-nav__btn" id="nav-prev" aria-label="Previous entry">&lsaquo;</button>
+        <span class="entry-nav__info" id="nav-info"></span>
+        <button class="entry-nav__btn" id="nav-next" aria-label="Next entry">&rsaquo;</button>
+        <button class="entry-nav__btn entry-nav__btn--list" id="nav-list-toggle" aria-label="Toggle list view">&#9776;</button>
+      </div>
+    </div>
+    <div class="footer-links footer-links--right">
+      <div class="kladg-player" id="kladg-player">
+        <a class="kladg-player__header" id="kladg-header" href="https://kladg.com" target="_blank" rel="noopener"><span class="kladg-player__header-text">KLADG RADIO</span></a>
+        <img class="kladg-player__art" id="kladg-art" src="" alt="Album art">
+        <a class="kladg-player__title" id="kladg-title" href="https://kladg.com" target="_blank" rel="noopener">Loading...</a>
+        <div class="kladg-player__controls">
+          <button class="kladg-player__btn" id="kladg-prev" aria-label="Previous track">&#9198;</button>
+          <button class="kladg-player__btn kladg-player__btn--play" id="kladg-play" aria-label="Play">&#9654;</button>
+          <button class="kladg-player__btn" id="kladg-next" aria-label="Next track">&#9197;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       LIST VIEW OVERLAY
+       ================================================================ -->
+  <div class="list-view" id="list-view" aria-hidden="true">
+    <div class="list-view__container">
+      <div class="list-view__sidebar" id="list-sidebar"></div>
+      <div class="list-view__detail" id="list-detail">
+        <div class="list-view__detail-content" id="list-detail-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       MAP CONTAINER
+       ================================================================ -->
+  <div class="map-container" id="map-container">
+    <div id="map"></div>
+    <!-- Fallback shown if no Mapbox token -->
+    <div class="map-fallback hidden" id="map-fallback">
+      <h2 class="map-fallback__title">Map</h2>
+      <p class="map-fallback__instructions">
+        To enable the interactive map, add your Mapbox access token
+        in js/map.js. Get one at
+        <a href="https://account.mapbox.com/" target="_blank" rel="noopener">mapbox.com</a>.
+      </p>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       LIGHTBOX
+       ================================================================ -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-label="Photo viewer" aria-hidden="true">
+    <button class="lightbox__close" id="lightbox-close" aria-label="Close photo viewer">&times;</button>
+    <button class="lightbox__nav lightbox__nav--prev" id="lightbox-prev" aria-label="Previous photo">&lsaquo;</button>
+    <img class="lightbox__img" id="lightbox-img" src="" alt="">
+    <iframe class="lightbox__video" id="lightbox-video" src="" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    <div class="lightbox__info" id="lightbox-info"></div>
+    <button class="lightbox__nav lightbox__nav--next" id="lightbox-next" aria-label="Next photo">&rsaquo;</button>
+  </div>
+
+  <!-- ================================================================
+       SCRIPTS
+       ================================================================ -->
+  <script>window.ENTRIES_PATH = 'data/entries-settling-in.json';</script>
+  <script src="js/tutorial.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/timeline.js"></script>
+  <script src="js/main.js"></script>
+
+  <!-- GoatCounter analytics (privacy-friendly, no cookies) -->
+  <script data-goatcounter="https://wanderingwojo.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

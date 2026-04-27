@@ -86,7 +86,7 @@ const AppModule = (function () {
   async function loadData() {
     try {
       const [entriesRes, locationsRes] = await Promise.all([
-        fetch('data/entries.json'),
+        fetch(window.ENTRIES_PATH || 'data/entries.json'),
         fetch('data/locations.json'),
       ]);
       entries = await entriesRes.json();
