@@ -1334,7 +1334,7 @@ a:hover {
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: 0.18em;
-  background: #E8B23A;
+  background: var(--chapter-accent);
   padding: 2px 6px;
 }
 
