@@ -1,12 +1,11 @@
 {
-  "id": "poll-20260421",
-  "question": "Where next?",
+  "id": "poll-20260426",
+  "question": "New plan:",
   "options": [
-    "Sideways",
-    "Upward",
-    "Inward",
-    "Outward",
-    "Spin Around"
+    "Live on scraps and kill the student loans",
+    "Buy a small house and try to get by",
+    "Sell all assets, pay off loans and forgo appreciation",
+    "Other? Message us... please."
   ],
   "active": true
 }
