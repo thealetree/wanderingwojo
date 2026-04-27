@@ -543,7 +543,21 @@ const MapModule = (function () {
    * Pins are created with cork-pin--pending class (hidden from the start).
    */
   function animateRouteDrawIn() {
-    if (routeCoords.length < 2) return;
+    if (routeCoords.length < 2) {
+      // No route to draw (e.g. chapter with a single entry). Still need to
+      // reveal pins, which would otherwise stay stuck in the pending state.
+      allLocationPins.forEach(function (pin) {
+        pin.element.classList.remove('cork-pin--pending');
+        pin.element.classList.add('cork-pin--reveal');
+      });
+      setTimeout(function () {
+        allLocationPins.forEach(function (pin) {
+          pin.element.classList.remove('cork-pin--reveal');
+        });
+      }, 700);
+      initialAnimationComplete = true;
+      return;
+    }
 
     // Build cumulative distance array for constant-speed interpolation
     var cumDist = [0];
