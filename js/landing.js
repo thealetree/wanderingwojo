@@ -68,13 +68,15 @@
     var totals = computeStats(entries);
     var slots = {
       days: document.querySelector('[data-stat="days"]'),
-      entriesMiles: document.querySelector('[data-stat="entries-miles"]'),
+      entries: document.querySelector('[data-stat="entries"]'),
+      miles: document.querySelector('[data-stat="miles"]'),
       states: document.querySelector('[data-stat="states"]'),
     };
     if (!totals.stats.length) return;
     // totals.stats = ['N DAYS','M ENTRIES','~X MI','Y STATES']
     if (slots.days) slots.days.textContent = totals.stats[0];
-    if (slots.entriesMiles) slots.entriesMiles.textContent = totals.stats[1] + ' · ' + totals.stats[2];
+    if (slots.entries) slots.entries.textContent = totals.stats[1];
+    if (slots.miles) slots.miles.textContent = totals.stats[2];
     if (slots.states) slots.states.textContent = totals.stats[3];
   }
 
