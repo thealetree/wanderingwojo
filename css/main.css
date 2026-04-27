@@ -18,20 +18,24 @@
   --charcoal:   #1A1814;  /* ink */
   --near-black: #1A1814;  /* ink */
 
+  /* Per-chapter accent — overridable per page via inline script.
+     Defaults to vermillion so existing visuals remain unchanged. */
+  --chapter-accent: #E5421A;
+
   /* Riso accents */
-  --accent:       #E5421A;  /* vermillion (was turquoise) */
+  --accent:       var(--chapter-accent, #E5421A);  /* vermillion default */
   --accent-light: #F26A45;
-  --link-color:   #1F8A8A;  /* riso teal */
+  --link-color:   var(--chapter-accent, #1F8A8A);  /* riso teal default */
   --link-hover:   #156E6E;
-  --terracotta:   #C73214;  /* deeper vermillion */
+  --terracotta:   var(--chapter-accent, #C73214);  /* deeper vermillion */
   --sage:         #6B8E4E;  /* moss */
-  --vermillion:   #E5421A;
-  --vermillion-2: #C73214;
+  --vermillion:   var(--chapter-accent, #E5421A);
+  --vermillion-2: var(--chapter-accent, #C73214);
   --teal:         #1F8A8A;
   --teal-2:       #156E6E;
   --mustard:      #E8B23A;
   --mustard-2:    #C99020;
-  --accent-yellow: #E5421A;  /* vermillion in light mode (was mustard) */
+  --accent-yellow: var(--chapter-accent, #E5421A);  /* dock active state */
 
   /* Semantic */
   --text-primary:   #1A1814;
@@ -89,11 +93,11 @@
     --charcoal:   #F2E9D2;
     --near-black: #F2E9D2;
 
-    --accent:       #F26A45;  /* vermillion stays warm */
+    --accent:       var(--chapter-accent, #F26A45);  /* vermillion stays warm */
     --accent-light: #FF8A6A;
-    --link-color:   #4FC0C0;
+    --link-color:   var(--chapter-accent, #4FC0C0);
     --link-hover:   #6FD8D8;
-    --terracotta:   #E5421A;
+    --terracotta:   var(--chapter-accent, #E5421A);
 
     --text-primary:   #F2E9D2;
     --text-secondary: #D9CDB0;
@@ -104,7 +108,7 @@
     --border-subtle:  #F2E9D2;
     --stack-card-bg:  #3A3833;
 
-    --accent-yellow: #E8B23A;  /* mustard in dark mode */
+    --accent-yellow: var(--chapter-accent, #E8B23A);  /* dock active state */
 
     --shadow-sm: 0 1px 0 rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.5);
     --shadow-md: 0 2px 0 rgba(0,0,0,0.5), 0 8px 22px rgba(0,0,0,0.6);
