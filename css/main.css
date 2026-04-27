@@ -861,27 +861,6 @@ a:hover {
   color: var(--text-primary);
 }
 
-.kladg-player__sub {
-  font-family: var(--font-mono);
-  font-weight: 400;
-  font-size: 0.25rem;
-  letter-spacing: 0;
-  display: block;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: var(--text-primary);
-  opacity: 0.6;
-  max-width: 9em;
-  text-align: left;
-  line-height: 1.1;
-}
-
-.kladg-player--mobile .kladg-player__sub {
-  display: inline;
-  font-size: 0.35rem;
-  margin-left: 0.3em;
-}
-
 .kladg-player__art {
   width: 36px;
   height: 36px;
