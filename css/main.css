@@ -31,6 +31,7 @@
   --teal-2:       #156E6E;
   --mustard:      #E8B23A;
   --mustard-2:    #C99020;
+  --accent-yellow: #E5421A;  /* vermillion in light mode (was mustard) */
 
   /* Semantic */
   --text-primary:   #1A1814;
@@ -102,6 +103,8 @@
     --bg-card-hover:  #2C2A26;
     --border-subtle:  #F2E9D2;
     --stack-card-bg:  #3A3833;
+
+    --accent-yellow: #E8B23A;  /* mustard in dark mode */
 
     --shadow-sm: 0 1px 0 rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.5);
     --shadow-md: 0 2px 0 rgba(0,0,0,0.5), 0 8px 22px rgba(0,0,0,0.6);
@@ -247,13 +250,13 @@ a:hover {
 }
 
 .dock__tab--link {
-  color: #E8B23A;
+  color: var(--accent-yellow);
   text-decoration: none;
 }
 .dock__tab--link:hover {
   background: #E8B23A;
   color: var(--text-primary);
-  border-color: #E8B23A;
+  border-color: var(--accent-yellow);
 }
 
 .dock__stats {
@@ -281,7 +284,7 @@ a:hover {
 .dock__stats .journey-stats__item strong {
   font-family: var(--font-mono);
   font-weight: 700;
-  color: #E8B23A;
+  color: var(--accent-yellow);
   letter-spacing: 0.1em;
 }
 
@@ -777,43 +780,6 @@ a:hover {
   color: var(--terracotta);
 }
 
-/* Other projects */
-.other-projects {
-  margin-top: var(--space-lg);
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--beige-dark);
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.other-projects__label {
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  color: var(--medium-gray);
-  letter-spacing: 0.02em;
-}
-
-.other-projects__link {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  color: var(--charcoal);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: color var(--transition-fast);
-}
-
-.other-projects__link:hover {
-  color: var(--terracotta);
-}
-
-/* Hide other-projects from about panel on desktop (shown in footer instead) */
-@media (min-width: 769px) {
-  .dock .other-projects {
-    display: none;
-  }
-}
-
 /* ==========================================================================
    Footer Project Links (inside entry-nav, desktop only)
    ========================================================================== */
@@ -852,11 +818,11 @@ a:hover {
   text-transform: uppercase;
   font-weight: 700;
   display: block;
-  color: #E8B23A;
+  color: var(--accent-yellow);
 }
 
 .footer-links__link:hover {
-  color: #E8B23A;
+  color: var(--accent-yellow);
   transform: translateY(-1px);
 }
 
@@ -875,12 +841,12 @@ a:hover {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #E8B23A;
+  color: var(--accent-yellow);
   text-decoration: none;
   white-space: nowrap;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
   line-height: 1.4;
   align-self: stretch;
@@ -898,7 +864,7 @@ a:hover {
 .kladg-player__sub {
   font-family: var(--font-mono);
   font-weight: 400;
-  font-size: 0.5rem;
+  font-size: 0.25rem;
   letter-spacing: 0;
   display: block;
   text-transform: uppercase;
@@ -906,13 +872,13 @@ a:hover {
   color: var(--text-primary);
   opacity: 0.6;
   max-width: 9em;
-  text-align: right;
+  text-align: left;
   line-height: 1.1;
 }
 
 .kladg-player--mobile .kladg-player__sub {
   display: inline;
-  font-size: 0.7rem;
+  font-size: 0.35rem;
   margin-left: 0.3em;
 }
 
@@ -939,7 +905,7 @@ a:hover {
 }
 
 .kladg-player__title:hover {
-  color: #E8B23A;
+  color: var(--accent-yellow);
 }
 
 .kladg-player__controls {
@@ -963,12 +929,12 @@ a:hover {
 }
 
 .kladg-player__btn:hover {
-  color: #E8B23A;
+  color: var(--accent-yellow);
 }
 
 .kladg-player__btn--play {
   font-size: 1rem;
-  color: #E8B23A;
+  color: var(--accent-yellow);
 }
 
 .kladg-player__btn--play:hover {
@@ -1132,7 +1098,7 @@ a:hover {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: #E8B23A;
+  color: var(--accent-yellow);
 }
 
 .journey-stats__divider {
@@ -1176,7 +1142,7 @@ a:hover {
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.16em;
-  color: #E8B23A;
+  color: var(--accent-yellow);
   padding: 0 0.85rem;
   white-space: nowrap;
   user-select: none;
@@ -2619,7 +2585,7 @@ a:hover {
 .entry-nav__btn--active {
   background: #E8B23A;
   color: var(--text-primary);
-  border-color: #E8B23A;
+  border-color: var(--accent-yellow);
 }
 
 .entry-nav__btn--active:hover {
@@ -3016,7 +2982,7 @@ a:hover {
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 1rem;
-  color: #E8B23A;
+  color: var(--accent-yellow);
   min-width: 1.8rem;
   text-align: center;
   letter-spacing: 0;
@@ -3025,7 +2991,7 @@ a:hover {
 .dock__tab--tutorial:hover {
   color: var(--text-primary);
   background: #E8B23A;
-  border-color: #E8B23A;
+  border-color: var(--accent-yellow);
 }
 
 @media (max-width: 767px) {
