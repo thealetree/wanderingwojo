@@ -10,6 +10,24 @@ const AppModule = (function () {
   // Contact email (encoded to avoid scrapers). Decode at runtime.
   var CONTACT_EMAIL = atob('dGhlYWxldHJlZUBnbWFpbC5jb20=');
 
+  // Chapter scope — derived from the entries file path so per-chapter pages
+  // (e.g. journal-ch2.html setting window.ENTRIES_PATH = 'data/entries-settling-in.json')
+  // get their own localStorage and Firebase namespace for suggestion pins.
+  // Default chapter "main" preserves backward compatibility with existing data.
+  var CHAPTER_SCOPE = (function () {
+    var p = window.ENTRIES_PATH || 'data/entries.json';
+    var m = p.match(/entries-([\w-]+)\.json$/);
+    return m ? m[1] : 'main';
+  })();
+  function scopedKey(base) {
+    return CHAPTER_SCOPE === 'main' ? base : base + '_' + CHAPTER_SCOPE;
+  }
+  function scopedFirebasePath(base) {
+    // base like '/suggestions' becomes '/suggestions' for main chapter,
+    // '/suggestions-<scope>' for other chapters.
+    return CHAPTER_SCOPE === 'main' ? base : base + '-' + CHAPTER_SCOPE;
+  }
+
   // --- State ---
   let entries = [];
   let locations = [];
@@ -480,7 +498,7 @@ const AppModule = (function () {
     MapModule.reverseGeocodePOI(lngLat.lat, lngLat.lng)
     .then(function (name) {
       if (name) pinData.name = name;
-      return fetch(FIREBASE_DB + '/suggestions.json', {
+      return fetch(FIREBASE_DB + scopedFirebasePath('/suggestions') + '.json', {
         method: 'POST',
         body: JSON.stringify(pinData)
       });
@@ -508,7 +526,7 @@ const AppModule = (function () {
     showToast('Pin removed', 2000);
 
     // Delete from Firebase
-    fetch(FIREBASE_DB + '/suggestions/' + key + '.json', {
+    fetch(FIREBASE_DB + scopedFirebasePath('/suggestions') + '/' + key + '.json', {
       method: 'DELETE'
     }).catch(function (err) {
       console.warn('Failed to delete suggestion pin:', err);
@@ -516,7 +534,7 @@ const AppModule = (function () {
   }
 
   function loadSuggestionPins() {
-    fetch(FIREBASE_DB + '/suggestions.json')
+    fetch(FIREBASE_DB + scopedFirebasePath('/suggestions') + '.json')
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!data) return;
@@ -538,16 +556,16 @@ const AppModule = (function () {
   }
 
   function getSuggestCount() {
-    return parseInt(localStorage.getItem('wojo_suggest_count') || '0', 10);
+    return parseInt(localStorage.getItem(scopedKey('wojo_suggest_count')) || '0', 10);
   }
   function incrementSuggestCount() {
     var count = getSuggestCount() + 1;
-    localStorage.setItem('wojo_suggest_count', String(count));
+    localStorage.setItem(scopedKey('wojo_suggest_count'), String(count));
     return count;
   }
   function decrementSuggestCount() {
     var count = Math.max(0, getSuggestCount() - 1);
-    localStorage.setItem('wojo_suggest_count', String(count));
+    localStorage.setItem(scopedKey('wojo_suggest_count'), String(count));
     return count;
   }
   function canSuggest() {
@@ -556,17 +574,17 @@ const AppModule = (function () {
 
   function getOwnPinKeys() {
     try {
-      return JSON.parse(localStorage.getItem('wojo_own_pins') || '[]');
+      return JSON.parse(localStorage.getItem(scopedKey('wojo_own_pins')) || '[]');
     } catch (e) { return []; }
   }
   function saveOwnPinKey(key) {
     var keys = getOwnPinKeys();
     keys.push(key);
-    localStorage.setItem('wojo_own_pins', JSON.stringify(keys));
+    localStorage.setItem(scopedKey('wojo_own_pins'), JSON.stringify(keys));
   }
   function removeOwnPinKey(key) {
     var keys = getOwnPinKeys().filter(function (k) { return k !== key; });
-    localStorage.setItem('wojo_own_pins', JSON.stringify(keys));
+    localStorage.setItem(scopedKey('wojo_own_pins'), JSON.stringify(keys));
   }
 
   function updateSuggestUI() {
