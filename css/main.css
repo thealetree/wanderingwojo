@@ -164,7 +164,7 @@ h4 { font-size: 1rem; }
 
 p {
   margin-bottom: var(--space-md);
-  color: #3A332A;
+  color: var(--text-secondary);
 }
 
 a {
@@ -186,7 +186,7 @@ a:hover {
   font-size: 0.6875rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #6B5F4F;
+  color: var(--text-muted);
 }
 
 /* ==========================================================================
@@ -209,8 +209,8 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-  background: #1A1814;
-  border: 2px solid #1A1814;
+  background: var(--bg-card);
+  border: 2px solid var(--border-subtle);
   border-radius: 0;
   padding: 0.4rem 1.2rem;
   box-shadow: var(--shadow-md);
@@ -224,7 +224,7 @@ a:hover {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #FBF6E6;
+  color: var(--text-primary);
   background: transparent;
   border: 1.5px solid transparent;
   padding: 0.45rem 0.7rem;
@@ -235,15 +235,15 @@ a:hover {
 }
 
 .dock__tab:hover {
-  background: #FBF6E6;
-  color: #1A1814;
-  border-color: #FBF6E6;
+  background: var(--text-primary);
+  color: var(--bg-card);
+  border-color: var(--text-primary);
 }
 
 .dock__tab--active {
-  background: #FBF6E6;
-  color: #1A1814;
-  border-color: #FBF6E6;
+  background: var(--text-primary);
+  color: var(--bg-card);
+  border-color: var(--text-primary);
 }
 
 .dock__tab--link {
@@ -252,7 +252,7 @@ a:hover {
 }
 .dock__tab--link:hover {
   background: #E8B23A;
-  color: #1A1814;
+  color: var(--text-primary);
   border-color: #E8B23A;
 }
 
@@ -264,13 +264,13 @@ a:hover {
   font-size: 0.65rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #FBF6E6;
+  color: var(--text-primary);
   white-space: nowrap;
   user-select: none;
   padding: 0 1rem;
   margin: 0 0.25rem;
-  border-left: 1px solid #FBF6E6;
-  border-right: 1px solid #FBF6E6;
+  border-left: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
 }
 
 .dock__stats:empty {
@@ -286,7 +286,7 @@ a:hover {
 }
 
 .dock__stats .journey-stats__divider {
-  color: #FBF6E6;
+  color: var(--text-primary);
   font-size: 0.7rem;
   opacity: 0.5;
 }
@@ -297,7 +297,7 @@ a:hover {
   overflow: hidden;
   transition: max-height var(--transition-med), opacity var(--transition-med), padding var(--transition-med);
   background: var(--bg-card);
-  border: 2px solid #1A1814;
+  border: 2px solid var(--border-subtle);
   border-top: none;
   border-radius: 0;
   box-shadow: var(--shadow-lg);
@@ -342,7 +342,7 @@ a:hover {
   font-family: var(--font-body);
   font-size: 1rem;
   line-height: 1.55;
-  color: #3A332A;
+  color: var(--text-secondary);
   margin-bottom: 0.75rem;
 }
 .dock__blurb--muted {
@@ -355,7 +355,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: 1.2rem;
   font-weight: 400;
-  color: #1A1814;
+  color: var(--text-primary);
   margin: 0 0 var(--space-sm);
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -373,16 +373,16 @@ a:hover {
   padding: 10px 14px;
   font-family: var(--font-hand);
   font-size: 1.2rem;
-  color: #1A1814;
+  color: var(--text-primary);
   background: var(--white);
-  border: 1.5px solid #1A1814;
+  border: 1.5px solid var(--border-subtle);
   border-radius: 0;
   cursor: pointer;
   overflow: hidden;
   transition: transform var(--transition-fast), background var(--transition-fast);
 }
 .dock__poll-option:hover:not(.dock__poll-option--voted) {
-  background: #E0D2B0;
+  background: var(--stack-card-bg);
   transform: translateX(2px);
 }
 .dock__poll-option--voted { cursor: default; }
@@ -410,14 +410,14 @@ a:hover {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.1em;
-  color: #6B5F4F;
+  color: var(--text-muted);
 }
 .dock__poll-total {
   font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: #6B5F4F;
+  color: var(--text-muted);
   text-align: right;
   margin-top: var(--space-md);
 }
@@ -440,7 +440,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 400;
-  color: #1A1814;
+  color: var(--text-primary);
   margin: 0 0 var(--space-sm);
   letter-spacing: -0.01em;
 }
@@ -458,9 +458,9 @@ a:hover {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #1A1814;
-  background: #FBF6E6;
-  border: 1.5px solid #1A1814;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
   border-left: 4px solid var(--pin-color);
   border-radius: 0;
   cursor: pointer;
@@ -468,11 +468,11 @@ a:hover {
   text-align: left;
 }
 .suggest__type-btn:hover {
-  background: #E0D2B0;
+  background: var(--stack-card-bg);
   transform: translateX(2px);
 }
 .suggest__type-btn--active {
-  background: #E0D2B0;
+  background: var(--stack-card-bg);
   border-color: var(--pin-color);
   border-left-color: var(--pin-color);
 }
@@ -484,7 +484,7 @@ a:hover {
 .suggest__status {
   font-family: var(--font-body);
   font-size: 0.95rem;
-  color: #1A1814;
+  color: var(--text-primary);
   margin-top: var(--space-sm);
   min-height: 1.4em;
 }
@@ -493,7 +493,7 @@ a:hover {
   font-size: 0.65rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #6B5F4F;
+  color: var(--text-muted);
   margin-top: var(--space-xs);
 }
 
@@ -592,7 +592,7 @@ a:hover {
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 1.05rem;
-  color: #1A1814;
+  color: var(--text-primary);
   margin-bottom: var(--space-sm);
   letter-spacing: -0.01em;
 }
@@ -603,9 +603,9 @@ a:hover {
   font-family: var(--font-body);
   font-size: 1rem;
   line-height: 1.5;
-  color: #1A1814;
-  background: #FBF6E6;
-  border: 1.5px solid #1A1814;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
   border-radius: 0;
   padding: 0.55rem 0.7rem;
   resize: vertical;
@@ -621,7 +621,7 @@ a:hover {
 }
 
 .contact-form__input::placeholder {
-  color: #6B5F4F;
+  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -630,7 +630,7 @@ a:hover {
   font-family: var(--font-mono);
   font-size: 0.65rem;
   letter-spacing: 0.12em;
-  color: #6B5F4F;
+  color: var(--text-muted);
   margin-top: var(--space-xs);
   margin-bottom: var(--space-sm);
   line-height: 1.5;
@@ -647,7 +647,7 @@ a:hover {
   font-weight: 700;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: #FBF6E6;
+  color: var(--text-primary);
   background: var(--vermillion, var(--near-black));
   border: 2px solid var(--vermillion-2, var(--near-black));
   border-radius: 0;
@@ -827,7 +827,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: 0.95rem;
   font-weight: 400;
-  color: #FBF6E6;
+  color: var(--text-primary);
   text-decoration: none;
   transition: color var(--transition-fast), transform var(--transition-fast);
   white-space: nowrap;
@@ -892,19 +892,22 @@ a:hover {
 }
 
 .kladg-player__header:hover {
-  color: #FBF6E6;
+  color: var(--text-primary);
 }
 
 .kladg-player__sub {
   font-family: var(--font-mono);
   font-weight: 400;
-  font-size: 0.55rem;
-  letter-spacing: 0.18em;
+  font-size: 0.5rem;
+  letter-spacing: 0;
   display: block;
   text-transform: uppercase;
   text-decoration: none;
-  color: #FBF6E6;
-  opacity: 0.7;
+  color: var(--text-primary);
+  opacity: 0.6;
+  max-width: 9em;
+  text-align: right;
+  line-height: 1.1;
 }
 
 .kladg-player--mobile .kladg-player__sub {
@@ -926,7 +929,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: 0.78rem;
   font-weight: 400;
-  color: #FBF6E6;
+  color: var(--text-primary);
   text-decoration: none;
   white-space: nowrap;
   max-width: 110px;
@@ -949,7 +952,7 @@ a:hover {
   background: none;
   border: none;
   cursor: pointer;
-  color: #FBF6E6;
+  color: var(--text-primary);
   font-size: 0.85rem;
   padding: 2px 4px;
   line-height: 1;
@@ -969,7 +972,7 @@ a:hover {
 }
 
 .kladg-player__btn--play:hover {
-  color: #FBF6E6;
+  color: var(--text-primary);
 }
 
 /* Mobile player — in about panel */
@@ -1055,13 +1058,13 @@ a:hover {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  background: #1A1814;
-  border: 2px solid #1A1814;
+  background: var(--bg-card);
+  border: 2px solid var(--border-subtle);
   border-radius: 0;
   padding: 8px 18px 7px;
   box-shadow: var(--shadow-md);
   filter: none;
-  color: #FBF6E6;
+  color: var(--text-primary);
 }
 
 .entry-nav__center {
@@ -1096,8 +1099,8 @@ a:hover {
 
   .entry-nav__center {
     flex-shrink: 0;
-    border-left: 1px solid #FBF6E6;
-    border-right: 1px solid #FBF6E6;
+    border-left: 1px solid var(--border-subtle);
+    border-right: 1px solid var(--border-subtle);
     padding-left: 2rem;
     padding-right: 2rem;
   }
@@ -1112,7 +1115,7 @@ a:hover {
   font-size: 0.65rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #FBF6E6;
+  color: var(--text-primary);
   white-space: nowrap;
   user-select: none;
   padding-bottom: 3px;
@@ -1133,7 +1136,7 @@ a:hover {
 }
 
 .journey-stats__divider {
-  color: #FBF6E6;
+  color: var(--text-primary);
   font-size: 0.7rem;
   opacity: 0.5;
 }
@@ -1154,17 +1157,17 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid #FBF6E6;
+  border: 1.5px solid var(--border-subtle);
   border-radius: 0;
   cursor: pointer;
   background: transparent;
-  color: #FBF6E6;
+  color: var(--text-primary);
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .entry-nav__btn:hover {
-  color: #1A1814;
-  background: #FBF6E6;
+  color: var(--text-primary);
+  background: var(--bg-card);
   transform: none;
 }
 
@@ -1263,8 +1266,8 @@ a:hover {
 }
 
 .cork-pin__card {
-  background: #FBF6E6;
-  border: 2px solid #1A1814;
+  background: var(--bg-card);
+  border: 2px solid var(--border-subtle);
   border-radius: 0;
   padding: 0.75rem 0.875rem 0.6rem;
   min-width: 220px;
@@ -1300,7 +1303,7 @@ a:hover {
   width: 12px;
   height: 12px;
   background: var(--vermillion-2, var(--terracotta));
-  border: 1.5px solid #1A1814;
+  border: 1.5px solid var(--border-subtle);
   border-radius: 50%;
   position: absolute;
   top: -4px;
@@ -1348,7 +1351,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: 1.1rem;
   font-weight: 400;
-  color: #1A1814;
+  color: var(--text-primary);
   line-height: 1.05;
   letter-spacing: -0.01em;
   margin-bottom: 0.35rem;
@@ -1368,7 +1371,7 @@ a:hover {
 .cork-pin__date {
   font-family: var(--font-hand);
   font-size: 1.15rem;
-  color: #3A332A;
+  color: var(--text-secondary);
   line-height: 1;
 }
 
@@ -1376,7 +1379,7 @@ a:hover {
   font-family: var(--font-mono);
   font-size: 0.65rem;
   font-weight: 700;
-  color: #1A1814;
+  color: var(--text-primary);
   letter-spacing: 0.18em;
   background: #E8B23A;
   padding: 2px 6px;
@@ -1388,7 +1391,7 @@ a:hover {
   border-radius: 0;
   overflow: hidden;
   aspect-ratio: 16 / 9;
-  border-top: 1.5px solid #1A1814;
+  border-top: 1.5px solid var(--border-subtle);
   position: relative;
   z-index: 1;
 }
@@ -1647,15 +1650,15 @@ a:hover {
    Expanded Entry (Cork Board & Linear)
    ========================================================================== */
 .entry-expanded {
-  background-color: #FBF6E6;
+  background-color: var(--bg-card);
   background-image:
     radial-gradient(rgba(26,24,20,0.04) 1px, transparent 1px),
     radial-gradient(rgba(26,24,20,0.025) 1px, transparent 1px);
   background-size: 3px 3px, 7px 7px;
   background-position: 0 0, 1px 2px;
-  border: 2px solid #1A1814;
+  border: 2px solid var(--border-subtle);
   border-radius: 0;
-  color: #1A1814;
+  color: var(--text-primary);
   max-width: 560px;
   max-height: calc(100vh - 160px);
   max-height: calc(100dvh - 160px);
@@ -1686,7 +1689,7 @@ a:hover {
 
 .entry-expanded__header {
   padding: var(--space-lg);
-  border-bottom: 2px solid #1A1814;
+  border-bottom: 2px solid var(--border-subtle);
 }
 
 /* Wojo illustration in expanded entry header */
@@ -1708,7 +1711,7 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: #FBF6E6;
+  background-color: var(--bg-card);
   border-radius: 0;
 }
 
@@ -1724,7 +1727,7 @@ a:hover {
   justify-content: center;
   background: none;
   border: none;
-  color: #1A1814;
+  color: var(--text-primary);
   cursor: pointer;
   font-family: var(--font-display);
   font-size: 1.8rem;
@@ -1759,7 +1762,7 @@ a:hover {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-weight: 700;
-  color: #6B5F4F;
+  color: var(--text-muted);
   background: none;
   border: none;
   border-bottom: 2.5px solid transparent;
@@ -1770,11 +1773,11 @@ a:hover {
 }
 
 .entry-tabs__tab:hover {
-  color: #1A1814;
+  color: var(--text-primary);
 }
 
 .entry-tabs__tab--active {
-  color: #1A1814;
+  color: var(--text-primary);
   border-bottom-color: var(--vermillion-2, var(--terracotta));
   font-weight: 700;
 }
@@ -1799,7 +1802,7 @@ a:hover {
   font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.12em;
-  color: #6B5F4F;
+  color: var(--text-muted);
   margin-bottom: var(--space-xs);
   text-transform: uppercase;
 }
@@ -1807,7 +1810,7 @@ a:hover {
 .entry-expanded__date {
   font-family: var(--font-hand);
   font-size: 1.4rem;
-  color: #3A332A;
+  color: var(--text-secondary);
   margin-bottom: var(--space-sm);
   line-height: 1;
 }
@@ -1816,7 +1819,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: clamp(1.6rem, 3vw, 2.2rem);
   font-weight: 400;
-  color: #1A1814;
+  color: var(--text-primary);
   line-height: 1;
   letter-spacing: -0.01em;
   margin-top: var(--space-xs);
@@ -1827,12 +1830,12 @@ a:hover {
   font-family: var(--font-body);
   font-size: 1.05rem;
   line-height: 1.6;
-  color: #1A1814;
+  color: var(--text-primary);
 }
 
 .entry-expanded__body p {
   margin-bottom: var(--space-md);
-  color: #1A1814;
+  color: var(--text-primary);
 }
 
 /* --- Photos --- */
@@ -2063,10 +2066,10 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #FBF6E6;
-  border: 2px solid #FBF6E6;
+  background: var(--bg-card);
+  border: 2px solid var(--border-subtle);
   border-radius: 0;
-  color: #1A1814;
+  color: var(--text-primary);
   font-family: var(--font-display);
   font-size: 1.4rem;
   cursor: pointer;
@@ -2076,7 +2079,7 @@ a:hover {
 
 .lightbox__close:hover {
   background: var(--vermillion-2, #C73214);
-  color: #FBF6E6;
+  color: var(--text-primary);
   transform: rotate(90deg);
 }
 
@@ -2090,9 +2093,9 @@ a:hover {
   align-items: center;
   justify-content: center;
   background: rgba(251, 246, 230, 0.92);
-  border: 1.5px solid #FBF6E6;
+  border: 1.5px solid var(--border-subtle);
   border-radius: 0;
-  color: #1A1814;
+  color: var(--text-primary);
   font-family: var(--font-display);
   font-size: 1.4rem;
   cursor: pointer;
@@ -2102,7 +2105,7 @@ a:hover {
 
 .lightbox__nav:hover {
   background: var(--vermillion-2, #C73214);
-  color: #FBF6E6;
+  color: var(--text-primary);
   transform: translateY(-50%);
 }
 
@@ -2120,9 +2123,9 @@ a:hover {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-weight: 700;
-  color: #1A1814;
-  background: #FBF6E6;
-  border: 1.5px solid #FBF6E6;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
   border-radius: 0;
   padding: 0.5rem 1rem;
   box-shadow: var(--shadow-md);
@@ -2465,8 +2468,8 @@ a:hover {
   top: var(--space-lg);
   left: 50%;
   transform: translateX(-50%) translateY(-20px);
-  background: #1A1814;
-  color: #FBF6E6;
+  background: var(--bg-card);
+  color: var(--text-primary);
   font-family: var(--font-mono);
   font-size: 0.7rem;
   font-weight: 700;
@@ -2517,8 +2520,8 @@ a:hover {
 .list-view__sidebar {
   width: 380px;
   min-width: 380px;
-  border-right: 2px solid #1A1814;
-  background: #EADFC4;
+  border-right: 2px solid var(--border-subtle);
+  background: var(--stack-card-bg);
   overflow-y: auto;
   padding: var(--space-sm) 0;
 }
@@ -2528,7 +2531,7 @@ a:hover {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-lg) var(--space-xl);
-  background-color: #FBF6E6;
+  background-color: var(--bg-card);
   background-image:
     radial-gradient(rgba(26,24,20,0.04) 1px, transparent 1px),
     radial-gradient(rgba(26,24,20,0.025) 1px, transparent 1px);
@@ -2559,27 +2562,27 @@ a:hover {
 
 .list-entry--active {
   border-left-color: var(--vermillion-2, var(--terracotta));
-  background: #FBF6E6;
+  background: var(--bg-card);
 }
 
 .list-entry__thumb {
   width: 56px;
   height: 56px;
   border-radius: 0;
-  border: 1.5px solid #1A1814;
+  border: 1.5px solid var(--border-subtle);
   object-fit: cover;
   flex-shrink: 0;
   filter: none;
 }
 
 .list-entry__thumb--placeholder {
-  background: #E0D2B0;
-  border: 1.5px solid #1A1814;
+  background: var(--stack-card-bg);
+  border: 1.5px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
-  color: #6B5F4F;
+  color: var(--text-muted);
 }
 
 .list-entry__info {
@@ -2591,7 +2594,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 400;
-  color: #1A1814;
+  color: var(--text-primary);
   line-height: 1.1;
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -2602,7 +2605,7 @@ a:hover {
 .list-entry__meta {
   font-family: var(--font-hand, var(--font-body));
   font-size: 1.05rem;
-  color: #3A332A;
+  color: var(--text-secondary);
   line-height: 1.2;
   margin-top: 2px;
 }
@@ -2615,13 +2618,13 @@ a:hover {
 
 .entry-nav__btn--active {
   background: #E8B23A;
-  color: #1A1814;
+  color: var(--text-primary);
   border-color: #E8B23A;
 }
 
 .entry-nav__btn--active:hover {
   background: #C99020;
-  color: #1A1814;
+  color: var(--text-primary);
 }
 
 /* --- Detail content reuses entry-expanded styles --- */
@@ -2930,7 +2933,7 @@ a:hover {
   font-family: var(--font-body);
   font-size: 1rem;
   line-height: 1.55;
-  color: #3A332A;
+  color: var(--text-secondary);
   margin-bottom: 1rem;
 }
 
@@ -3020,7 +3023,7 @@ a:hover {
 }
 
 .dock__tab--tutorial:hover {
-  color: #1A1814;
+  color: var(--text-primary);
   background: #E8B23A;
   border-color: #E8B23A;
 }
