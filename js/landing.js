@@ -10,36 +10,56 @@
 
   var MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
-  Promise.all([
-    fetch('data/chapters.json').then(function (r) { return r.json(); }),
-    fetch('data/entries.json').then(function (r) { return r.json(); }).catch(function () { return []; }),
-  ]).then(function (results) {
-    var chapters = results[0] || [];
-    var entries = results[1] || [];
+  fetch('data/chapters.json').then(function (r) { return r.json(); }).then(function (chapters) {
+    chapters = chapters || [];
 
-    var chapterEntries = mapEntriesToChapters(chapters, entries);
-
-    // An upcoming chapter only shows once it has at least one entry.
-    // Exception: a chapter with no title (e.g. chapter 03) is the
-    // "more to come" placeholder — always render it.
-    var visible = chapters.filter(function (c) {
-      if (c.status === 'live') return true;
-      if ((chapterEntries[c.id] || []).length > 0) return true;
-      if (!c.title) return true;
-      return false;
+    // Load each chapter's entries from its own entries_file (if specified).
+    var perChapter = chapters.map(function (c) {
+      if (!c.entries_file) return Promise.resolve([]);
+      return fetch(c.entries_file)
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .catch(function () { return []; });
     });
 
-    visible.forEach(function (chapter) {
-      var slot = document.createElement('div');
-      slot.className = 'fg-chapters__slot';
+    return Promise.all(perChapter).then(function (lists) {
+      var chapterEntries = {};
+      chapters.forEach(function (c, i) { chapterEntries[c.id] = lists[i] || []; });
 
-      var stats = computeStats(chapterEntries[chapter.id] || []);
-      slot.appendChild(renderNotebook(chapter, stats));
+      // A chapter only renders once it has at least one entry.
+      // Exception: a chapter with no title is the "more to come"
+      // placeholder — always show.
+      var visible = chapters.filter(function (c) {
+        if ((chapterEntries[c.id] || []).length > 0) return true;
+        if (!c.title) return true;
+        return false;
+      });
 
-      grid.appendChild(slot);
+      // ACTIVE sticker goes on whichever chapter contains the single
+      // most recent entry across all chapters.
+      var activeChapterId = null;
+      var latestDate = -Infinity;
+      chapters.forEach(function (c) {
+        (chapterEntries[c.id] || []).forEach(function (e) {
+          var t = new Date(e.date).getTime();
+          if (!isNaN(t) && t > latestDate) {
+            latestDate = t;
+            activeChapterId = c.id;
+          }
+        });
+      });
+
+      visible.forEach(function (chapter) {
+        var slot = document.createElement('div');
+        slot.className = 'fg-chapters__slot';
+        var stats = computeStats(chapterEntries[chapter.id] || []);
+        slot.appendChild(renderNotebook(chapter, stats, chapter.id === activeChapterId));
+        grid.appendChild(slot);
+      });
+
+      // Topbar stats are the union of all entries across all chapters.
+      var allEntries = lists.reduce(function (acc, l) { return acc.concat(l); }, []);
+      paintTopbarStats(allEntries);
     });
-
-    paintTopbarStats(entries);
   }).catch(function (err) {
     console.error('[landing] failed to load chapters', err);
   });
@@ -59,21 +79,6 @@
   }
 
   /* ---------- helpers ---------- */
-
-  // For now every entry maps to chapter 01. When a real `chapter` field
-  // gets added to entries.json this is where to switch.
-  function mapEntriesToChapters(chapters, entries) {
-    var byId = {};
-    chapters.forEach(function (c) { byId[c.id] = []; });
-    var liveChapter = chapters.find(function (c) { return c.status === 'live'; });
-    if (!liveChapter) return byId;
-
-    entries.forEach(function (e) {
-      var cid = e.chapter && byId[e.chapter] ? e.chapter : liveChapter.id;
-      byId[cid].push(e);
-    });
-    return byId;
-  }
 
   function computeStats(entries) {
     if (!entries.length) {
@@ -149,7 +154,7 @@
 
   /* ---------- DOM builders ---------- */
 
-  function renderNotebook(chapter, stats) {
+  function renderNotebook(chapter, stats, isActive) {
     var notebook = document.createElement(chapter.path && chapter.status === 'live' ? 'a' : 'div');
     notebook.className = 'notebook notebook--' + chapter.color
       + (chapter.status === 'upcoming' ? ' notebook--upcoming' : '');
@@ -222,7 +227,7 @@
 
     notebook.appendChild(cover);
 
-    if (chapter.status === 'live') {
+    if (isActive) {
       notebook.appendChild(el('div', 'notebook__active-tab', 'ACTIVE'));
     }
 
