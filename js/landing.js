@@ -19,7 +19,17 @@
 
     var chapterEntries = mapEntriesToChapters(chapters, entries);
 
-    chapters.forEach(function (chapter) {
+    // An upcoming chapter only shows once it has at least one entry.
+    // Exception: a chapter with no title (e.g. chapter 03) is the
+    // "more to come" placeholder — always render it.
+    var visible = chapters.filter(function (c) {
+      if (c.status === 'live') return true;
+      if ((chapterEntries[c.id] || []).length > 0) return true;
+      if (!c.title) return true;
+      return false;
+    });
+
+    visible.forEach(function (chapter) {
       var slot = document.createElement('div');
       slot.className = 'fg-chapters__slot';
 
