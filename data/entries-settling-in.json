@@ -28,5 +28,24 @@
     "mood_right": "Wondering",
     "mood_value": 0.5,
     "chapter": "settling-in"
+  },
+  {
+    "id": "2026-05-19-idaho",
+    "date": "2026-05-19",
+    "title": "Idaho...",
+    "type": "field-notes",
+    "location_name": "Coeur D'Alene, ID",
+    "coordinates": [
+      47.6742994,
+      -116.7811531
+    ],
+    "body": "Just touching base to show that we hit another state - Idaho.",
+    "video_url": null,
+    "photos": [],
+    "preview_photo": null,
+    "mood_left": "Potatoes",
+    "mood_right": "Trees",
+    "mood_value": 0.8,
+    "chapter": "settling-in"
   }
 ]
