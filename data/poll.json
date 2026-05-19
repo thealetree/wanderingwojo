@@ -1,11 +1,9 @@
 {
-  "id": "poll-20260426",
-  "question": "New plan:",
+  "id": "poll-20260519",
+  "question": "Next move?",
   "options": [
-    "Live on scraps and kill the student loans",
-    "Buy a small house and try to get by",
-    "Sell all assets, pay off loans and forgo appreciation",
-    "Other? Message us... please."
+    "Drive to Alaska",
+    "Float around the PNW"
   ],
   "active": true
 }
