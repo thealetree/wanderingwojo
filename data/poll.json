@@ -1,9 +1,11 @@
 {
-  "id": "poll-20260519",
-  "question": "Next move?",
+  "id": "poll-20260523",
+  "question": "Taking Bets on when we arrive:",
   "options": [
-    "Drive to Alaska",
-    "Float around the PNW"
+    "Monday, 9-10 pm",
+    "Monday, 8-9 pm",
+    "Monday, before 8pm",
+    "Monday, after 10 pm"
   ],
   "active": true
 }
