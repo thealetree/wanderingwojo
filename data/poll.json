@@ -1,9 +1,14 @@
 {
-  "id": "poll-20260525",
-  "question": "Artichoke",
+  "id": "poll-20260622",
+  "question": "More.....",
   "options": [
-    "YES",
-    "No"
+    "Camping",
+    "Singing",
+    "Partying",
+    "Meditating",
+    "Fishing",
+    "Sleeping",
+    "Hugging"
   ],
   "active": true
 }
